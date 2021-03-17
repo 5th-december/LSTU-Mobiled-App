@@ -1,22 +1,29 @@
 import 'package:flutter/material.dart';
 import 'page/authorization_page.dart';
 import 'page/basic/page_skeleton.dart';
+import 'app_theme.dart';
+import 'router_path.dart';
 
-class LkApp extends StatelessWidget
-{
+class LkApp extends StatefulWidget {
+  @override
+  _LkAppState createState() => _LkAppState();
+}
+
+class _LkAppState extends State<LkApp> {
+  final RouteObserver<Route> appRouteObserver = new RouteObserver<Route>();
+
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'LkApp',
-      theme: ThemeData(
-        primarySwatch: Colors.purple,
-        fontFamily: 'Raleway'
-      ),
+      theme: lkAppTheme(),
       routes: {
-        '/register': (context) => RegisterPage(),
-        '/login': (context) => LoginPage(),
-        '/create-account': (context) => PageSkeleton(body: null)
+        RouterPathContainer.appRegisterPage: (context) => RegisterPage(),
+        RouterPathContainer.appLoginPage: (context) => LoginPage(),
+        RouterPathContainer.appCreateAccount: (context) =>
+            PageSkeleton(body: null)
       },
       initialRoute: '/login',
+      navigatorObservers: [appRouteObserver],
     );
   }
 }
