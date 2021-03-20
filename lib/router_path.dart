@@ -1,5 +1,6 @@
 class RouterPathContainer {
+  static String appAuthorizePage = '/auth';
+  static String appIdentifyPage = '/identify';
   static String appRegisterPage = '/register';
-  static String appLoginPage = '/login';
-  static String appCreateAccount = '/create-account';
+  static String appHomePage = '/home';
 }

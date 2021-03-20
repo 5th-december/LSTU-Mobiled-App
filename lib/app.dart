@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'page/authorization_page.dart';
+import 'package:lk_client/page/authorization_pages.dart';
 import 'page/basic/page_skeleton.dart';
 import 'app_theme.dart';
 import 'router_path.dart';
@@ -18,11 +18,11 @@ class _LkAppState extends State<LkApp> {
       theme: lkAppTheme(),
       routes: {
         RouterPathContainer.appRegisterPage: (context) => RegisterPage(),
-        RouterPathContainer.appLoginPage: (context) => LoginPage(),
-        RouterPathContainer.appCreateAccount: (context) =>
-            PageSkeleton(body: null)
+        RouterPathContainer.appAuthorizePage: (context) => LoginPage(),
+        RouterPathContainer.appIdentifyPage: (context) => IdentificationPage(),
+        RouterPathContainer.appHomePage: (context) => PageSkeleton(body: null)
       },
-      initialRoute: '/login',
+      initialRoute: RouterPathContainer.appAuthorizePage,
       navigatorObservers: [appRouteObserver],
     );
   }

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'bloc_container.dart';
+import 'bloc_provider.dart';
 
 class AppStateContainer extends StatefulWidget {
   final Widget child;
-  final BlocContainer blocLibrary;
+  final BlocProvider blocProvider;
 
-  AppStateContainer({Key key, @required this.child, @required this.blocLibrary})
+  AppStateContainer({Key key, @required this.child, @required this.blocProvider})
       : super(key: key);
 
   @override
@@ -30,7 +30,7 @@ class AppStateContainerInherited extends InheritedWidget {
 }
 
 class AppState extends State<AppStateContainer> {
-  BlocContainer get blocLibrary => widget.blocLibrary;
+  BlocProvider get blocProvider => widget.blocProvider;
 
   // global defined values here
   // bloc container access by AppStateContainer.of(context).blockContainer

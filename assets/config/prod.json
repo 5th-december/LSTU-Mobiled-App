@@ -1,0 +1,4 @@
+{
+    "apiBase": "http://localhost:81/api",
+    "apiVersion": "v1"
+}

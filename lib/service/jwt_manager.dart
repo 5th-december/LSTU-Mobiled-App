@@ -6,31 +6,30 @@ class JwtManager {
 
   FlutterSecureStorage _storage;
 
-  static final JwtManager _instance = JwtManager.privateConstructor();
-  JwtManager.privateConstructor() {
+  static final JwtManager _instance = JwtManager._();
+  JwtManager._() {
     this._storage = FlutterSecureStorage();
   }
 
-  Future<String> getJwt() async {
-    var jwt = await _storage.read(key: 'jwt');
-    if (jwt == null) {
-      throw new Exception();
-    }
+  Future<bool> hasSavedJwt() async {
+    return await _storage.containsKey(key: 'jwt');
+  }
+
+  Future<String> getSavedJwt() async {
+    String jwt = await _storage.read(key: 'jwt');
     return jwt;
   }
 
-  Future<void> setJwt(String jwt) async {
-    _storage.write(key: 'jwt', value: jwt);
+  Future<void> setSavedJwt(String jwt) async {
+    await _storage.write(key: 'jwt', value: jwt);
   }
 
-  Future<void> removeJwt() async {
-    _storage.delete(key: 'jwt');
+  Future<void> removeSavedJwt() async {
+    await _storage.delete(key: 'jwt');
   }
 
-  Future<bool> checkJwtValid() async {
-    var jwt = await getJwt();
-
-    List<String> splittedJwt = jwt.split('.');
+  static bool checkJwtValid(String jwtToken) {
+    List<String> splittedJwt = jwtToken.split('.');
     if (splittedJwt.length != 3) {
       throw new FormatException();
     }
@@ -40,4 +39,5 @@ class JwtManager {
     var exp = (encodedJwt['exp'] ?? 0) * 1000;
     return DateTime.fromMillisecondsSinceEpoch(exp).isAfter(DateTime.now());
   }
+
 }
