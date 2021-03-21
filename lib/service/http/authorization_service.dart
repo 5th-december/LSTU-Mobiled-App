@@ -91,5 +91,4 @@ class AuthorizationService extends HttpService
     }
   }
 
-
 }

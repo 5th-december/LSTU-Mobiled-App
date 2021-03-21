@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/page/authorization_pages.dart';
-import 'page/basic/page_skeleton.dart';
+import 'package:lk_client/page/basic/private_page_skeleton.dart';
+import 'package:lk_client/service/http/authorization_service.dart';
 import 'app_theme.dart';
 import 'router_path.dart';
 
 class LkApp extends StatefulWidget {
+  AuthorizationService appAuthorizationService;
+
+  LkApp(this.appAuthorizationService);
+
   @override
   _LkAppState createState() => _LkAppState();
 }
@@ -17,12 +21,9 @@ class _LkAppState extends State<LkApp> {
       title: 'LkApp',
       theme: lkAppTheme(),
       routes: {
-        RouterPathContainer.appRegisterPage: (context) => RegisterPage(),
-        RouterPathContainer.appAuthorizePage: (context) => LoginPage(),
-        RouterPathContainer.appIdentifyPage: (context) => IdentificationPage(),
-        RouterPathContainer.appHomePage: (context) => PageSkeleton(body: null)
+        RouterPathContainer.appHomePage: (context) => PrivatePageSkeleton(Scaffold(body: Text('Authorized')), widget.appAuthorizationService)
       },
-      initialRoute: RouterPathContainer.appAuthorizePage,
+      initialRoute: RouterPathContainer.appHomePage,
       navigatorObservers: [appRouteObserver],
     );
   }

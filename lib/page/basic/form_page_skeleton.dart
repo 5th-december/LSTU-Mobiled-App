@@ -1,5 +1,5 @@
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/page/basic/page_skeleton.dart';
 
 class CenteredFormPageSkeleton extends StatefulWidget
 {
@@ -8,20 +8,16 @@ class CenteredFormPageSkeleton extends StatefulWidget
   CenteredFormPageSkeleton({this.centeredForm});
 
   @override 
-  _CenteredFormPageSkeletonState createState() => _CenteredFormPageSkeletonState(this.centeredForm);
+  _CenteredFormPageSkeletonState createState() => _CenteredFormPageSkeletonState();
 }
 
 class _CenteredFormPageSkeletonState extends State<CenteredFormPageSkeleton>
 {
-  Widget _centeredForm;
-
-  _CenteredFormPageSkeletonState(Widget centeredForm) {
-    this._centeredForm = centeredForm;
-  }
+  Widget get centeredForm => widget.centeredForm;
 
   @override 
   Widget build(BuildContext context) {
-    return PageSkeleton(
+    return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -31,7 +27,7 @@ class _CenteredFormPageSkeletonState extends State<CenteredFormPageSkeleton>
             ),
             child: Column(
               children: [
-                this._centeredForm
+                this.centeredForm
               ],
             ),
           ),

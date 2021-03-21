@@ -1,54 +1,64 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/registration_bloc.dart';
 import 'package:lk_client/event/register_event.dart';
 import 'package:lk_client/model/response/business_logic_error.dart';
+import 'package:lk_client/model/response/student_identifier.dart';
 import 'package:lk_client/router_path.dart';
+import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/register_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
 class RegisterFormWidget extends StatefulWidget
 {
+  AuthorizationService _authorizationService;
+  StudentIdentifier _studentIdentifier;
+
+  RegisterFormWidget(this._authorizationService, this._studentIdentifier);
+
   @override
   _RegisterFormWidgetState createState() => _RegisterFormWidgetState();
 }
 
 class _RegisterFormWidgetState extends State<RegisterFormWidget>
 {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _stateKey = GlobalKey<FormState>();
   final _emailTextEditingController = TextEditingController();
   final _passwordTextEditingController = TextEditingController();
+
+  RegistrationBloc _registrationBloc;
 
   String _emailErrorText;
   String _passwordErrorText;
 
-  Stream _stateStream;
+  AuthorizationService get authorizationService => widget._authorizationService;
+  StudentIdentifier get studentIdentifier => widget._studentIdentifier;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if(this._registrationBloc == null) {
+      AuthenticationBloc authenticationBloc = AppStateContainer.of(context).blocProvider.authenticationBloc;
+      this._registrationBloc = RegistrationBloc(authorizationService, authenticationBloc, studentIdentifier);
+    }
+  }
+
+  @override
+  dispose() async {
+    await this._registrationBloc.dispose();
+    super.dispose();
+  }
 
   @override 
   Widget build(BuildContext context) {
-    RegistrationBloc registrationBloc = AppStateContainer.of(context).blocProvider.registrationBloc;
-
-    Function formSubmitButton = () {
-      return ElevatedButton(
-        child: Text('Регистрация'),
-        onPressed: () {
-          setState(() => this._stateStream = registrationBloc.state);
-          registrationBloc.eventController.sink.add(
-            RegisterButtonPressedEvent(
-              login: this._emailTextEditingController.text,
-              password: this._passwordTextEditingController.text
-            )
-          );
-        },
-      );
-    };
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Form(
-          key: this._formKey,
+          key: this._stateKey,
           child: Column(
             children: [
               TextFormField(
@@ -79,46 +89,17 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget>
               Padding(
                 padding: EdgeInsets.only(top: 15),
                 child: StreamBuilder<RegisterState>(
-                  stream: this._stateStream,
+                  stream: this._registrationBloc.state,
                   builder: (
                     BuildContext context,
                     AsyncSnapshot<RegisterState> registerStateSnapshot
-                  ) {
-                    if (registerStateSnapshot.hasError) {
-                      return AlertDialog(
-                        title: Text('Произошла непредвиденная ошибка. Перезапустите приложение'),
-                        actions: <Widget>[
-                          TextButton(
-                            onPressed: () => exit(1), 
-                            child: Text('OK')
-                          )
-                        ],
-                      );
-                    }      
+                  ) { 
 
-                    var connectionState = registerStateSnapshot.connectionState;
-                    if (connectionState == ConnectionState.none) {
-                      return formSubmitButton();
-                    }
-                    else if (connectionState == ConnectionState.waiting) {
-                      return Container(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      );
-                    }
-                    else if (connectionState == ConnectionState.active) {
-
-                      if (!registerStateSnapshot.hasData) {
-                        return null;
-                      }
+                    if (registerStateSnapshot.connectionState == ConnectionState.active) {
 
                       RegisterState state = registerStateSnapshot.data;
-                      if (state is RegisterIdentifiedState) { 
-                        Navigator.of(context).popAndPushNamed(RouterPathContainer.appHomePage);
-                        return null;
-                      }
-                      else if (state is RegisterProcessingState) {
+
+                      if (state is RegisterProcessingState) {
                         return Container(
                           child: Center(
                             child: CircularProgressIndicator(),
@@ -126,21 +107,30 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget>
                         );
                       }
                       else if (state is RegisterErrorState) {
-                        BusinessLogicError error = state.error;
-
                         setState(() {
-                          if (error.errorProperties['email'] != null) {
-                            this._emailErrorText = error.errorProperties['email'];
+                          if (state.error.errorProperties['email'] != null) {
+                            this._emailErrorText = state.error.errorProperties['email'];
                           }
-                          if (error.errorProperties['password'] != null) {
-                            this._passwordErrorText = error.errorProperties['password'];
+                          if (state.error.errorProperties['password'] != null) {
+                            this._passwordErrorText = state.error.errorProperties['password'];
                           }
                         });
 
                       }
-
                     }
-                    return null;
+                    
+                    return ElevatedButton(
+                      child: Text('Регистрация'),
+                      onPressed: () {
+                        _registrationBloc.eventController.sink.add(
+                          RegisterButtonPressedEvent(
+                            login: this._emailTextEditingController.text,
+                            password: this._passwordTextEditingController.text
+                          )
+                        );
+                      },
+                    );
+
                   },
                 )
               )

@@ -3,6 +3,7 @@ import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/identification_bloc.dart';
 import 'package:lk_client/bloc/login_bloc.dart';
 import 'package:lk_client/bloc/registration_bloc.dart';
+import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/service/jwt_manager.dart';
@@ -17,21 +18,17 @@ Future<void> main() async {
   AuthorizationService appAuthorizationService = AuthorizationService(config);
 
   AuthenticationBloc appAuthenticationBloc = AuthenticationBloc(jwtManager: JwtManager.instance);
-  LoginBloc appLoginBloc = LoginBloc(authorizationService: appAuthorizationService, 
-    authenticationBloc: appAuthenticationBloc);
-
-  RegistrationBloc appRegistrationBloc = RegistrationBloc(appAuthorizationService, appAuthenticationBloc);
-  IdentificationBloc appIdentificationBloc = IdentificationBloc(appAuthorizationService, appRegistrationBloc);
+  appAuthenticationBloc.eventController.sink.add(AppStartedEvent());
 
   BlocProvider blocProvider = BlocProvider(
     authenticationBloc: appAuthenticationBloc,
-    loginBloc: appLoginBloc,
-    registrationBloc: appRegistrationBloc,
-    identificationBloc: appIdentificationBloc
+    loginBloc: null,
+    registrationBloc: null,
+    identificationBloc: null
   );
 
   runApp(AppStateContainer(
-    child: LkApp(),
+    child: LkApp(appAuthorizationService),
     blocProvider: blocProvider,
   ));
 }

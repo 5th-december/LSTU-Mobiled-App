@@ -1,9 +1,8 @@
 import 'dart:async';
 
-import 'package:lk_client/bloc/login_bloc.dart';
-import 'package:lk_client/bloc/registration_bloc.dart';
+import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/identify_event.dart';
-import 'package:lk_client/event/register_event.dart';
 import 'package:lk_client/exception/business_logic_exception.dart';
 import 'package:lk_client/model/request/user_identify_credentials.dart';
 import 'package:lk_client/model/response/business_logic_error.dart';
@@ -15,9 +14,9 @@ class IdentificationBloc
 {
   IdentifyState _currentState;
   AuthorizationService _authorizationService;
-  RegistrationBloc _registrationBloc;
+  AuthenticationBloc _authenticationBloc;
 
-  StreamController<IdentifyState> _stateController = StreamController<IdentifyState>();
+  StreamController<IdentifyState> _stateController = StreamController<IdentifyState>.broadcast();
   Stream<IdentifyState> get state => _stateController.stream;
 
   StreamController<IdentifyEvent> eventController = StreamController<IdentifyEvent>.broadcast();
@@ -30,14 +29,20 @@ class IdentificationBloc
     this._stateController.add(newState);
   }
 
-  IdentificationBloc(AuthorizationService authorizationService, RegistrationBloc registrationBloc) {
+  dispose() async {
+    await this._stateController.close();
+    await this.eventController.close();
+  }
+
+  IdentificationBloc(AuthorizationService authorizationService, AuthenticationBloc authenticationBloc) {
     this._authorizationService = authorizationService;
-    this._registrationBloc = registrationBloc;
+    this._authenticationBloc = authenticationBloc;
     this._currentState = IdentifyInitState();
 
     this._event.listen((IdentifyEvent event) async {
       if (_currentState is IdentifyInitState || _currentState is IdentifyErrorState) {
         IdentificationButtonPressedEvent _event = event as IdentificationButtonPressedEvent;
+
         this._updateState(IdentifyProcessingState());
 
         UserIdentifyCredentials credentials = UserIdentifyCredentials(
@@ -48,8 +53,13 @@ class IdentificationBloc
 
         try {
           StudentIdentifier studentIdentifier = await this._authorizationService.identifyStudent(credentials);
-          this._registrationBloc.eventController.sink.add(UserIdentifiedEvent(studentIdentifier: studentIdentifier));
+
+          this._authenticationBloc.eventController.sink.add(
+            IdentifiedEvent(identifier: studentIdentifier)
+          );
+          
           this._updateState(IdentifyInitState());
+          
         } on BusinessLogicException catch(ble) {
           this._updateState(IdentifyErrorState(error: ble.error));
         } on Exception {

@@ -1,15 +1,14 @@
 import 'package:flutter/material.dart';
 
-class PageSkeleton extends StatelessWidget
+class AppPageSkeleton extends StatelessWidget
 {
-
   Widget body;
 
   Widget bottomNavigationBar;
 
   Widget menuDrawer;
 
-  PageSkeleton({
+  AppPageSkeleton({
     Key key,
     @required this.body, 
     this.bottomNavigationBar, 

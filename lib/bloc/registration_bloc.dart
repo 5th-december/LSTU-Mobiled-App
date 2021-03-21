@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:lk_client/bloc/authentication_bloc.dart';
@@ -17,14 +16,12 @@ class RegistrationBloc
   RegisterState _currentState;
   AuthorizationService _authorizationService;
   AuthenticationBloc _authenticationBloc;
+  StudentIdentifier _studentIdentifier;
 
-  StreamController<RegisterState> _stateController = StreamController<RegisterState>();
+  StreamController<RegisterState> _stateController = StreamController<RegisterState>.broadcast();
   Stream<RegisterState> get state => _stateController.stream;
 
   StreamController<RegisterEvent> eventController = StreamController<RegisterEvent>.broadcast();
-  Stream<RegisterEvent> get _onUserIdentifiedEvent => eventController.stream.where(
-    (event) => event is UserIdentifiedEvent
-  );
 
   Stream<RegisterEvent> get _onRegisterButtonPressed => eventController.stream.where(
     (event) => event is RegisterButtonPressedEvent
@@ -39,49 +36,48 @@ class RegistrationBloc
     this._stateController.sink.add(newState);
   }
 
-  RegistrationBloc(AuthorizationService authorizationService, AuthenticationBloc authenticationBloc) {
+  dispose() async {
+    await this._stateController.close();
+    await this.eventController.close();
+  }
+
+  RegistrationBloc(AuthorizationService authorizationService, AuthenticationBloc authenticationBloc, StudentIdentifier studentIdentifier) {
     this._currentState = RegisterInitState();
     this._authorizationService = authorizationService;
     this._authenticationBloc = authenticationBloc;
-
-    this._onUserIdentifiedEvent.listen((RegisterEvent event) async {
-      UserIdentifiedEvent _event = event as UserIdentifiedEvent;
-
-      if(_currentState is RegisterInitState) {
-        this._updateState(RegisterIdentifiedState(identifier: _event.studentIdentifier));
-      }
-    });
+    this._studentIdentifier = studentIdentifier;
 
     this._onRegisterButtonPressed.listen((RegisterEvent event) async {
       RegisterButtonPressedEvent _event = event as RegisterButtonPressedEvent;
 
-      if (_currentState is RegisterIdentifiedState) {
+      if (_currentState is RegisterInitState || _currentState is RegisterErrorState) {
+
         this._updateState(RegisterProcessingState());
 
         try {
           UserRegisterCredentials credentials = UserRegisterCredentials(
             login: _event.login,
             password: _event.password,
-            temporaryLoggingId: (_currentState as RegisterIdentifiedState).identifier.temporaryLoggingId
+            temporaryLoggingId: _studentIdentifier.temporaryLoggingId
           );
+
           JwtToken userToken = await this._authorizationService.register(credentials);
+
           this._authenticationBloc.eventController.sink.add(LoggedInEvent(apiToken: userToken));
+
           this._updateState(RegisterInitState());
+
         } on BusinessLogicException catch(ble) {
           this._updateState(RegisterErrorState(error: ble.error));
+
         } on Exception {
-          this._updateState(RegisterErrorState(error: new BusinessLogicError(
-            code: 'REGISTER_ERROR',
-            systemMessage: 'REGISTER_ERROR',
-            userMessage: 'Ошибка регистрации',
-            errorProperties: {}
-          )));
+          this._updateState(RegisterErrorState(error: BusinessLogicError()));
         }
       }
     });
 
     this._onRegistrationCancel.listen((RegisterEvent event) async {
-      RegistrationCanceledEvent _event = event as RegistrationCanceledEvent;
+      this._authenticationBloc.eventController.sink.add(AppStartedEvent());
       this._updateState(RegisterInitState());
     });
   }

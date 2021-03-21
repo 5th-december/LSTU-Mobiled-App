@@ -1,50 +1,62 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/login_bloc.dart';
 import 'package:lk_client/event/login_event.dart';
 import 'package:lk_client/model/request/user_login_credentials.dart';
 import 'package:lk_client/router_path.dart';
+import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/login_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
 class LoginFormWidget extends StatefulWidget
 {
+  AuthorizationService _authorizationService;
+
+  LoginFormWidget(this._authorizationService);
+
   @override
   _LoginFormWidgetState createState() => _LoginFormWidgetState();
 }
 
 class _LoginFormWidgetState extends State<LoginFormWidget> 
 {
-  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _stateKey = GlobalKey<FormState>();
+
   final _usernameEditingController = TextEditingController();
   final _passwordEditingController = TextEditingController();
+
   String _usernameErrorText;
   String _passwordErrorText;
 
-  Stream stateStream;
+  LoginBloc _loginBloc;
 
-  Widget showAlertDialog(String message, Function action) {
-    return AlertDialog(
-      title: Text(message),
-      actions: <Widget>[
-        TextButton(
-          onPressed: action, 
-          child: Text('OK')
-        )
-      ],
-    );
+  AuthorizationService get authorizationService => widget._authorizationService;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (this._loginBloc == null) {
+      AuthenticationBloc authenticationBloc = AppStateContainer.of(context).blocProvider.authenticationBloc;
+      this._loginBloc = LoginBloc(authorizationService, authenticationBloc);
+    }
+  }
+
+  @override
+  dispose() async {
+    this._loginBloc.dispose();
+    super.dispose();
   }
 
   @override 
   Widget build(BuildContext context) {
-    LoginBloc loginBloc = AppStateContainer.of(context).blocProvider.loginBloc;
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Form(
-          key: this._formKey,
+          key: this._stateKey,
           child: Column(
             children: [
               TextFormField(
@@ -67,64 +79,48 @@ class _LoginFormWidgetState extends State<LoginFormWidget>
               Padding(
                 padding: EdgeInsets.only(top: 15),
                 child: StreamBuilder<LoginState> (
-                  stream: stateStream,
+                  stream: this._loginBloc.state,
                   builder: (
                     BuildContext context,
                     AsyncSnapshot<LoginState> loginStateSnapshot
                   ) {
-                    if (loginStateSnapshot.hasError) {
-                      return this.showAlertDialog(
-                        'Возникла неожиданная ошибка. Перезапустите приложение', 
-                        () => exit(1)
-                      );
-                    }
-
-                    var connectionState = loginStateSnapshot.connectionState;
-                    if (connectionState == ConnectionState.none) {
-                      return ElevatedButton(
-                        child: Text('Вход'),
-                        onPressed: () {
-                          setState(() => stateStream = loginBloc.state);
-                          UserLoginCredentials loginCredentials = UserLoginCredentials(
-                            login: this._usernameEditingController.text,
-                            password: this._passwordEditingController.text
+                    if (loginStateSnapshot.connectionState == ConnectionState.active) {
+                      LoginState receivedLoginState = loginStateSnapshot.data;
+                      if (receivedLoginState is LoginErrorState) {
+                        _onWidgetDidBuild(() {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${receivedLoginState.error.userMessage}'),
+                              backgroundColor: Colors.red,
+                            ),
                           );
-                          LoginButtonPressedEvent userLoginEvent = LoginButtonPressedEvent(
-                            userLoginCredentials: loginCredentials
-                          );
-                          loginBloc.eventController.add(userLoginEvent);
-                        }
-                      );
-                    }
-                    else if (connectionState == ConnectionState.waiting) {
-                      return Container(
-                        child: Center(
-                          child: CircularProgressIndicator(),
-                        )
-                      );
-                    }
-                    else if (connectionState == ConnectionState.active) {
-                      if (loginStateSnapshot.hasData) {
-                        LoginState receivedLoginState = loginStateSnapshot.data;
-
-                        if (receivedLoginState is LoginInitState) {
-                            Navigator.of(context).popAndPushNamed(RouterPathContainer.appHomePage);
-                        }
-                        else if (receivedLoginState is LoginErrorState) {
-                          String error = receivedLoginState.error.userMessage;
-                          return this.showAlertDialog(error, null);
-                        }
-                        else if (receivedLoginState is LoginProcessingState) {
-                          return Container(
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            )
-                          );
-                        }
+                        });
+                      }
+                      else if (receivedLoginState is LoginProcessingState) {
+                        return Container(
+                          child: Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        );
                       }
                     }
+                    
+                    return ElevatedButton(
+                      child: Text('Вход'),
+                      onPressed: () {
+                        UserLoginCredentials loginCredentials = UserLoginCredentials(
+                          login: this._usernameEditingController.text,
+                          password: this._passwordEditingController.text
+                        );
 
-                    return null;
+                        LoginButtonPressedEvent userLoginEvent = LoginButtonPressedEvent(
+                          userLoginCredentials: loginCredentials
+                        );
+                        this._loginBloc.eventController.add(userLoginEvent);
+
+                      }
+                    );
+
                   }
                 )
               )
@@ -135,10 +131,10 @@ class _LoginFormWidgetState extends State<LoginFormWidget>
     );
   }
 
-  @override 
-  void dispose() {
-    this._passwordEditingController.dispose();
-    this._usernameEditingController.dispose();
-    super.dispose();
+  void _onWidgetDidBuild(Function callback) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      callback();
+    });
   }
+
 }

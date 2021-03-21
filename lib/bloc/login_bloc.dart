@@ -14,10 +14,10 @@ class LoginBloc
   AuthorizationService _authorizationService;
   AuthenticationBloc _authenticationBloc;
 
-  StreamController<LoginState> _stateController = StreamController<LoginState>();
+  StreamController<LoginState> _stateController = StreamController<LoginState>.broadcast();
   Stream<LoginState> get state => _stateController.stream;
 
-  StreamController<LoginEvent> eventController = StreamController<LoginEvent>();
+  StreamController<LoginEvent> eventController = StreamController<LoginEvent>.broadcast();
   Stream<LoginEvent> get _event => eventController.stream;
 
   void _updateState(LoginState newState) {
@@ -25,28 +25,37 @@ class LoginBloc
     this._stateController.add(newState);
   }
 
-  LoginBloc({AuthorizationService authorizationService, AuthenticationBloc authenticationBloc}) {
+  dispose() async{
+    this._stateController.close();
+    this.eventController.close();
+  }
+
+  LoginBloc(AuthorizationService authorizationService, AuthenticationBloc authenticationBloc) {
     this._authorizationService = authorizationService;
     this._authenticationBloc = authenticationBloc;
     this._currentLoginState = LoginInitState();
 
     this._event.listen((LoginEvent event) async {
-      if (event is LoginButtonPressedEvent) {
-        this._updateState(LoginProcessingState());
-        try {
-          JwtToken token = await this._authorizationService.authenticate(event.userLoginCredentials);
-          this._authenticationBloc.eventController.add(LoggedInEvent(apiToken: token));
-          this._updateState(LoginInitState());
-        } on BusinessLogicError catch(ble) {
-          this._updateState(LoginErrorState(error: ble));
-        } 
-        on Exception {
-          this._updateState(LoginErrorState(error: new BusinessLogicError(
-            code: 'UNDEFINED_ERROR',
-            systemMessage: 'UNDEFINED_ERROR',
-            userMessage: 'An unexpected error occured',
-            errorProperties: {}
-          )));
+
+      if(_currentLoginState is LoginInitState || _currentLoginState is LoginErrorState) {
+
+        if (event is LoginButtonPressedEvent) {
+          this._updateState(LoginProcessingState());
+
+          try {
+            JwtToken token = await this._authorizationService.authenticate(event.userLoginCredentials);
+            this._authenticationBloc.eventController.add(LoggedInEvent(apiToken: token));
+            this._updateState(LoginInitState());
+
+          } on BusinessLogicError catch(ble) {
+            this._updateState(LoginErrorState(error: ble));
+
+          } 
+          on Exception {
+            this._updateState(LoginErrorState(error: new BusinessLogicError(
+              userMessage: 'В процессе авторизации возникла ошибка'
+            )));
+          }
         }
       }
     });
