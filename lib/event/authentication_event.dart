@@ -1,20 +1,19 @@
-import 'package:lk_client/model/response/jwt_token.dart';
-import 'package:lk_client/model/response/student_identifier.dart';
+import 'package:lk_client/model/response/api_key.dart';
 
 abstract class AuthenticationEvent {}
 
 class AppStartedEvent extends AuthenticationEvent {}
 
 class IdentifiedEvent extends AuthenticationEvent {
-  StudentIdentifier identifier;
+  ApiKey apiKey;
 
-  IdentifiedEvent({this.identifier});
+  IdentifiedEvent({this.apiKey});
 }
 
 class LoggedInEvent extends AuthenticationEvent {
-  JwtToken apiToken;
+  ApiKey apiKey;
 
-  LoggedInEvent({this.apiToken});
+  LoggedInEvent({this.apiKey});
 }
 
 class LoggedOutEvent extends AuthenticationEvent {}

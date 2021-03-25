@@ -1,24 +1,20 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'user_register_credentials.dart';
+part of 'login_credentials.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-UserRegisterCredentials _$UserRegisterCredentialsFromJson(
-    Map<String, dynamic> json) {
-  return UserRegisterCredentials(
-    temporaryLoggingId: json['temporaryLoggingId'] as String,
+LoginCredentials _$LoginCredentialsFromJson(Map<String, dynamic> json) {
+  return LoginCredentials(
     login: json['login'] as String,
     password: json['password'] as String,
   );
 }
 
-Map<String, dynamic> _$UserRegisterCredentialsToJson(
-        UserRegisterCredentials instance) =>
+Map<String, dynamic> _$LoginCredentialsToJson(LoginCredentials instance) =>
     <String, dynamic>{
-      'temporaryLoggingId': instance.temporaryLoggingId,
       'login': instance.login,
       'password': instance.password,
     };

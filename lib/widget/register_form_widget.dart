@@ -11,19 +11,16 @@ import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/register_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
-class RegisterFormWidget extends StatefulWidget
-{
+class RegisterFormWidget extends StatefulWidget {
   AuthorizationService _authorizationService;
-  StudentIdentifier _studentIdentifier;
 
-  RegisterFormWidget(this._authorizationService, this._studentIdentifier);
+  RegisterFormWidget(this._authorizationService);
 
   @override
   _RegisterFormWidgetState createState() => _RegisterFormWidgetState();
 }
 
-class _RegisterFormWidgetState extends State<RegisterFormWidget>
-{
+class _RegisterFormWidgetState extends State<RegisterFormWidget> {
   final GlobalKey<FormState> _stateKey = GlobalKey<FormState>();
   final _emailTextEditingController = TextEditingController();
   final _passwordTextEditingController = TextEditingController();
@@ -34,14 +31,15 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget>
   String _passwordErrorText;
 
   AuthorizationService get authorizationService => widget._authorizationService;
-  StudentIdentifier get studentIdentifier => widget._studentIdentifier;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._registrationBloc == null) {
-      AuthenticationBloc authenticationBloc = AppStateContainer.of(context).blocProvider.authenticationBloc;
-      this._registrationBloc = RegistrationBloc(authorizationService, authenticationBloc, studentIdentifier);
+    if (this._registrationBloc == null) {
+      AuthenticationBloc authenticationBloc =
+          AppStateContainer.of(context).blocProvider.authenticationBloc;
+      this._registrationBloc =
+          RegistrationBloc(authorizationService, authenticationBloc);
     }
   }
 
@@ -51,9 +49,8 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget>
     super.dispose();
   }
 
-  @override 
+  @override
   Widget build(BuildContext context) {
-
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -62,78 +59,57 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget>
           child: Column(
             children: [
               TextFormField(
-                decoration: InputDecoration(
-                  labelText: 'Электронная почта',
-                  errorText: this._emailErrorText
-                ),
-                controller: _emailTextEditingController
-              ), 
+                  decoration: InputDecoration(
+                      labelText: 'Электронная почта',
+                      errorText: this._emailErrorText),
+                  controller: _emailTextEditingController),
               TextFormField(
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                controller: this._passwordTextEditingController,
-                decoration: InputDecoration(
-                  labelText: 'Пароль',
-                  errorText: this._passwordErrorText
-                )
-              ),
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  controller: this._passwordTextEditingController,
+                  decoration: InputDecoration(
+                      labelText: 'Пароль', errorText: this._passwordErrorText)),
               TextFormField(
-                obscureText: true,
-                enableSuggestions: false,
-                autocorrect: false,
-                decoration: InputDecoration(
-                  labelText: 'Повторите пароль'
-                )
-              ),
+                  obscureText: true,
+                  enableSuggestions: false,
+                  autocorrect: false,
+                  decoration: InputDecoration(labelText: 'Повторите пароль')),
               Padding(
-                padding: EdgeInsets.only(top: 15),
-                child: StreamBuilder<RegisterState>(
-                  stream: this._registrationBloc.state,
-                  builder: (
-                    BuildContext context,
-                    AsyncSnapshot<RegisterState> registerStateSnapshot
-                  ) { 
+                  padding: EdgeInsets.only(top: 15),
+                  child: StreamBuilder<RegisterState>(
+                    stream: this._registrationBloc.state,
+                    builder: (BuildContext context,
+                        AsyncSnapshot<RegisterState> registerStateSnapshot) {
+                      if (registerStateSnapshot.connectionState ==
+                          ConnectionState.active) {
+                        RegisterState state = registerStateSnapshot.data;
 
-                    if (registerStateSnapshot.connectionState == ConnectionState.active) {
-
-                      RegisterState state = registerStateSnapshot.data;
-
-                      if (state is RegisterProcessingState) {
-                        return Container(
-                          child: Center(
+                        if (state is RegisterProcessingState) {
+                          return Container(
+                              child: Center(
                             child: CircularProgressIndicator(),
-                          )
-                        );
+                          ));
+                        } else if (state is RegisterErrorState) {
+                          setState(() {
+                            // exception handling
+                          });
+                        }
                       }
-                      else if (state is RegisterErrorState) {
-                        setState(() {
-                          if (state.error.errorProperties['email'] != null) {
-                            this._emailErrorText = state.error.errorProperties['email'];
-                          }
-                          if (state.error.errorProperties['password'] != null) {
-                            this._passwordErrorText = state.error.errorProperties['password'];
-                          }
-                        });
 
-                      }
-                    }
-                    
-                    return ElevatedButton(
-                      child: Text('Регистрация'),
-                      onPressed: () {
-                        _registrationBloc.eventController.sink.add(
-                          RegisterButtonPressedEvent(
-                            login: this._emailTextEditingController.text,
-                            password: this._passwordTextEditingController.text
-                          )
-                        );
-                      },
-                    );
-
-                  },
-                )
-              )
+                      return ElevatedButton(
+                        child: Text('Регистрация'),
+                        onPressed: () {
+                          _registrationBloc.eventController.sink.add(
+                              RegisterButtonPressedEvent(
+                                  login: this._emailTextEditingController.text,
+                                  password: this
+                                      ._passwordTextEditingController
+                                      .text));
+                        },
+                      );
+                    },
+                  ))
             ],
           ),
         )
