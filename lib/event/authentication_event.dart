@@ -5,15 +5,18 @@ abstract class AuthenticationEvent {}
 class AppStartedEvent extends AuthenticationEvent {}
 
 class IdentifiedEvent extends AuthenticationEvent {
-  ApiKey apiKey;
-
-  IdentifiedEvent({this.apiKey});
+  ApiKey identificationKey;
+  IdentifiedEvent(this.identificationKey);
 }
 
-class LoggedInEvent extends AuthenticationEvent {
-  ApiKey apiKey;
+class TokenValidateEvent extends AuthenticationEvent {
+  ApiKey validToken;
+  TokenValidateEvent(this.validToken);
+}
 
-  LoggedInEvent({this.apiKey});
+class TokenInvalidateEvent extends AuthenticationEvent {
+  ApiKey invalidToken;
+  TokenInvalidateEvent(this.invalidToken);
 }
 
 class LoggedOutEvent extends AuthenticationEvent {}

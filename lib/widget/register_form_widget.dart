@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/registration_bloc.dart';
 import 'package:lk_client/event/register_event.dart';
-import 'package:lk_client/model/response/business_logic_error.dart';
-import 'package:lk_client/model/response/student_identifier.dart';
 import 'package:lk_client/router_path.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/register_state.dart';
@@ -45,7 +43,9 @@ class _RegisterFormWidgetState extends State<RegisterFormWidget> {
 
   @override
   dispose() async {
-    await this._registrationBloc.dispose();
+    Future.delayed(Duration.zero, () async {
+      await this._registrationBloc.dispose();
+    });
     super.dispose();
   }
 

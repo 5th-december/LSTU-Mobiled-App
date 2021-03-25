@@ -25,7 +25,7 @@ abstract class HttpService {
   HttpService(this._configuration);
 
   Future<HttpResponse> post(String url, Map<String, dynamic> body,
-      [ApiKey apiKey]) async {
+      [String apiJwtToken]) async {
     Uri uri;
     if (_configuration.useHttps == true) {
       uri = Uri.https(_configuration.apiBase, url);
@@ -34,12 +34,12 @@ abstract class HttpService {
     }
 
     Map<String, String> headers = defaultHeaders;
-    if (apiKey != null) {
-      headers[HttpHeaders.authorizationHeader] = apiKey.token;
+    if (apiJwtToken != null) {
+      headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
     }
 
     try {
-      final response = await http.post(uri, headers: headers, body: body);
+      final response = await http.post(uri, headers: headers, body: jsonEncode(body));
       final responseBody = jsonDecode(response.body);
       return new HttpResponse(status: response.statusCode, body: responseBody);
     } on Exception {
@@ -48,7 +48,7 @@ abstract class HttpService {
   }
 
   Future<HttpResponse> get(String url, Map<String, dynamic> params,
-      [ApiKey apiKey]) async {
+      [String apiJwtToken]) async {
     if (params.length != 0) {
       List<String> queryData = [];
 
@@ -68,8 +68,8 @@ abstract class HttpService {
     }
 
     Map<String, String> headers = defaultHeaders;
-    if (apiKey != null) {
-      headers[HttpHeaders.authorizationHeader] = apiKey.token;
+    if (apiJwtToken != null) {
+      headers[HttpHeaders.authorizationHeader] = apiJwtToken;
     }
 
     try {

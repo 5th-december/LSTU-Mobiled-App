@@ -7,5 +7,5 @@ class RegisterProcessingState extends RegisterState {}
 class RegisterErrorState extends RegisterState {
   Exception error;
 
-  RegisterErrorState({this.error});
+  RegisterErrorState(this.error);
 }

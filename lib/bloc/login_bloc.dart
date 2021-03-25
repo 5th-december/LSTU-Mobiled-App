@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/login_event.dart';
-import 'package:lk_client/model/response/business_logic_error.dart';
 import 'package:lk_client/model/response/api_key.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/login_state.dart';
@@ -42,22 +41,18 @@ class LoginBloc {
           _currentLoginState is LoginErrorState) {
         if (event is LoginButtonPressedEvent) {
           this._updateState(LoginProcessingState());
-
           try {
-            JwtToken token = await this
+            ApiKey apiKey = await this
                 ._authorizationService
                 .authenticate(event.userLoginCredentials);
             this
                 ._authenticationBloc
                 .eventController
-                .add(LoggedInEvent(apiToken: token));
+                .add(TokenValidateEvent(apiKey));
+
             this._updateState(LoginInitState());
-          } on BusinessLogicError catch (ble) {
-            this._updateState(LoginErrorState(error: ble));
-          } on Exception {
-            this._updateState(LoginErrorState(
-                error: new BusinessLogicError(
-                    userMessage: 'В процессе авторизации возникла ошибка')));
+          } on Exception catch (ble) {
+            this._updateState(LoginErrorState(ble));
           }
         }
       }

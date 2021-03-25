@@ -38,7 +38,9 @@ class _UserIdentifyFormWidgetState extends State<UserIdentifyFormWidget> {
 
   @override
   dispose() async {
-    await this._identificationBloc.dispose();
+    Future.delayed(Duration.zero, () async {
+      await this._identificationBloc.dispose();
+    });    
     super.dispose();
   }
 
@@ -89,7 +91,7 @@ class _UserIdentifyFormWidgetState extends State<UserIdentifyFormWidget> {
                               _onWidgetDidBuild(() {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text('${receivedState.error}'),
+                                    content: Text('${receivedState.error.toString()}'),
                                     backgroundColor: Colors.red,
                                   ),
                                 );

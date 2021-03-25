@@ -3,10 +3,8 @@ import 'dart:async';
 import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/identify_event.dart';
-import 'package:lk_client/exception/business_logic_exception.dart';
 import 'package:lk_client/model/request/identify_credentials.dart';
-import 'package:lk_client/model/response/business_logic_error.dart';
-import 'package:lk_client/model/response/student_identifier.dart';
+import 'package:lk_client/model/response/api_key.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/identify_state.dart';
 
@@ -48,28 +46,23 @@ class IdentificationBloc {
 
         this._updateState(IdentifyProcessingState());
 
-        UserIdentifyCredentials credentials = UserIdentifyCredentials(
-            name: _event.name,
-            zNumber: _event.zBookNumber,
+        IdentifyCredentials credentials = IdentifyCredentials(
+            username: _event.name,
+            zBookNumber: _event.zBookNumber,
             enterYear: _event.enterYear);
 
         try {
-          StudentIdentifier studentIdentifier =
+          ApiKey jwtIdentifier =
               await this._authorizationService.identifyStudent(credentials);
-
           this
               ._authenticationBloc
               .eventController
               .sink
-              .add(IdentifiedEvent(identifier: studentIdentifier));
+              .add(IdentifiedEvent(jwtIdentifier));
 
           this._updateState(IdentifyInitState());
-        } on BusinessLogicException catch (ble) {
-          this._updateState(IdentifyErrorState(error: ble.error));
-        } on Exception {
-          this._updateState(IdentifyErrorState(
-              error: BusinessLogicError(
-                  userMessage: 'Произошла неожиданная ошибка')));
+        } on Exception catch (ble) {
+          this._updateState(IdentifyErrorState(error: ble));
         }
       }
     });

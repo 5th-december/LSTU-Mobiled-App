@@ -4,6 +4,9 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class JwtManager {
   static JwtManager get instance => _instance;
 
+  static const _jwtKeyName = 'jwt';
+  static const _refreshKeyName = 'refresh';
+
   FlutterSecureStorage _storage;
 
   static final JwtManager _instance = JwtManager._();
@@ -11,8 +14,9 @@ class JwtManager {
     this._storage = FlutterSecureStorage();
   }
 
-  Future<bool> hasSavedJwt() async {
-    return await _storage.containsKey(key: 'jwt');
+  Future<bool> hasSavedKeyPair() async {
+    return await _storage.containsKey(key: _jwtKeyName)
+      && await _storage.containsKey(key: _refreshKeyName);
   }
 
   Future<String> getSavedJwt() async {
@@ -20,12 +24,25 @@ class JwtManager {
     return jwt;
   }
 
+  Future<String> getSavedRefresh() async {
+    String refresh = await _storage.read(key: _refreshKeyName);
+    return refresh;
+  }
+
   Future<void> setSavedJwt(String jwt) async {
-    await _storage.write(key: 'jwt', value: jwt);
+    await _storage.write(key: _jwtKeyName, value: jwt);
+  }
+
+  Future<void> setSavedRefresh(String refresh) async {
+    await _storage.write(key: _refreshKeyName, value: refresh);
   }
 
   Future<void> removeSavedJwt() async {
-    await _storage.delete(key: 'jwt');
+    await _storage.delete(key: _jwtKeyName);
+  }
+
+  Future<void> removeSavedRefresh() async {
+    await _storage.delete(key: _refreshKeyName);
   }
 
   static bool checkJwtValid(String jwtToken) {

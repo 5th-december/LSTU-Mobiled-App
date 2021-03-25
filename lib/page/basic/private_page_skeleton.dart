@@ -36,15 +36,25 @@ class _PrivatePageSkeletonState extends State<PrivatePageSkeleton> {
           AuthenticationState state = snapshot.data;
 
           if (state is AuthenticationIdentifiedState) {
+            
             return CenteredFormPageSkeleton(
-                centeredForm: RegisterFormWidget(authorizationService));
+                centeredForm: RegisterFormWidget(authorizationService)
+            );
+
           } else if (state is AuthenticationUnauthorizedState) {
+
             return CenteredFormPageSkeleton(
-                centeredForm: UserIdentifyFormWidget(authorizationService));
-          } else if (state is AuthenticationProcessingState) {
+                centeredForm: UserIdentifyFormWidget(authorizationService)
+            );
+
+          } else if (state is AuthenticationProcessingState || state is AuthenticationInvalidState) {
+
             return FullscreenLoadingPage();
-          } else if (state is AuthenticationSuccessState) {
+
+          } else if (state is AuthenticationValidState) {
+
             return this.page;
+            
           }
 
           return FullscreenLoadingPage();

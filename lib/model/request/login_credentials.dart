@@ -6,7 +6,7 @@ part 'login_credentials.g.dart';
 
 @JsonSerializable()
 class LoginCredentials {
-  @JsonKey(name: 'login')
+  @JsonKey(name: 'username')
   final String login;
 
   @JsonKey(name: 'password')

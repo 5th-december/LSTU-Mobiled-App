@@ -7,5 +7,5 @@ class LoginProcessingState extends LoginState {}
 class LoginErrorState extends LoginState {
   Exception error;
 
-  LoginErrorState({this.error});
+  LoginErrorState(this.error);
 }

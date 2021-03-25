@@ -1,22 +1,26 @@
+import 'package:flutter/foundation.dart';
+
 abstract class ComponentErrorHandler {
   final ComponentErrorHandler next;
 
-  bool _isApplicable(dynamic errorSource);
+  @protected
+  bool isApplicable(dynamic errorSource);
 
   Exception apply(dynamic errorSource) {
-    if (this._isApplicable(errorSource)) {
-      return _handle(errorSource);
+    if (this.isApplicable(errorSource)) {
+      return handle(errorSource);
     } else {
       if (this.next == null) {
-        return this._handleDefault(errorSource);
+        return this.handleDefault(errorSource);
       }
       return next.apply(errorSource);
     }
   }
 
-  Exception _handle(dynamic errorSource);
+  @protected
+  Exception handle(dynamic errorSource);
 
-  Exception _handleDefault(dynamic errorSource) {
+  Exception handleDefault(dynamic errorSource) {
     return Exception('Undefined exception occurred');
   }
 

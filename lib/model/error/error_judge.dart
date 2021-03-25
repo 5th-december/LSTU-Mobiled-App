@@ -2,12 +2,12 @@ import 'package:lk_client/model/error/component_error_handler.dart';
 
 class ErrorJudge extends ComponentErrorHandler {
   @override
-  bool _isApplicable(dynamic errorSource) {
+  bool isApplicable(dynamic errorSource) {
     return errorSource is Exception;
   }
 
   @override
-  Exception _handle(dynamic errorSource) {
+  Exception handle(dynamic errorSource) {
     return errorSource;
   }
 

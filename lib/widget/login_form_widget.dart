@@ -44,7 +44,9 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
 
   @override
   dispose() async {
-    this._loginBloc.dispose();
+    Future.delayed(Duration.zero, () async {
+      await this._loginBloc.dispose();
+    });
     super.dispose();
   }
 
@@ -85,7 +87,7 @@ class _LoginFormWidgetState extends State<LoginFormWidget> {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
                                   content: Text(
-                                      '${receivedLoginState.error.userMessage}'),
+                                      '${receivedLoginState.error}'),
                                   backgroundColor: Colors.red,
                                 ),
                               );

@@ -1,22 +1,20 @@
-import 'dart:html';
-
 import 'package:lk_client/model/error/component_error_handler.dart';
 
 class ApiSystemErrorHandler extends ComponentErrorHandler {
   @override
-  bool _isApplicable(dynamic errorSource) {
+  bool isApplicable(dynamic errorSource) {
     return errorSource is Map<String, dynamic> &&
         errorSource.containsKey('type') &&
         errorSource['type'] == 'system' &&
         errorSource.containsKey('code') &&
-        errorSource['code'] == HttpStatus.internalServerError &&
+        errorSource['code'] == 500 &&
         errorSource.containsKey('error') &&
         errorSource['error'] == 'ERR_SYSTEM' &&
         errorSource.containsKey('message');
   }
 
   @override
-  Exception _handle(dynamic errorSource) {
+  Exception handle(dynamic errorSource) {
     return new ApiSystemException(errorSource['message']);
   }
 
