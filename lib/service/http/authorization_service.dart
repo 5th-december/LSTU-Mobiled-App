@@ -16,7 +16,7 @@ class AuthorizationService extends HttpService {
   Future<ApiKey> authenticate(LoginCredentials user) async {
     HttpResponse response = await this.post('api/v1/auth', user.toJson());
 
-    if (response.status == 201) {
+    if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body);
       return token;
     }

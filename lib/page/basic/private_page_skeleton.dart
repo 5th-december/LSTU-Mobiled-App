@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
-import 'package:lk_client/page/basic/form_page_skeleton.dart';
 import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
+import 'package:lk_client/page/register_page.dart';
+import 'package:lk_client/page/togglable_login_page.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/authentication_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
@@ -37,15 +38,11 @@ class _PrivatePageSkeletonState extends State<PrivatePageSkeleton> {
 
           if (state is AuthenticationIdentifiedState) {
             
-            return CenteredFormPageSkeleton(
-                centeredForm: RegisterFormWidget(authorizationService)
-            );
+            return RegisterPage();
 
           } else if (state is AuthenticationUnauthorizedState) {
 
-            return CenteredFormPageSkeleton(
-                centeredForm: UserIdentifyFormWidget(authorizationService)
-            );
+            return TogglableLoginPage();
 
           } else if (state is AuthenticationProcessingState || state is AuthenticationInvalidState) {
 

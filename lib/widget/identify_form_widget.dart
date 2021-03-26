@@ -80,8 +80,8 @@ class _UserIdentifyFormWidgetState extends State<UserIdentifyFormWidget> {
                                 registerStateSnapshot) {
                           if (registerStateSnapshot.connectionState ==
                               ConnectionState.active) {
-                            var receivedState = registerStateSnapshot.data;
-
+                            var receivedState = registerStateSnapshot.data; 
+                            
                             if (receivedState is IdentifyProcessingState) {
                               return Container(
                                   child: Center(
