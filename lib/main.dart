@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/navigation_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/model/error/api_system_error_handler.dart';
 import 'package:lk_client/model/error/duplicate_error_handler.dart';
@@ -45,8 +46,11 @@ Future<void> main() async {
   // start authorization immediately after app running
   appAuthenticationBloc.eventController.sink.add(AppStartedEvent());
 
+  NavigationBloc appNavigationBloc = NavigationBloc();
+
   BlocProvider blocProvider = BlocProvider(
-    authenticationBloc: appAuthenticationBloc
+    authenticationBloc: appAuthenticationBloc,
+    navigationBloc: appNavigationBloc
   );
   
   runApp(

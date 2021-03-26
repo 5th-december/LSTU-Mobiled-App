@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/page/basic/private_page_skeleton.dart';
+import 'package:lk_client/page/home_page.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'app_theme.dart';
 import 'router_path.dart';
@@ -21,7 +22,7 @@ class _LkAppState extends State<LkApp> {
       title: 'LkApp',
       theme: lkAppTheme(),
       routes: {
-        RouterPathContainer.appHomePage: (context) => PrivatePageSkeleton(Scaffold(body: Text('Authorized')), widget.appAuthorizationService)
+        RouterPathContainer.appHomePage: (context) => PrivatePageSkeleton(HomePage())
       },
       initialRoute: RouterPathContainer.appHomePage,
       navigatorObservers: [appRouteObserver],

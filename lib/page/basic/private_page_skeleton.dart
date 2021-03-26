@@ -1,21 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:lk_client/bloc/authentication_bloc.dart';
-import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
 import 'package:lk_client/page/register_page.dart';
 import 'package:lk_client/page/togglable_login_page.dart';
-import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/authentication_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
-import 'package:lk_client/widget/identify_form_widget.dart';
-import 'package:lk_client/widget/login_form_widget.dart';
-import 'package:lk_client/widget/register_form_widget.dart';
 
 class PrivatePageSkeleton extends StatefulWidget {
   Widget page;
-  AuthorizationService authorizationService;
 
-  PrivatePageSkeleton(this.page, this.authorizationService);
+  PrivatePageSkeleton(this.page);
 
   @override
   _PrivatePageSkeletonState createState() => _PrivatePageSkeletonState();
@@ -23,7 +17,6 @@ class PrivatePageSkeleton extends StatefulWidget {
 
 class _PrivatePageSkeletonState extends State<PrivatePageSkeleton> {
   Widget get page => widget.page;
-  AuthorizationService get authorizationService => widget.authorizationService;
 
   @override
   Widget build(BuildContext context) {
