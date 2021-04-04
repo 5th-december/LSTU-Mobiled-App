@@ -1,14 +1,17 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 
-class EducationPage extends StatefulWidget
-{
+class EducationPage extends StatefulWidget {
   @override
-  _EducationPageState createState () => _EducationPageState();
+  _EducationPageState createState() => _EducationPageState();
 }
 
-class _EducationPageState extends State<EducationPage> 
-{
+class _EducationPageState extends State<EducationPage> {
   Widget build(BuildContext context) {
-    return Center(child: Text('This is a education page'));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Supercool'),
+      ),
+    );
   }
 }
