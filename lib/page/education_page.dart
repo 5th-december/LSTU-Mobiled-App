@@ -7,11 +7,13 @@ class EducationPage extends StatefulWidget {
 }
 
 class _EducationPageState extends State<EducationPage> {
+  
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Supercool'),
       ),
+
     );
   }
 }
