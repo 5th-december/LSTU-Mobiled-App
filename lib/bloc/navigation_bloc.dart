@@ -23,9 +23,7 @@ class NavigationBloc
     await this.eventController.close();
   }
 
-  NavigationBloc() {
-    _updateState(NavigatedToPersonalPage(3));
-    
+  NavigationBloc() {    
     this._navigatedEvent.listen((NavigationEvent event) {
       NavigateToEvent _event = event as NavigateToEvent;
       switch(_event.pageNumber) {

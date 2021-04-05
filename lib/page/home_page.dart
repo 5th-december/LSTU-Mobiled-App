@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
+import 'package:lk_client/bloc/personal_data_bloc.dart';
+import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
+import 'package:lk_client/event/request_command/user_request_command.dart';
+import 'package:lk_client/model/entity/person_entity.dart';
 import 'package:lk_client/page/basic/navigator_wrapped_page.dart';
 import 'package:lk_client/page/education_page.dart';
 import 'package:lk_client/page/messenger_page.dart';
 import 'package:lk_client/page/personal_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
+import 'package:lk_client/service/caching/person_query_service.dart';
+import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
@@ -16,6 +22,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   NavigationBloc _appNavidationBloc;
+  PersonalDataBloc _personalDataBloc;
 
   @override
   void didChangeDependencies() {
@@ -23,6 +30,9 @@ class _HomePageState extends State<HomePage> {
     if (this._appNavidationBloc == null) {
       this._appNavidationBloc =
           AppStateContainer.of(context).blocProvider.navigationBloc;
+      PersonQueryService personQueryService =
+          AppStateContainer.of(context).serviceProvider.personQueryService;
+      this._personalDataBloc = PersonalDataBloc(personQueryService);
     }
   }
 
@@ -36,6 +46,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // перейти на личную страницу
+    this._appNavidationBloc.eventController.add(NavigateToEvent(3));
+    // отправка запроса на получение пользователя
+    this._personalDataBloc.eventController.add(
+        StartLoadingContentEvent<LoadCurrentUserObject>(
+            LoadCurrentUserObject()));
+
     return Scaffold(
         body: StreamBuilder(
             stream: this._appNavidationBloc.state,
@@ -60,10 +77,74 @@ class _HomePageState extends State<HomePage> {
                       }
                     }(),
                     children: <Widget>[
-                      NavigatorWrappedPage(EducationPage()),
-                      NavigatorWrappedPage(MessengerPage()),
-                      NavigatorWrappedPage(TimetablePage()),
-                      NavigatorWrappedPage(PersonalPage()),
+                      StreamBuilder(
+                          stream:
+                              this._personalDataBloc.personEntityStateStream,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData) {
+                              dynamic data = snapshot.data;
+                              if (data is ContentReadyState<PersonEntity>) {
+                                return NavigatorWrappedPage(EducationPage(
+                                    data.content as PersonEntity));
+                              }
+                            }
+                            // TODO: Обработка ошибок стрима
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }),
+                      StreamBuilder(
+                          stream:
+                              this._personalDataBloc.personEntityStateStream,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData) {
+                              dynamic data = snapshot.data;
+                              if (data is ContentReadyState<PersonEntity>) {
+                                return NavigatorWrappedPage(MessengerPage(
+                                    data.content as PersonEntity));
+                              }
+                            }
+                            // TODO: Обработка ошибок стрима
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }),
+                      StreamBuilder(
+                          stream:
+                              this._personalDataBloc.personEntityStateStream,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData) {
+                              dynamic data = snapshot.data;
+                              if (data is ContentReadyState<PersonEntity>) {
+                                return NavigatorWrappedPage(TimetablePage(
+                                    data.content as PersonEntity));
+                              }
+                            }
+                            // TODO: Обработка ошибок стрима
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }),
+                      StreamBuilder(
+                          stream:
+                              this._personalDataBloc.personEntityStateStream,
+                          builder: (BuildContext context,
+                              AsyncSnapshot<dynamic> snapshot) {
+                            if (snapshot.hasData) {
+                              dynamic data = snapshot.data;
+                              if (data is ContentReadyState<PersonEntity>) {
+                                return NavigatorWrappedPage(
+                                    PersonalPage(data.content as PersonEntity));
+                              }
+                            }
+                            // TODO: Обработка ошибок стрима
+                            return Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          }),
                     ],
                   )),
                 );
