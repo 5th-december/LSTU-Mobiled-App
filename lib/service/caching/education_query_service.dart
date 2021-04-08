@@ -3,6 +3,7 @@ import 'dart:ffi';
 
 import 'package:lk_client/model/entity/education_entity.dart';
 import 'package:lk_client/model/entity/semester_entity.dart';
+import 'package:lk_client/model/entity/subject_entity.dart';
 import 'package:lk_client/model/error/component_error_handler.dart';
 import 'package:lk_client/model/response/api_key.dart';
 import 'package:lk_client/service/app_config.dart';
@@ -49,6 +50,25 @@ class EducationQueryService extends HttpService {
       }
 
       return semesters;
+    }
+
+    throw this.apiErrorHandler.apply(response.body);
+  }
+
+  Future<List<SubjectEntity>> getSubjectList(String educationId, String semesterId) async {
+    HttpResponse response = await this.get('/api/v1/student/subject/list', 
+        <String, String>{'edu': educationId, 'sem': semesterId});
+
+    if(response.status == 200) {
+      List<SubjectEntity> subjects = [];
+
+      List<dynamic> subjectsData = response.body as List<dynamic>;
+
+      for(var subjectData in subjectsData) {
+        subjects.add(SubjectEntity.fromJson(subjectData));
+      } 
+
+      return subjects;
     }
 
     throw this.apiErrorHandler.apply(response.body);
