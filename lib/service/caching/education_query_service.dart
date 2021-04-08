@@ -55,18 +55,19 @@ class EducationQueryService extends HttpService {
     throw this.apiErrorHandler.apply(response.body);
   }
 
-  Future<List<SubjectEntity>> getSubjectList(String educationId, String semesterId) async {
-    HttpResponse response = await this.get('/api/v1/student/subject/list', 
+  Future<List<SubjectEntity>> getSubjectList(
+      String educationId, String semesterId) async {
+    HttpResponse response = await this.get('/api/v1/student/subjects/list',
         <String, String>{'edu': educationId, 'sem': semesterId});
 
-    if(response.status == 200) {
+    if (response.status == 200) {
       List<SubjectEntity> subjects = [];
 
       List<dynamic> subjectsData = response.body as List<dynamic>;
 
-      for(var subjectData in subjectsData) {
+      for (var subjectData in subjectsData) {
         subjects.add(SubjectEntity.fromJson(subjectData));
-      } 
+      }
 
       return subjects;
     }
