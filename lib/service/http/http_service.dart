@@ -9,7 +9,7 @@ import 'package:lk_client/service/app_config.dart';
 
 class HttpResponse {
   final int status;
-  final Map<String, dynamic> body;
+  final dynamic body;
 
   HttpResponse({this.status, this.body});
 }
@@ -39,7 +39,8 @@ abstract class HttpService {
     }
 
     try {
-      final response = await http.post(uri, headers: headers, body: jsonEncode(body));
+      final response =
+          await http.post(uri, headers: headers, body: jsonEncode(body));
       final responseBody = jsonDecode(response.body);
       return new HttpResponse(status: response.statusCode, body: responseBody);
     } on Exception {
@@ -49,27 +50,16 @@ abstract class HttpService {
 
   Future<HttpResponse> get(String url, Map<String, dynamic> params,
       [String apiJwtToken]) async {
-    if (params.length != 0) {
-      List<String> queryData = [];
-
-      params.forEach((key, value) {
-        queryData
-            .add("${Uri.encodeComponent(key)}=${Uri.encodeComponent(value)}");
-      });
-
-      url = "$url?${queryData.join('&')}";
-    }
-
     Uri uri;
     if (_configuration.useHttps == true) {
-      uri = Uri.https(_configuration.apiBase, url);
+      uri = Uri.https(_configuration.apiBase, url, params);
     } else {
-      uri = Uri.http(_configuration.apiBase, url);
+      uri = Uri.http(_configuration.apiBase, url, params);
     }
 
     Map<String, String> headers = defaultHeaders;
     if (apiJwtToken != null) {
-      headers[HttpHeaders.authorizationHeader] = apiJwtToken;
+      headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
     }
 
     try {

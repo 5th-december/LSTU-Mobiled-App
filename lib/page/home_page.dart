@@ -46,9 +46,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    // перейти на личную страницу
     this._appNavidationBloc.eventController.add(NavigateToEvent(3));
-    // отправка запроса на получение пользователя
+
     this._personalDataBloc.eventController.add(
         StartLoadingContentEvent<LoadCurrentUserObject>(
             LoadCurrentUserObject()));
@@ -62,91 +61,76 @@ class _HomePageState extends State<HomePage> {
                 return Scaffold(
                   body: SafeArea(
                       child: IndexedStack(
-                    index: () {
-                      if (snapshot.hasData) {
-                        NavigationState state = snapshot.data;
-                        if (state is NavigatedToEducationPage) {
-                          return 0;
-                        } else if (state is NavigatedToMessagesPage) {
-                          return 1;
-                        } else if (state is NavigatedToTimetablePage) {
-                          return 2;
-                        } else if (state is NavigatedToPersonalPage) {
-                          return 3;
-                        }
-                      }
-                    }(),
-                    children: <Widget>[
-                      StreamBuilder(
-                          stream:
-                              this._personalDataBloc.personEntityStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<dynamic> snapshot) {
+                          index: () {
                             if (snapshot.hasData) {
-                              dynamic data = snapshot.data;
-                              if (data is ContentReadyState<PersonEntity>) {
-                                return NavigatorWrappedPage(EducationPage(
-                                    data.content as PersonEntity));
+                              NavigationState state = snapshot.data;
+                              if (state is NavigatedToEducationPage) {
+                                return 0;
+                              } else if (state is NavigatedToMessagesPage) {
+                                return 1;
+                              } else if (state is NavigatedToTimetablePage) {
+                                return 2;
+                              } else if (state is NavigatedToPersonalPage) {
+                                return 3;
                               }
                             }
-                            // TODO: Обработка ошибок стрима
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }),
-                      StreamBuilder(
-                          stream:
-                              this._personalDataBloc.personEntityStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<dynamic> snapshot) {
-                            if (snapshot.hasData) {
-                              dynamic data = snapshot.data;
-                              if (data is ContentReadyState<PersonEntity>) {
-                                return NavigatorWrappedPage(MessengerPage(
-                                    data.content as PersonEntity));
-                              }
-                            }
-                            // TODO: Обработка ошибок стрима
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }),
-                      StreamBuilder(
-                          stream:
-                              this._personalDataBloc.personEntityStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<dynamic> snapshot) {
-                            if (snapshot.hasData) {
-                              dynamic data = snapshot.data;
-                              if (data is ContentReadyState<PersonEntity>) {
-                                return NavigatorWrappedPage(TimetablePage(
-                                    data.content as PersonEntity));
-                              }
-                            }
-                            // TODO: Обработка ошибок стрима
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }),
-                      StreamBuilder(
-                          stream:
-                              this._personalDataBloc.personEntityStateStream,
-                          builder: (BuildContext context,
-                              AsyncSnapshot<dynamic> snapshot) {
-                            if (snapshot.hasData) {
-                              dynamic data = snapshot.data;
-                              if (data is ContentReadyState<PersonEntity>) {
-                                return NavigatorWrappedPage(
-                                    PersonalPage(data.content as PersonEntity));
-                              }
-                            }
-                            // TODO: Обработка ошибок стрима
-                            return Center(
-                              child: CircularProgressIndicator(),
-                            );
-                          }),
-                    ],
-                  )),
+                          }(),
+                          children: [
+                              StreamBuilder(
+                                stream: this._personalDataBloc.personEntityStateStream,
+                                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data is ContentState<PersonEntity>) {
+                                    return EducationPage(snapshot.data.content as PersonEntity);
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                }
+                              ),
+                              StreamBuilder(
+                                stream: this._personalDataBloc.personEntityStateStream,
+                                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data is ContentState<PersonEntity>) {
+                                    return MessengerPage(snapshot.data.content as PersonEntity);
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                }
+                              ),
+                              StreamBuilder(
+                                stream: this._personalDataBloc.personEntityStateStream,
+                                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data is ContentState<PersonEntity>) {
+                                    return TimetablePage(snapshot.data.content as PersonEntity);
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                }
+                              ),
+                              StreamBuilder(
+                                stream: this._personalDataBloc.personEntityStateStream,
+                                builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
+                                  if (snapshot.hasData &&
+                                      snapshot.data is ContentState<PersonEntity>) {
+                                    return PersonalPage(snapshot.data.content as PersonEntity);
+                                  } else {
+                                    return Center(
+                                      child: CircularProgressIndicator(),
+                                    );
+                                  }
+                                }
+                              )
+                          ]
+                      )
+                  ),
                 );
               }
               return Center(

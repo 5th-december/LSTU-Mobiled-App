@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'person_entity.g.dart';
@@ -17,7 +18,7 @@ class PersonEntity {
   @JsonKey(name: 'partonymic')
   final String partonymic;
 
-  @JsonKey(name: 'bday')
+  @JsonKey(name: 'bday', fromJson: _dateFromJson, toJson: _dateToJson)
   final DateTime birthday;
 
   @JsonKey(name: 'sex')
@@ -47,3 +48,7 @@ class PersonEntity {
       _$PersonEntityFromJson(json);
   Map<String, dynamic> toJson() => _$PersonEntityToJson(this);
 }
+
+final _dateFormatter = DateFormat('d.M.yyyy');
+DateTime _dateFromJson(String date) => _dateFormatter.parse(date);
+String _dateToJson(DateTime date) => _dateFormatter.format(date);

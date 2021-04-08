@@ -12,8 +12,7 @@ PersonEntity _$PersonEntityFromJson(Map<String, dynamic> json) {
     surname: json['lname'] as String,
     name: json['fname'] as String,
     partonymic: json['partonymic'] as String,
-    birthday:
-        json['bday'] == null ? null : DateTime.parse(json['bday'] as String),
+    birthday: _dateFromJson(json['bday'] as String),
     sex: json['sex'] as String,
     phone: json['phone'] as String,
     email: json['email'] as String,
@@ -27,7 +26,7 @@ Map<String, dynamic> _$PersonEntityToJson(PersonEntity instance) =>
       'lname': instance.surname,
       'fname': instance.name,
       'partonymic': instance.partonymic,
-      'bday': instance.birthday?.toIso8601String(),
+      'bday': _dateToJson(instance.birthday),
       'sex': instance.sex,
       'phone': instance.phone,
       'email': instance.email,

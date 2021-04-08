@@ -1,9 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/education_list_bloc.dart';
+import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/request_command/education_request_command.dart';
+import 'package:lk_client/model/entity/education_entity.dart';
 import 'package:lk_client/model/entity/person_entity.dart';
+import 'package:lk_client/page/semester_page.dart';
 import 'package:lk_client/service/caching/education_query_service.dart';
+import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
 class EducationPage extends StatefulWidget {
@@ -26,10 +30,7 @@ class _EducationPageState extends State<EducationPage> {
     if (this._educationBloc == null) {
       EducationQueryService queryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
-      AuthenticationBloc appAuthenticator =
-          AppStateContainer.of(context).blocProvider.authenticationBloc;
-      this._educationBloc =
-          new EducationListBloc(appAuthenticator, queryService);
+      this._educationBloc = EducationListBloc(queryService);
     }
   }
 
@@ -42,14 +43,49 @@ class _EducationPageState extends State<EducationPage> {
   }
 
   Widget build(BuildContext context) {
+    this._educationBloc.eventController.sink.add(
+        StartLoadingContentEvent<LoadUserEducationListCommand>(
+            LoadUserEducationListCommand(this._currentPerson)));
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Supercool'),
+        title: Text('Обучение'),
       ),
       body: StreamBuilder(
-        stream: this._educationBloc.state,
+        stream: this._educationBloc.educationListStateStream,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
-          
+          if (snapshot.hasData &&
+              snapshot.data is ContentReadyState<List<EducationEntity>>) {
+            List<EducationEntity> educationsList =
+                (snapshot.data as ContentReadyState<List<EducationEntity>>)
+                    .content;
+
+            return Container(
+                child: ListView.builder(
+                    itemCount: educationsList.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return Card(
+                        child: ListTile(
+                          leading: FlutterLogo(
+                            size: 50,
+                          ),
+                          title: Text(educationsList[index].name),
+                          subtitle: Text(educationsList[index].qualification),
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                                builder: (BuildContext context) {
+                              return SemesterPage(
+                                  this._currentPerson, educationsList[index]);
+                            }));
+                          },
+                        ),
+                      );
+                    }));
+          } else {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          }
         },
       ),
     );

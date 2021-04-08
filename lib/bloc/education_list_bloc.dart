@@ -1,46 +1,41 @@
 import 'dart:async';
 
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/request_command/education_request_command.dart';
 import 'package:lk_client/model/entity/education_entity.dart';
+import 'package:lk_client/model/entity/person_entity.dart';
 import 'package:lk_client/service/caching/education_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 
-class EducationListBloc {
-  ContentState<EducationEntity> _currentState;
-
+class EducationListBloc extends AbstractBloc<ContentState, ContentEvent> {
   EducationQueryService _educationQueryService;
-  AuthenticationBloc _authenticationBloc;
 
-  StreamController<ContentState<EducationEntity>> _stateController =
-      StreamController<ContentState<EducationEntity>>.broadcast();
-  Stream<ContentState<EducationEntity>> get state => _stateController.stream;
+  Stream<ContentState> get educationListStateStream =>
+      this.stateContoller.stream;
 
-  StreamController<ContentEvent> _eventController =
-      StreamController<ContentEvent>.broadcast();
-  Stream<ContentEvent> get _loadStateEvent => _eventController.stream
-      .where((event) => event is StartLoadingContentEvent);
+  Stream<ContentEvent> get _loadEducationListEventStream =>
+      this.eventController.stream.where((event) =>
+          event is StartLoadingContentEvent<LoadUserEducationListCommand>);
 
-  void _updateState(ContentState<EducationEntity> state) {
-    this._currentState = state;
-    this._stateController.sink.add(state);
-  }
+  EducationListBloc(this._educationQueryService) {
+    this._loadEducationListEventStream.listen((event) async {
+      StartLoadingContentEvent<LoadUserEducationListCommand> _event =
+          event as StartLoadingContentEvent<LoadUserEducationListCommand>;
 
-  dispose() async {
-    await this._stateController.close();
-    await this._eventController.close();
-  }
+      PersonEntity requestedPerson = _event.request.person;
 
-  EducationListBloc(AuthenticationBloc authenticationBloc,
-      EducationQueryService educationQueryService) {
-    this._authenticationBloc = authenticationBloc;
-    this._educationQueryService = educationQueryService;
+      this.updateState(ContentLoadingState<LoadUserEducationListCommand>());
 
-    this._loadStateEvent.listen((event) async {
-      this._updateState(ContentLoadingState());
+      try {
+        List<EducationEntity> educations = await this
+            ._educationQueryService
+            .getEducationsList(requestedPerson.id);
 
-      List<EducationEntity> educations =
-          await this._educationQueryService.getEducationsList('person');
+        this.updateState(ContentReadyState<List<EducationEntity>>(educations));
+      } on Exception catch (e) {
+        this.updateState(ContentErrorState(e));
+      }
     });
   }
 }

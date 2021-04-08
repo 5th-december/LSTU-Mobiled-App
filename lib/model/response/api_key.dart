@@ -4,7 +4,7 @@ part 'api_key.g.dart';
 
 @JsonSerializable()
 class ApiKey {
-  @JsonKey(name: 'jwt_token')
+  //@JsonKey(name: 'jwt_token')
   final String token;
 
   @JsonKey(name: 'roles')
