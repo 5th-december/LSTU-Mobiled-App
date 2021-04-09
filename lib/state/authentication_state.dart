@@ -1,4 +1,4 @@
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/model/response/api_key.dart';
 
 abstract class AuthenticationState {}

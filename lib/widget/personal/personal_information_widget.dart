@@ -32,6 +32,7 @@ class PersonalInformationWidget extends StatelessWidget {
     }
 
     if (personProperties.length == 0) {
+      // TODO: implement
       throw Exception('Not implemented');
     } else {
       List<Widget> colProperties = [Divider()];

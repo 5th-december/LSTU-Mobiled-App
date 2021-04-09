@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
-import 'package:lk_client/bloc/navigation_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
+import 'package:lk_client/bloc/util/navigation_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/model/error/api_system_error_handler.dart';
 import 'package:lk_client/model/error/duplicate_error_handler.dart';

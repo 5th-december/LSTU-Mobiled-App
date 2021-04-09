@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/education_list_bloc.dart';
+import 'package:lk_client/bloc/education/education_list_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/education_request_command.dart';
 import 'package:lk_client/model/entity/education_entity.dart';

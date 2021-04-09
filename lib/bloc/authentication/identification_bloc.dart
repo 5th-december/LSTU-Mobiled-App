@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:lk_client/bloc/abstract_bloc.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/identify_event.dart';
 import 'package:lk_client/model/request/identify_credentials.dart';

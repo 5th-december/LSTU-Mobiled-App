@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/navigation_bloc.dart';
-import 'package:lk_client/bloc/personal_data_bloc.dart';
+import 'package:lk_client/bloc/util/navigation_bloc.dart';
+import 'package:lk_client/bloc/personal/personal_data_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';

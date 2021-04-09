@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
 import 'package:lk_client/page/register_page.dart';
 import 'package:lk_client/page/togglable_login_page.dart';

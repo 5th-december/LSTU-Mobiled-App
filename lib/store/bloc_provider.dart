@@ -1,10 +1,10 @@
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/identification_bloc.dart';
-import 'package:lk_client/bloc/login_bloc.dart';
-import 'package:lk_client/bloc/navigation_bloc.dart';
-import 'package:lk_client/bloc/registration_bloc.dart';
+import 'package:lk_client/bloc/authentication/identification_bloc.dart';
+import 'package:lk_client/bloc/authentication/login_bloc.dart';
+import 'package:lk_client/bloc/util/navigation_bloc.dart';
+import 'package:lk_client/bloc/authentication/registration_bloc.dart';
 
 class BlocProvider
 {

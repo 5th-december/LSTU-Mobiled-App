@@ -23,3 +23,9 @@ class LoadSubjectListCommand extends EducationRequestCommand {
 
   LoadSubjectListCommand(this.education, this.semester);
 }
+
+class LoadCurrentEducationsCommand extends EducationRequestCommand {
+  final PersonEntity person;
+
+  LoadCurrentEducationsCommand(this.person);
+}
