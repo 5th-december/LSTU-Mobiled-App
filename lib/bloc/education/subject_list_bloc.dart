@@ -1,10 +1,10 @@
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/education_request_command.dart';
-import 'package:lk_client/model/entity/education_entity.dart';
-import 'package:lk_client/model/entity/semester_entity.dart';
-import 'package:lk_client/model/entity/subject_entity.dart';
-import 'package:lk_client/service/caching/education_query_service.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
+import 'package:lk_client/model/discipline/discipline.dart';
+import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 
 class SubjectListBloc extends AbstractBloc<ContentState, ContentEvent> {
@@ -26,16 +26,14 @@ class SubjectListBloc extends AbstractBloc<ContentState, ContentEvent> {
 
       LoadSubjectListCommand loadCmd = _event.request;
 
-      EducationEntity requestedEducation = loadCmd.education;
-      SemesterEntity requestedSemester = loadCmd.semester;
+      Education requestedEducation = loadCmd.education;
+      Semester requestedSemester = loadCmd.semester;
 
       try {
-        List<SubjectEntity> loadedSubjects = await this
-            ._educationQueryService
-            .getSubjectList(requestedEducation.id, requestedSemester.id);
+        this._educationQueryService.getSubjectList(requestedEducation.id, requestedSemester.id).listen((event) {
+          this.updateState(ContentReadyState<List<Discipline>>(event.payload));
+        });
 
-        this.updateState(
-            ContentReadyState<List<SubjectEntity>>(loadedSubjects));
       } on Exception catch (e) {
         this.updateState(ContentErrorState<LoadSubjectListCommand>(e));
       }

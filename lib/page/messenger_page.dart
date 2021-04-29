@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
+import 'package:lk_client/model/person/person.dart';
 
 class MessengerPage extends StatefulWidget {
-  PersonEntity currentUser;
+  Person currentUser;
 
   MessengerPage(this.currentUser);
   

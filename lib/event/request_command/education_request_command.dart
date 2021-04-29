@@ -1,31 +1,31 @@
-import 'package:lk_client/model/entity/education_entity.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
-import 'package:lk_client/model/entity/semester_entity.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/model/education/semester.dart';
 
 abstract class EducationRequestCommand {}
 
 class LoadUserEducationListCommand extends EducationRequestCommand {
-  final PersonEntity person;
+  final Person person;
 
   LoadUserEducationListCommand(this.person);
 }
 
 class LoadSemsterListCommand extends EducationRequestCommand {
-  final PersonEntity person;
-  final EducationEntity education;
+  final Person person;
+  final Education education;
 
   LoadSemsterListCommand(this.person, this.education);
 }
 
 class LoadSubjectListCommand extends EducationRequestCommand {
-  final EducationEntity education;
-  final SemesterEntity semester;
+  final Education education;
+  final Semester semester;
 
   LoadSubjectListCommand(this.education, this.semester);
 }
 
 class LoadCurrentEducationsCommand extends EducationRequestCommand {
-  final PersonEntity person;
+  final Person person;
 
   LoadCurrentEducationsCommand(this.person);
 }

@@ -4,13 +4,13 @@ import 'package:lk_client/bloc/personal/personal_data_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
+import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/navigator_wrapped_page.dart';
 import 'package:lk_client/page/education_page.dart';
 import 'package:lk_client/page/messenger_page.dart';
 import 'package:lk_client/page/personal_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
-import 'package:lk_client/service/caching/person_query_service.dart';
+import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
@@ -82,9 +82,9 @@ class _HomePageState extends State<HomePage> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
-                                  snapshot.data is ContentState<PersonEntity>) {
+                                  snapshot.data is ContentState<Person>) {
                                 return NavigatorWrappedPage(EducationPage(
-                                    snapshot.data.content as PersonEntity));
+                                    snapshot.data.content as Person));
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(),
@@ -97,9 +97,9 @@ class _HomePageState extends State<HomePage> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
-                                  snapshot.data is ContentState<PersonEntity>) {
+                                  snapshot.data is ContentState<Person>) {
                                 return NavigatorWrappedPage(MessengerPage(
-                                    snapshot.data.content as PersonEntity));
+                                    snapshot.data.content as Person));
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(),
@@ -112,9 +112,9 @@ class _HomePageState extends State<HomePage> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
-                                  snapshot.data is ContentState<PersonEntity>) {
+                                  snapshot.data is ContentState<Person>) {
                                 return NavigatorWrappedPage(TimetablePage(
-                                    snapshot.data.content as PersonEntity));
+                                    snapshot.data.content as Person));
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(),
@@ -127,9 +127,9 @@ class _HomePageState extends State<HomePage> {
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
-                                  snapshot.data is ContentState<PersonEntity>) {
+                                  snapshot.data is ContentState<Person>) {
                                 return NavigatorWrappedPage(PersonalPage(
-                                    snapshot.data.content as PersonEntity));
+                                    snapshot.data.content as Person));
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(),

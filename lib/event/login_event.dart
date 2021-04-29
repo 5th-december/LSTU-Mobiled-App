@@ -1,4 +1,4 @@
-import 'package:lk_client/model/request/login_credentials.dart';
+import 'package:lk_client/model/authentication/login_credentials.dart';
 
 abstract class LoginEvent {}
 

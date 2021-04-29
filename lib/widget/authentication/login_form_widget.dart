@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/authentication/login_bloc.dart';
 import 'package:lk_client/event/login_event.dart';
-import 'package:lk_client/model/request/login_credentials.dart';
+import 'package:lk_client/model/authentication/login_credentials.dart';
 import 'package:lk_client/router_path.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/login_state.dart';

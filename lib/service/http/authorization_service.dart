@@ -1,7 +1,7 @@
-import 'package:lk_client/model/error/component_error_handler.dart';
-import 'package:lk_client/model/request/identify_credentials.dart';
-import 'package:lk_client/model/request/login_credentials.dart';
-import 'package:lk_client/model/response/api_key.dart';
+import 'package:lk_client/error_handler/component_error_handler.dart';
+import 'package:lk_client/model/authentication/identify_credentials.dart';
+import 'package:lk_client/model/authentication/login_credentials.dart';
+import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/http/http_service.dart';
 import 'package:lk_client/service/jwt_manager.dart';

@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
+import 'package:lk_client/model/person/person.dart';
 
 class PersonalInformationWidget extends StatelessWidget {
-  final PersonEntity _person;
+  final Person _person;
 
   PersonalInformationWidget(this._person);
 
-  Widget _buildInfoView(PersonEntity person) {
+  Widget _buildInfoView(Person person) {
     List<Widget> personProperties = [];
 
     if (person.sex != null) {

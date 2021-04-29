@@ -3,17 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/education/subject_list_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/education_request_command.dart';
-import 'package:lk_client/model/entity/education_entity.dart';
-import 'package:lk_client/model/entity/semester_entity.dart';
-import 'package:lk_client/model/entity/subject_entity.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
+import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/page/subject_view_page.dart';
-import 'package:lk_client/service/caching/education_query_service.dart';
+import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
 class SubjectListPage extends StatefulWidget {
-  final SemesterEntity _requiredSemester;
-  final EducationEntity _requiredEducation;
+  final Semester _requiredSemester;
+  final Education _requiredEducation;
 
   SubjectListPage(this._requiredEducation, this._requiredSemester);
 
@@ -22,8 +22,8 @@ class SubjectListPage extends StatefulWidget {
 }
 
 class _SubjectListPageState extends State<SubjectListPage> {
-  SemesterEntity get _requiredSemester => widget._requiredSemester;
-  EducationEntity get _requiredEducation => widget._requiredEducation;
+  Semester get _requiredSemester => widget._requiredSemester;
+  Education get _requiredEducation => widget._requiredEducation;
 
   SubjectListBloc _subjectListBloc;
 
@@ -51,9 +51,9 @@ class _SubjectListPageState extends State<SubjectListPage> {
         stream: this._subjectListBloc.subjectListContentStateStream,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData &&
-              snapshot.data is ContentReadyState<List<SubjectEntity>>) {
-            List<SubjectEntity> loadedSubjects =
-                (snapshot.data as ContentReadyState<List<SubjectEntity>>)
+              snapshot.data is ContentReadyState<List<Discipline>>) {
+            List<Discipline> loadedSubjects =
+                (snapshot.data as ContentReadyState<List<Discipline>>)
                     .content;
 
             return ListView.builder(
@@ -62,8 +62,7 @@ class _SubjectListPageState extends State<SubjectListPage> {
                   return Card(
                     child: ListTile(
                       leading: FlutterLogo(size: 50),
-                      title: Text(loadedSubjects[index].subjectName),
-                      subtitle: Text(loadedSubjects[index].chairName),
+                      title: Text(loadedSubjects[index].name),
                       onTap: () {
                         Navigator.of(context).push(
                             MaterialPageRoute(builder: (BuildContext context) {

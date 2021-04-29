@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:async';
 
 import 'package:http/http.dart' as http;
-import 'package:lk_client/model/response/api_key.dart';
+import 'package:lk_client/model/authentication/api_key.dart';
 
 import 'package:lk_client/service/app_config.dart';
 
@@ -62,12 +62,12 @@ abstract class HttpService {
       headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
     }
 
-    try {
-      final response = await http.get(uri, headers: headers);
-      final responseBody = jsonDecode(response.body);
-      return new HttpResponse(status: response.statusCode, body: responseBody);
-    } on Exception {
-      rethrow;
+    final response = await http.get(uri, headers: headers);
+    if(response.headers['content-type'] != 'application/json') {
+      var r = response.body;
+      throw new Exception('Undefined response type');
     }
+    final responseBody = jsonDecode(response.body);
+    return new HttpResponse(status: response.statusCode, body: responseBody);
   }
 }

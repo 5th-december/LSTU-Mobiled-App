@@ -1,8 +1,8 @@
 import 'package:flutter/foundation.dart';
+import 'package:lk_client/service/api_consumer/education_query_service.dart';
+import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
-import 'package:lk_client/service/caching/education_query_service.dart';
-import 'package:lk_client/service/caching/person_query_service.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/service/jwt_manager.dart';
 

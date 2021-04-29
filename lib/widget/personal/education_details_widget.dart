@@ -3,14 +3,14 @@ import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/education/education_details_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/education_request_command.dart';
-import 'package:lk_client/model/entity/education_entity.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
-import 'package:lk_client/service/caching/education_query_service.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
 
 class EducationDetailsWidget extends StatefulWidget {
-  final PersonEntity _person;
+  final Person _person;
 
   EducationDetailsWidget(this._person);
 
@@ -21,7 +21,7 @@ class EducationDetailsWidget extends StatefulWidget {
 class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
   EducationDetailsBloc _educationDetailsBloc;
 
-  PersonEntity get _person => widget._person;
+  Person get _person => widget._person;
 
   @override
   void didChangeDependencies() {
@@ -32,13 +32,13 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
     }
   }
 
-  Widget _buildEducationDetailsView(List<EducationEntity> educationsList) {
+  Widget _buildEducationDetailsView(List<Education> educationsList) {
     if(educationsList.length == 1) {
       return Column(
         children: [
           Divider(),
-          Text('${educationsList[0].name}'),
-          Text('Квалификация: ${educationsList[0].qualification}'),
+          Text('${educationsList[0].group.speciality.specName}'),
+          Text('Квалификация: ${educationsList[0].group.speciality.qualification}'),
           Text('Статус: ${educationsList[0].status}'),
           Text('Период обучения: ${educationsList[0].status}')
         ],
@@ -51,7 +51,7 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
           ];
 
           for(var educationItem in educationsList) {
-            educationViewGroups.add(Text('${educationItem.name}, ${educationItem.qualification}'));
+            educationViewGroups.add(Text('${educationItem.group.speciality.specName}, ${educationItem.group.speciality.specName}'));
           }
 
           return educationViewGroups;
@@ -66,8 +66,8 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
     return StreamBuilder(
       stream: this._educationDetailsBloc.educationDetailsStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData && snapshot.data is ContentReadyState<List<EducationEntity>>) {
-          List<EducationEntity> currentEducationList = (snapshot.data as ContentReadyState<List<EducationEntity>>).content;
+        if (snapshot.hasData && snapshot.data is ContentReadyState<List<Education>>) {
+          List<Education> currentEducationList = (snapshot.data as ContentReadyState<List<Education>>).content;
 
           return this._buildEducationDetailsView(currentEducationList);
         } else {

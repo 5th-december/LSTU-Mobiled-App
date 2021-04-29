@@ -4,8 +4,8 @@ import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/register_event.dart';
-import 'package:lk_client/model/request/login_credentials.dart';
-import 'package:lk_client/model/response/api_key.dart';
+import 'package:lk_client/model/authentication/login_credentials.dart';
+import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/service/http/authorization_service.dart';
 import 'package:lk_client/state/register_state.dart';
 

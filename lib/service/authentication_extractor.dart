@@ -1,5 +1,5 @@
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
-import 'package:lk_client/model/response/api_key.dart';
+import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/state/authentication_state.dart';
 
 class AuthenticationExtractor {

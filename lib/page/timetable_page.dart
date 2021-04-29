@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
-import 'package:lk_client/model/entity/person_entity.dart';
+import 'package:lk_client/model/person/person.dart';
 
 class TimetablePage extends StatefulWidget {
-  PersonEntity currentPerson;
+  Person currentPerson;
 
   TimetablePage(this.currentPerson);
   @override

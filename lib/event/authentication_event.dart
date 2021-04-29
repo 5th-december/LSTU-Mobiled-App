@@ -1,4 +1,4 @@
-import 'package:lk_client/model/response/api_key.dart';
+import 'package:lk_client/model/authentication/api_key.dart';
 
 abstract class AuthenticationEvent {}
 

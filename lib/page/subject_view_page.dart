@@ -1,9 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/model/entity/subject_entity.dart';
+import 'package:lk_client/model/discipline/discipline.dart';
 
 class SubjectViewPage extends StatefulWidget {
-  SubjectEntity _currentSubject;
+  Discipline _currentSubject;
 
   SubjectViewPage(this._currentSubject);
 
@@ -18,7 +18,7 @@ class _SubjectViewPageState extends State<SubjectViewPage> {
       appBar: AppBar(
         title: Text('Дисциплина'),
       ),
-      body: Center(child: Text(widget._currentSubject.subjectName)),
+      body: Center(child: Text(widget._currentSubject.name)),
     );
   }
 }
