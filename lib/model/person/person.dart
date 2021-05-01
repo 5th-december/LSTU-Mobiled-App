@@ -15,7 +15,7 @@ class Person {
   @JsonKey(name: 'fname')
   final String name;
 
-  final String partonymic;
+  final String patronymic;
 
   @JsonKey(name: 'bday')
   final DateTime birthday;
@@ -30,20 +30,18 @@ class Person {
 
   final String post;
 
-  Person({
-    @required this.id,
-    @required this.surname,
-    @required this.name,
-    this.partonymic,
-    this.birthday,
-    this.sex,
-    this.phone,
-    this.email,
-    this.messenger,
-    this.post
-  });
+  Person(
+      {@required this.id,
+      @required this.surname,
+      @required this.name,
+      this.patronymic,
+      this.birthday,
+      this.sex,
+      this.phone,
+      this.email,
+      this.messenger,
+      this.post});
 
-  factory Person.fromJson(Map<String, dynamic> json) =>
-      _$PersonFromJson(json);
+  factory Person.fromJson(Map<String, dynamic> json) => _$PersonFromJson(json);
   Map<String, dynamic> toJson() => _$PersonToJson(this);
 }

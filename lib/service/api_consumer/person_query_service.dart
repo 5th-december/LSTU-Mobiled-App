@@ -19,53 +19,53 @@ class PersonQueryService extends HttpService {
       AppConfig config, this.authenticationExtractor, this.apiErrorHandler)
       : super(config);
 
-  Future<Person> getPersonEntity(String person) async {
-    HttpResponse response =
-        await this.get('/api/v1/person/props', <String, String>{'p': person}, this.accessKey.token);
+  Stream<Person> getPersonProperties(String person) async* {
+    HttpResponse response = await this.get('/api/v1/person/info',
+        <String, String>{'p': person}, this.accessKey.token);
 
     if (response.status == 200) {
-      Person person =
-          Person.fromJson(response.body as Map<String, dynamic>);
-      return person;
+      Person person = Person.fromJson(response.body);
+      yield person;
+    } else {
+      throw apiErrorHandler.apply(response.body);
     }
-
-    throw apiErrorHandler.apply(response.body);
   }
 
-  Future<Person> getCurrentPerson() async {
+  Stream<Person> getCurrentPersonIdentifier() async* {
     HttpResponse response =
         await this.get('/api/v1/whoami', {}, this.accessKey.token);
 
     if (response.status == 200) {
-      Person person =
-          Person.fromJson(response.body as Map<String, dynamic>);
-      return person;
+      Person person = Person.fromJson(response.body);
+      yield person;
+    } else {
+      throw apiErrorHandler.apply(response.body);
     }
-
-    throw apiErrorHandler.apply(response.body);
   }
 
-  Future<ProfilePicture> getPersonProfilePicture(String person, String size) async {
-    HttpResponse response = await this.get('/api/v1/person/userpic', 
-      <String, String>{'p': person, 'size': size}, this.accessKey.token);
+  Stream<ProfilePicture> getPersonProfilePicture(
+      String person, String size) async* {
+    HttpResponse response = await this.get('/api/v1/person/pic',
+        <String, String>{'p': person, 'size': size}, this.accessKey.token);
 
-    if(response.status == 200) {
+    if (response.status == 200) {
       ProfilePicture pictureData = ProfilePicture.fromJson(response.body);
-      return pictureData;
+      yield pictureData;
+    } else {
+      throw apiErrorHandler.apply(response.body);
     }
-
-    throw apiErrorHandler.apply(response.body);
   }
 
   Future<bool> editPersonProfile(Contacts updatedProfileData) async {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
-    HttpResponse response = await this.post('/api/v1/person/props', 
-      updateProfileSerialized, this.accessKey.token);
+    HttpResponse response = await this.post(
+        '/api/v1/person/props', updateProfileSerialized, this.accessKey.token);
 
-    if(response.status == 200) {
+    if (response.status == 200) {
       Map<String, dynamic> receivedData = jsonDecode(response.body);
-      if(receivedData.containsKey('success') && receivedData['success'] == true) {
+      if (receivedData.containsKey('success') &&
+          receivedData['success'] == true) {
         return true;
       }
     }

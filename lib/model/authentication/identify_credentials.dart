@@ -6,7 +6,7 @@ part 'identify_credentials.g.dart';
 class IdentifyCredentials {
   final String username;
 
-  @JsonKey(name: 'enter_year')
+  @JsonKey(name: 'entered_year')
   final int enterYear;
 
   @JsonKey(name: 'z_book_number')

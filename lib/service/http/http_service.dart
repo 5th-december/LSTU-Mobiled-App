@@ -41,6 +41,11 @@ abstract class HttpService {
     try {
       final response =
           await http.post(uri, headers: headers, body: jsonEncode(body));
+
+      if (response.headers['content-type'] != 'application/json') {
+        throw new Exception('Undefined response type');
+      }
+
       final responseBody = jsonDecode(response.body);
       return new HttpResponse(status: response.statusCode, body: responseBody);
     } on Exception {
@@ -63,10 +68,10 @@ abstract class HttpService {
     }
 
     final response = await http.get(uri, headers: headers);
-    if(response.headers['content-type'] != 'application/json') {
-      var r = response.body;
+    if (response.headers['content-type'] != 'application/json') {
       throw new Exception('Undefined response type');
     }
+
     final responseBody = jsonDecode(response.body);
     return new HttpResponse(status: response.statusCode, body: responseBody);
   }

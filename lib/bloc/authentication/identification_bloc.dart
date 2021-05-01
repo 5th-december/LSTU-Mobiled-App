@@ -49,8 +49,8 @@ class IdentificationBloc extends AbstractBloc<IdentifyState, IdentifyEvent> {
               .add(IdentifiedEvent(jwtIdentifier));
 
           this.updateState(IdentifyInitState());
-        } on Exception catch (ble) {
-          this.updateState(IdentifyErrorState(error: ble));
+        } on Exception catch (e) {
+          this.updateState(IdentifyErrorState(error: e));
         }
       }
     });

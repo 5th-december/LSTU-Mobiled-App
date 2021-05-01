@@ -36,8 +36,8 @@ class LoginBloc extends AbstractBloc<LoginState, LoginEvent> {
                 .add(TokenValidateEvent(apiKey));
 
             this.updateState(LoginInitState());
-          } on Exception catch (ble) {
-            this.updateState(LoginErrorState(ble));
+          } on Exception catch (e) {
+            this.updateState(LoginErrorState(e));
           }
         }
       }

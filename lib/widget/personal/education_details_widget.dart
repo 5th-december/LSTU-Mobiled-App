@@ -26,19 +26,22 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(_educationDetailsBloc == null) {
-      EducationQueryService appEducationQueryService = AppStateContainer.of(context).serviceProvider.educationQueryService;
-      this._educationDetailsBloc = new EducationDetailsBloc(appEducationQueryService);
+    if (_educationDetailsBloc == null) {
+      EducationQueryService appEducationQueryService =
+          AppStateContainer.of(context).serviceProvider.educationQueryService;
+      this._educationDetailsBloc =
+          new EducationDetailsBloc(appEducationQueryService);
     }
   }
 
   Widget _buildEducationDetailsView(List<Education> educationsList) {
-    if(educationsList.length == 1) {
+    if (educationsList.length == 1) {
       return Column(
         children: [
           Divider(),
           Text('${educationsList[0].group.speciality.specName}'),
-          Text('Квалификация: ${educationsList[0].group.speciality.qualification}'),
+          Text(
+              'Квалификация: ${educationsList[0].group.speciality.qualification}'),
           Text('Статус: ${educationsList[0].status}'),
           Text('Период обучения: ${educationsList[0].status}')
         ],
@@ -46,12 +49,11 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
     } else {
       return Column(
         children: () {
-          List<Widget> educationViewGroups = [
-            Divider()
-          ];
+          List<Widget> educationViewGroups = [Divider()];
 
-          for(var educationItem in educationsList) {
-            educationViewGroups.add(Text('${educationItem.group.speciality.specName}, ${educationItem.group.speciality.specName}'));
+          for (var educationItem in educationsList) {
+            educationViewGroups.add(Text(
+                '${educationItem.group.speciality.specName}, ${educationItem.group.speciality.specName}'));
           }
 
           return educationViewGroups;
@@ -62,12 +64,16 @@ class _EducationDetailsWidgetState extends State<EducationDetailsWidget> {
 
   @override
   Widget build(BuildContext context) {
-    this._educationDetailsBloc.eventController.sink.add(StartLoadingContentEvent<LoadCurrentEducationsCommand>(LoadCurrentEducationsCommand(this._person)));
+    this._educationDetailsBloc.eventController.sink.add(
+        StartLoadingContentEvent<LoadCurrentEducationsCommand>(
+            LoadCurrentEducationsCommand(this._person)));
     return StreamBuilder(
       stream: this._educationDetailsBloc.educationDetailsStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if (snapshot.hasData && snapshot.data is ContentReadyState<List<Education>>) {
-          List<Education> currentEducationList = (snapshot.data as ContentReadyState<List<Education>>).content;
+        if (snapshot.hasData &&
+            snapshot.data is ContentReadyState<List<Education>>) {
+          List<Education> currentEducationList =
+              (snapshot.data as ContentReadyState<List<Education>>).content;
 
           return this._buildEducationDetailsView(currentEducationList);
         } else {

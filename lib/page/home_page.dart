@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:lk_client/bloc/personal/user_definition_bloc.dart';
 import 'package:lk_client/bloc/util/navigation_bloc.dart';
-import 'package:lk_client/bloc/personal/personal_data_bloc.dart';
+import 'package:lk_client/bloc/personal/personal_details_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';
@@ -22,7 +23,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   NavigationBloc _appNavidationBloc;
-  PersonalDataBloc _personalDataBloc;
+  UserDefinitionBloc _personalDataBloc;
 
   @override
   void didChangeDependencies() {
@@ -32,7 +33,7 @@ class _HomePageState extends State<HomePage> {
           AppStateContainer.of(context).blocProvider.navigationBloc;
       PersonQueryService personQueryService =
           AppStateContainer.of(context).serviceProvider.personQueryService;
-      this._personalDataBloc = PersonalDataBloc(personQueryService);
+      this._personalDataBloc = UserDefinitionBloc(personQueryService);
     }
   }
 
@@ -49,8 +50,8 @@ class _HomePageState extends State<HomePage> {
     this._appNavidationBloc.eventController.add(NavigateToEvent(3));
 
     this._personalDataBloc.eventController.add(
-        StartLoadingContentEvent<LoadCurrentUserObject>(
-            LoadCurrentUserObject()));
+        StartLoadingContentEvent<LoadCurrentUserIdentifier>(
+            LoadCurrentUserIdentifier()));
 
     return Scaffold(
         body: StreamBuilder(
@@ -77,8 +78,9 @@ class _HomePageState extends State<HomePage> {
                           }(),
                           children: [
                         StreamBuilder(
-                            stream:
-                                this._personalDataBloc.personEntityStateStream,
+                            stream: this
+                                ._personalDataBloc
+                                .personDefinitionStateSteream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
@@ -92,8 +94,9 @@ class _HomePageState extends State<HomePage> {
                               }
                             }),
                         StreamBuilder(
-                            stream:
-                                this._personalDataBloc.personEntityStateStream,
+                            stream: this
+                                ._personalDataBloc
+                                .personDefinitionStateSteream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
@@ -107,8 +110,9 @@ class _HomePageState extends State<HomePage> {
                               }
                             }),
                         StreamBuilder(
-                            stream:
-                                this._personalDataBloc.personEntityStateStream,
+                            stream: this
+                                ._personalDataBloc
+                                .personDefinitionStateSteream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
@@ -122,8 +126,9 @@ class _HomePageState extends State<HomePage> {
                               }
                             }),
                         StreamBuilder(
-                            stream:
-                                this._personalDataBloc.personEntityStateStream,
+                            stream: this
+                                ._personalDataBloc
+                                .personDefinitionStateSteream,
                             builder: (BuildContext context,
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&

@@ -52,8 +52,8 @@ class RegistrationBloc extends AbstractBloc<RegisterState, RegisterEvent> {
               .add(TokenValidateEvent(accessKey));
 
           this.updateState(RegisterInitState());
-        } on Exception catch (ex) {
-          this.updateState(RegisterErrorState(ex));
+        } on Exception catch (e) {
+          this.updateState(RegisterErrorState(e));
         }
       }
     });

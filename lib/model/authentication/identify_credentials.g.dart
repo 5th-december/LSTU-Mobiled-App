@@ -9,7 +9,7 @@ part of 'identify_credentials.dart';
 IdentifyCredentials _$IdentifyCredentialsFromJson(Map<String, dynamic> json) {
   return IdentifyCredentials(
     username: json['username'] as String,
-    enterYear: json['enter_year'] as int,
+    enterYear: json['entered_year'] as int,
     zBookNumber: json['z_book_number'] as String,
   );
 }
@@ -18,6 +18,6 @@ Map<String, dynamic> _$IdentifyCredentialsToJson(
         IdentifyCredentials instance) =>
     <String, dynamic>{
       'username': instance.username,
-      'enter_year': instance.enterYear,
+      'entered_year': instance.enterYear,
       'z_book_number': instance.zBookNumber,
     };

@@ -29,7 +29,7 @@ class AuthorizationService extends HttpService {
     HttpResponse response =
         await this.post('api/v1/identify', credentials.toJson());
 
-    if (response.status == 201) {
+    if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body as Map<String, dynamic>);
       return token;
     }
@@ -43,7 +43,7 @@ class AuthorizationService extends HttpService {
     HttpResponse response =
         await this.post('api/v1/reg', user.toJson(), jwtToken);
 
-    if (response.status == 201) {
+    if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body as Map<String, dynamic>);
       return token;
     }

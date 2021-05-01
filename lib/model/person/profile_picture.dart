@@ -7,7 +7,6 @@ part 'profile_picture.g.dart';
 @JsonSerializable()
 class ProfilePicture
 {
-  @JsonKey(name: 'person')
   final String person;
 
   @JsonKey(name: 'profile_picture')
