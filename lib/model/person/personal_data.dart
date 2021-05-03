@@ -45,7 +45,7 @@ class PersonalData extends Validatable {
     if (this.email == null || this.email == '') {
       return errors;
     }
-    if (isEmail(this.email)) {
+    if (!isEmail(this.email)) {
       errors.add(new ValidationError(
           path: 'email',
           message:

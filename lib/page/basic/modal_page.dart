@@ -24,8 +24,7 @@ class _ModalPageState extends State<ModalPage>
           constraints: BoxConstraints(maxHeight: 350.0),
           child: Padding(
             padding: EdgeInsets.all(20.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
+            child: ListView(
               children: [
                 Padding(
                   padding: EdgeInsets.only(bottom: 12.0),

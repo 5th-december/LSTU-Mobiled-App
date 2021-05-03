@@ -203,7 +203,7 @@ class _PersonalPageState extends State<PersonalPage> {
                                                 builder: (context) {
                                                   return ModalPage(
                                                       'Редактирование профиля',
-                                                      PersonalDataForm(_person),
+                                                      PersonalDataForm(loadedPerson),
                                                       outerContext: context,);
                                                 });
                                           },

@@ -21,7 +21,7 @@ class ValidationErrorBox {
   bool hasErrors() => this._errors.length != 0;
 
   ValidationError getFirstForField(String fieldName) {
-    return this._errors.firstWhere((element) => element.path == fieldName);
+    return this._errors.firstWhere((element) => element.path == fieldName, orElse: () => null);
   }
 
   List<ValidationError> getAllForField(String fieldName) {

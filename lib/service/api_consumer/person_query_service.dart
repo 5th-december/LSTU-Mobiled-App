@@ -60,14 +60,10 @@ class PersonQueryService extends HttpService {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
     HttpResponse response = await this.post(
-        '/api/v1/person/props', updateProfileSerialized, this.accessKey.token);
+        '/api/v1/person/info', updateProfileSerialized, this.accessKey.token);
 
     if (response.status == 200) {
-      Map<String, dynamic> receivedData = jsonDecode(response.body);
-      if (receivedData.containsKey('success') &&
-          receivedData['success'] == true) {
-        return true;
-      }
+      return true;
     }
 
     throw this.apiErrorHandler.apply(response.body);

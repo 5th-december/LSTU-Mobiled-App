@@ -28,82 +28,93 @@ class _PersonalDataFormState extends State<PersonalDataForm> {
   final _messengerEditionController = TextEditingController();
 
   @override
-  void didChangeDependencies(){
+  void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._personalDataFormBloc == null) {
-      PersonQueryService service = AppStateContainer.of(context).serviceProvider.personQueryService;
+    if (this._personalDataFormBloc == null) {
+      PersonQueryService service =
+          AppStateContainer.of(context).serviceProvider.personQueryService;
       this._personalDataFormBloc = PersonalDataFormBloc(service);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    this._personalDataFormBloc.eventController.sink.add(ProducerInitEvent<PersonalData>(resource: PersonalData.fromPerson(widget._editablePerson)));
+    this._personalDataFormBloc.eventController.sink.add(
+        ProducerInitEvent<PersonalData>(
+            resource: PersonalData.fromPerson(widget._editablePerson)));
     return Container(
-      child: StreamBuilder(
-        stream: this._personalDataFormBloc.personalDataUpdateStateStream,
-        builder: (BuildContext context, AsyncSnapshot snapshot) {
-          if(snapshot.hasData && snapshot.data is ProducingState<PersonalData>) {
-            ProducingState<PersonalData> state = snapshot.data;
+        child: StreamBuilder(
+      stream: this._personalDataFormBloc.personalDataUpdateStateStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData && snapshot.data is ProducingState<PersonalData>) {
+          ProducingState<PersonalData> state = snapshot.data;
 
-            if(state.data != null) {
-              this._phoneEditingController.text = state.data?.phone;
-              this._emailEditionController.text = state.data?.email;
-              this._messengerEditionController.text = state.data?.messenger;
-            }
-
-            return Form(
-              key: _editFormKey,
-              child: Column(
-                children: [
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Телефон',
-                      errorText: state is ProducingInvalidState<PersonalData> ? state.errorBox.getFirstForField('phone').message: null,
-                    ),
-                    controller: _phoneEditingController,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'E-mail',
-                      errorText: state is ProducingInvalidState<PersonalData> ? state.errorBox.getFirstForField('email').message: null,
-                    ),
-                    controller: _emailEditionController,
-                  ),
-                  TextFormField(
-                    decoration: InputDecoration(
-                      labelText: 'Мессенджер',
-                      errorText: state is ProducingInvalidState<PersonalData> ? state.errorBox.getFirstForField('messenger').message: null,
-                    ),
-                    controller: _messengerEditionController,
-                  ),
-                  constructSubmitButton(state)
-                ],
-              ),
-            );
-
-          } else {
-            return Center(child: CircularProgressIndicator());
+          if (state.data != null) {
+            this._phoneEditingController.text = state.data?.phone;
+            this._emailEditionController.text = state.data?.email;
+            this._messengerEditionController.text = state.data?.messenger;
           }
-        },
-      )
-    );
+
+          return Form(
+            key: _editFormKey,
+            child: Column(
+              children: [
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Телефон',
+                    errorText: state is ProducingInvalidState<PersonalData>
+                        ? state.errorBox.getFirstForField('phone')?.message
+                        : null,
+                  ),
+                  controller: _phoneEditingController,
+                ),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'E-mail',
+                    errorText: state is ProducingInvalidState<PersonalData>
+                        ? state.errorBox.getFirstForField('email')?.message
+                        : null,
+                  ),
+                  controller: _emailEditionController,
+                ),
+                TextFormField(
+                  decoration: InputDecoration(
+                    labelText: 'Мессенджер',
+                    errorText: state is ProducingInvalidState<PersonalData>
+                        ? state.errorBox.getFirstForField('messenger')?.message
+                        : null,
+                  ),
+                  controller: _messengerEditionController,
+                ),
+                constructSubmitButton(state)
+              ],
+            ),
+          );
+        } else {
+          return Center(child: CircularProgressIndicator());
+        }
+      },
+    ));
   }
 
   Widget constructSubmitButton(ProducingState<PersonalData> state) {
-    if(state is ProducingLoadingState<PersonalData>) {
-      return SubmitLoaderButton(text: 'Сохранить', isLoading: true, onPressed: () {});
+    if (state is ProducingLoadingState<PersonalData>) {
+      return SubmitLoaderButton(
+          text: 'Сохранить', isLoading: true, onPressed: () {});
     }
 
-    PersonalData personalData = PersonalData(
-      email: this._emailEditionController.text, 
-      phone: this._phoneEditingController.text, 
-      messenger: this._messengerEditionController.text
-    );
+    return SubmitLoaderButton(
+        text: 'Сохранить',
+        isLoading: false,
+        onPressed: () {
+          PersonalData personalData = PersonalData(
+              email: this._emailEditionController.text,
+              phone: this._phoneEditingController.text,
+              messenger: this._messengerEditionController.text);
 
-    return SubmitLoaderButton(text: 'Сохранить', isLoading: false, onPressed: () {
-      this._personalDataFormBloc.eventController.sink.add(
-        ProduceResourceEvent<PersonalData, UpdateProfileInformation>(command: UpdateProfileInformation(), resource: personalData));
-    });
+          this._personalDataFormBloc.eventController.sink.add(
+              ProduceResourceEvent<PersonalData, UpdateProfileInformation>(
+                  command: UpdateProfileInformation(), resource: personalData));
+        });
   }
 }
