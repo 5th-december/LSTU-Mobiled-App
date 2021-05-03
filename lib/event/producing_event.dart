@@ -1,16 +1,15 @@
 import 'package:flutter/foundation.dart';
 
-abstract class ProducingEvent<TR, TC> {}
-
-class ProducerInitEvent<TR, TC> {
-  TR resource;
-  TC command;
-
-  ProducerInitEvent({this.resource, this.command});
+abstract class ProducingEvent<T> {
+  T resourse;
+  ProducingEvent({this.resourse});
 }
 
-class ProduceResourceEvent<TR, TC> extends ProducingEvent<TR, TC> {
-  TR resource;
+class ProducerInitEvent<T> extends ProducingEvent<T> {
+  ProducerInitEvent({T resource}): super(resourse: resource);
+}
+
+class ProduceResourceEvent<TR, TC> extends ProducingEvent<TR> {
   TC command;
-  ProduceResourceEvent({@required this.command, this.resource});
+  ProduceResourceEvent({@required this.command, TR resource}): super(resourse: resource);
 }

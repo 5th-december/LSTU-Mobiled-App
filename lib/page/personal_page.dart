@@ -6,10 +6,12 @@ import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';
 import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/page/basic/modal_page.dart';
 import 'package:lk_client/page/personal_data_edit_modal.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
+import 'package:lk_client/widget/form/personal_data_form.dart';
 import 'package:lk_client/widget/personal/education_details_widget.dart';
 import 'package:lk_client/widget/personal/personal_information_widget.dart';
 import 'package:lk_client/widget/profile_picture.dart';
@@ -199,9 +201,10 @@ class _PersonalPageState extends State<PersonalPage> {
                                             showDialog(
                                                 context: context,
                                                 builder: (context) {
-                                                  return PersonalDataEditModal(
-                                                      loadedPerson,
-                                                      context);
+                                                  return ModalPage(
+                                                      'Редактирование профиля',
+                                                      PersonalDataForm(_person),
+                                                      outerContext: context,);
                                                 });
                                           },
                                           child: Text('Редактировать')))

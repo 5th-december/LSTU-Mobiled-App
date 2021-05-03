@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:lk_client/model/person/person.dart';
-import 'package:lk_client/model/person/contacts.dart';
+import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/model/person/profile_picture.dart';
 import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
@@ -56,7 +56,7 @@ class PersonQueryService extends HttpService {
     }
   }
 
-  Future<bool> editPersonProfile(Contacts updatedProfileData) async {
+  Future<bool> editPersonProfile(PersonalData updatedProfileData) async {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
     HttpResponse response = await this.post(

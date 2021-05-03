@@ -1,20 +1,21 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'contacts.dart';
+part of 'personal_data.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Contacts _$ContactsFromJson(Map<String, dynamic> json) {
-  return Contacts(
+PersonalData _$PersonalDataFromJson(Map<String, dynamic> json) {
+  return PersonalData(
     phone: json['phone'] as String,
     email: json['email'] as String,
     messenger: json['messenger'] as String,
   );
 }
 
-Map<String, dynamic> _$ContactsToJson(Contacts instance) => <String, dynamic>{
+Map<String, dynamic> _$PersonalDataToJson(PersonalData instance) =>
+    <String, dynamic>{
       'phone': instance.phone,
       'email': instance.email,
       'messenger': instance.messenger,

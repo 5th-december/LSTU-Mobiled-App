@@ -1,18 +1,19 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/validatable.dart';
 import 'package:validators/validators.dart';
 
-part 'contacts.g.dart';
+part 'personal_data.g.dart';
 
 @JsonSerializable()
-class Contacts extends Validatable {
+class PersonalData extends Validatable {
   final String phone;
 
   final String email;
 
   final String messenger;
 
-  Contacts({this.phone, this.email, this.messenger});
+  PersonalData({this.phone, this.email, this.messenger});
 
   @override
   ValidationErrorBox validate() {
@@ -65,7 +66,18 @@ class Contacts extends Validatable {
     return errors;
   }
 
-  factory Contacts.fromJson(Map<String, dynamic> json) =>
-      _$ContactsFromJson(json);
-  Map<String, dynamic> toJson() => _$ContactsToJson(this);
+  factory PersonalData.fromPerson(Person person) {
+    PersonalData pd = PersonalData(
+      email: person.email,
+      messenger: person.messenger,
+      phone: person.phone
+    );
+
+    return pd;
+    
+  }
+
+  factory PersonalData.fromJson(Map<String, dynamic> json) =>
+      _$PersonalDataFromJson(json);
+  Map<String, dynamic> toJson() => _$PersonalDataToJson(this);
 }
