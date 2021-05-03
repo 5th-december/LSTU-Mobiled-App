@@ -5,11 +5,15 @@ import 'package:lk_client/bloc/personal/personal_details_bloc.dart';
 import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/navigator_wrapped_page.dart';
 import 'package:lk_client/page/education_page.dart';
 import 'package:lk_client/page/messenger_page.dart';
 import 'package:lk_client/page/personal_page.dart';
+import 'package:lk_client/page/semester_page.dart';
+import 'package:lk_client/page/subject_list_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
@@ -85,8 +89,14 @@ class _HomePageState extends State<HomePage> {
                                 AsyncSnapshot<dynamic> snapshot) {
                               if (snapshot.hasData &&
                                   snapshot.data is ContentState<Person>) {
-                                return NavigatorWrappedPage(EducationPage(
-                                    snapshot.data.content as Person));
+                                Person currentPerson = snapshot.data.content as Person;
+                                return NavigatorWrappedPage(
+                                  EducationPage(currentPerson, true, (Education edu) {
+                                    return SemesterPage(edu, true, (Semester semester) {
+                                      return SubjectListPage(edu, semester);
+                                    });
+                                  })
+                                );
                               } else {
                                 return Center(
                                   child: CircularProgressIndicator(),

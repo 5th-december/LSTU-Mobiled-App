@@ -73,12 +73,12 @@ class EducationQueryService extends HttpService {
     }
   }
 
-  Stream<Semester> getCurrentSemester(String personId) async* 
+  Stream<Semester> getCurrentSemester(String educationId) async* 
   {
     HttpResponse response = await this.get(
       '/api/v1/student/edu/current', 
       <String, String>{
-        'p': personId
+        'edu': educationId
       }, 
       this.accessKey.token
     );

@@ -11,10 +11,9 @@ class LoadUserEducationListCommand extends EducationRequestCommand {
 }
 
 class LoadSemsterListCommand extends EducationRequestCommand {
-  final Person person;
   final Education education;
 
-  LoadSemsterListCommand(this.person, this.education);
+  LoadSemsterListCommand(this.education);
 }
 
 class LoadSubjectListCommand extends EducationRequestCommand {

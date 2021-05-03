@@ -7,7 +7,6 @@ import 'package:lk_client/event/content_event.dart';
 import 'package:lk_client/event/request_command/user_request_command.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/modal_page.dart';
-import 'package:lk_client/page/personal_data_edit_modal.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
 import 'package:lk_client/store/app_state_container.dart';
