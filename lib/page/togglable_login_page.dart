@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/store/app_state_container.dart';
-import 'package:lk_client/widget/authentication/identify_form_widget.dart';
-import 'package:lk_client/widget/authentication/login_form_widget.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/form/identify_form.dart';
+import 'package:lk_client/widget/form/login_form.dart';
 
 enum DisplayedLoginType { loginPage, registerPage }
 
@@ -35,13 +35,13 @@ class _TogglableLoginPageState extends State<TogglableLoginPage> {
               Visibility(
                   maintainState: true,
                   visible: this.type == DisplayedLoginType.registerPage,
-                  child: UserIdentifyFormWidget(AppStateContainer.of(context)
+                  child: IdentifyForm(AppStateContainer.of(context)
                       .serviceProvider
                       .authorizationService)),
               Visibility(
                   maintainState: true,
                   visible: this.type == DisplayedLoginType.loginPage,
-                  child: LoginFormWidget(AppStateContainer.of(context)
+                  child: LoginForm(AppStateContainer.of(context)
                       .serviceProvider
                       .authorizationService)),
               ElevatedButton(

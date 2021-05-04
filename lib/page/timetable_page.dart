@@ -1,10 +1,15 @@
 import 'package:flutter/cupertino.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/person/person.dart';
 
 class TimetablePage extends StatefulWidget {
-  Person currentPerson;
+  Education _education;
+  Semester _semester;
 
-  TimetablePage(this.currentPerson);
+  TimetablePage(Person person) {}
+
+  //TimetablePage(this._education, this._semester);
   @override
   _TimetablePageState createState() => _TimetablePageState();
 }

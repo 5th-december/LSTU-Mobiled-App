@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/personal/personal_data_form_bloc.dart';
-import 'package:lk_client/event/produce_command/user_produce_command.dart';
+import 'package:lk_client/bloc/personal_data_form_bloc.dart';
+import 'package:lk_client/command/produce_command/user_produce_command.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/producing_state.dart';
-import 'package:lk_client/store/app_state_container.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/chunk/submit_loader_button.dart';
 
 class PersonalDataForm extends StatefulWidget {

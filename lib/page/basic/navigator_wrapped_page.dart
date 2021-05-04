@@ -11,11 +11,10 @@ class NavigatorWrappedPage extends StatelessWidget {
     return Navigator(
       onGenerateRoute: (RouteSettings settings) {
         return MaterialPageRoute(
-          settings: settings,
-          builder: (BuildContext context) {
-            return _child;
-          }
-        );
+            settings: settings,
+            builder: (BuildContext context) {
+              return _child;
+            });
       },
     );
   }

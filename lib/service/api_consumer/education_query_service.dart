@@ -6,7 +6,7 @@ import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
-import 'package:lk_client/service/http/http_service.dart';
+import 'package:lk_client/service/http_service.dart';
 
 class EducationQueryService extends HttpService {
   final ComponentErrorHandler apiErrorHandler;
@@ -18,72 +18,55 @@ class EducationQueryService extends HttpService {
       this.apiErrorHandler)
       : super(configurator);
 
-  Stream<ListedResponse<Education>> getEducationsList(String person) async* 
-  {
-    HttpResponse response = await this.get(
-      '/api/v1/student/edu/list',
-      <String, String>{
-        'p': person
-      }, 
-      this.accessKey.token
-    );
+  Stream<ListedResponse<Education>> getEducationsList(String person) async* {
+    HttpResponse response = await this.get('/api/v1/student/edu/list',
+        <String, String>{'p': person}, this.accessKey.token);
 
     if (response.status == 200) {
-      ListedResponse<Education> personEducationsList = ListedResponse.fromJson(response.body, Education.fromJson);
+      ListedResponse<Education> personEducationsList =
+          ListedResponse.fromJson(response.body, Education.fromJson);
       yield personEducationsList;
     } else {
       throw this.apiErrorHandler.apply(response.body);
     }
   }
 
-  Stream<ListedResponse<Semester>> getSemesterList(String educationId) async* 
-  {
-    HttpResponse response = await this.get(
-      '/api/v1/student/edu/semesters',
-      <String, String>{
-        'edu': educationId
-      },
-      this.accessKey.token
-    );
+  Stream<ListedResponse<Semester>> getSemesterList(String educationId) async* {
+    HttpResponse response = await this.get('/api/v1/student/edu/semesters',
+        <String, String>{'edu': educationId}, this.accessKey.token);
 
     if (response.status == 200) {
-      ListedResponse<Semester> personSemesterList = ListedResponse.fromJson(response.body, Semester.fromJson);
+      ListedResponse<Semester> personSemesterList =
+          ListedResponse.fromJson(response.body, Semester.fromJson);
       yield personSemesterList;
     } else {
       throw this.apiErrorHandler.apply(response.body);
     }
   }
 
-  Stream<ListedResponse<Discipline>> getSubjectList(String educationId, String semesterId) async* 
-  {
+  Stream<ListedResponse<Discipline>> getSubjectList(
+      String educationId, String semesterId) async* {
     HttpResponse response = await this.get(
-      '/api/v1/student/discipline/list',
-      <String, String>{
-        'edu': educationId, 
-        'sem': semesterId
-      }, 
-      this.accessKey.token
-    );
+        '/api/v1/student/discipline/list',
+        <String, String>{'edu': educationId, 'sem': semesterId},
+        this.accessKey.token);
 
     if (response.status == 200) {
-      ListedResponse<Discipline> requiredDisciplineList = ListedResponse.fromJson(response.body, Discipline.fromJson);
+      ListedResponse<Discipline> requiredDisciplineList =
+          ListedResponse.fromJson(response.body, Discipline.fromJson);
       yield requiredDisciplineList;
     } else {
       throw this.apiErrorHandler.apply(response.body);
     }
   }
 
-  Stream<Semester> getCurrentSemester(String educationId) async* 
-  {
+  Stream<Semester> getCurrentSemester(String educationId) async* {
     HttpResponse response = await this.get(
-      '/api/v1/student/edu/current', 
-      <String, String>{
-        'edu': educationId
-      }, 
-      this.accessKey.token
-    );
+        '/api/v1/student/edu/semesters/current',
+        <String, String>{'edu': educationId},
+        this.accessKey.token);
 
-    if(response.status == 200) {
+    if (response.status == 200) {
       Semester currentSemester = Semester.fromJson(response.body);
       yield currentSemester;
     } else {

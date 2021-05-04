@@ -7,7 +7,7 @@ import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
-import 'package:lk_client/service/http/http_service.dart';
+import 'package:lk_client/service/http_service.dart';
 
 class PersonQueryService extends HttpService {
   final ComponentErrorHandler apiErrorHandler;

@@ -3,16 +3,17 @@ import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
-import 'package:lk_client/service/http/http_service.dart';
+import 'package:lk_client/service/http_service.dart';
 
-class AchievementQurtyService extends HttpService
-{
+class AchievementQurtyService extends HttpService {
   final ComponentErrorHandler apiErrorHandler;
   final AuthenticationExtractor authenticationExtractor;
 
   ApiKey get accessKey => authenticationExtractor.getAuthenticationData();
 
-  AchievementQurtyService(AppConfig config, this.authenticationExtractor, this.apiErrorHandler): super(config);
+  AchievementQurtyService(
+      AppConfig config, this.authenticationExtractor, this.apiErrorHandler)
+      : super(config);
 
   /*Future<AchievementList> getAchievementList(String person, int offset, int count) async {
     HttpResponse response = await this.get('/api/v1/person/achievements', 

@@ -1,19 +1,18 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lk_client/bloc/personal/personal_details_bloc.dart';
+import 'package:lk_client/bloc/personal_details_bloc.dart';
+import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/content_event.dart';
-import 'package:lk_client/event/request_command/user_request_command.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/modal_page.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
-import 'package:lk_client/store/app_state_container.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/form/personal_data_form.dart';
-import 'package:lk_client/widget/personal/education_details_widget.dart';
-import 'package:lk_client/widget/personal/personal_information_widget.dart';
-import 'package:lk_client/widget/profile_picture.dart';
+import 'package:lk_client/widget/layout/education_details.dart';
+import 'package:lk_client/widget/layout/profile_picture.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PersonalPage extends StatefulWidget {
@@ -201,9 +200,11 @@ class _PersonalPageState extends State<PersonalPage> {
                                                 context: context,
                                                 builder: (context) {
                                                   return ModalPage(
-                                                      'Редактирование профиля',
-                                                      PersonalDataForm(loadedPerson),
-                                                      outerContext: context,);
+                                                    'Редактирование профиля',
+                                                    PersonalDataForm(
+                                                        loadedPerson),
+                                                    outerContext: context,
+                                                  );
                                                 });
                                           },
                                           child: Text('Редактировать')))

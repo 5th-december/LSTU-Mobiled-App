@@ -1,15 +1,15 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/education/subject_list_bloc.dart';
+import 'package:lk_client/bloc/subject_list_bloc.dart';
+import 'package:lk_client/command/consume_command/education_request_command.dart';
 import 'package:lk_client/event/content_event.dart';
-import 'package:lk_client/event/request_command/education_request_command.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/page/subject_view_page.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/content_state.dart';
-import 'package:lk_client/store/app_state_container.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
 
 class SubjectListPage extends StatefulWidget {
   final Semester _requiredSemester;
@@ -53,8 +53,7 @@ class _SubjectListPageState extends State<SubjectListPage> {
           if (snapshot.hasData &&
               snapshot.data is ContentReadyState<List<Discipline>>) {
             List<Discipline> loadedSubjects =
-                (snapshot.data as ContentReadyState<List<Discipline>>)
-                    .content;
+                (snapshot.data as ContentReadyState<List<Discipline>>).content;
 
             return ListView.builder(
                 itemCount: loadedSubjects.length,

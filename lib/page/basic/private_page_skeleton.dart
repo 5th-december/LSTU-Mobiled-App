@@ -1,13 +1,13 @@
 import 'package:flutter/cupertino.dart';
-import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
 import 'package:lk_client/page/register_page.dart';
 import 'package:lk_client/page/togglable_login_page.dart';
 import 'package:lk_client/state/authentication_state.dart';
-import 'package:lk_client/store/app_state_container.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
 
 class PrivatePageSkeleton extends StatefulWidget {
-  Widget page;
+  final Widget page;
 
   PrivatePageSkeleton(this.page);
 
@@ -30,21 +30,14 @@ class _PrivatePageSkeletonState extends State<PrivatePageSkeleton> {
           AuthenticationState state = snapshot.data;
 
           if (state is AuthenticationIdentifiedState) {
-            
             return RegisterPage();
-
           } else if (state is AuthenticationUnauthorizedState) {
-
             return TogglableLoginPage();
-
-          } else if (state is AuthenticationProcessingState || state is AuthenticationInvalidState) {
-
+          } else if (state is AuthenticationProcessingState ||
+              state is AuthenticationInvalidState) {
             return FullscreenLoadingPage();
-
           } else if (state is AuthenticationValidState) {
-
             return this.page;
-            
           }
 
           return FullscreenLoadingPage();
