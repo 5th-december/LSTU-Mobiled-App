@@ -43,6 +43,7 @@ class _HomePageState extends State<HomePage> {
             LoadCurrentUserIdentifier()));
 
     return StreamBuilder(
+        stream: this._userDefinitionBloc.personDefinitionStateSteream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
       if (snapshot.hasData && snapshot.data is ContentReadyState<Person>) {
         Person person = (snapshot.data as ContentReadyState<Person>).content;

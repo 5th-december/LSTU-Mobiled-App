@@ -14,6 +14,7 @@ import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/local/timetable_page_state_container.dart';
+import 'package:lk_client/widget/util/timetable_page_manager.dart';
 
 class PageGlobalManager extends StatefulWidget {
   final Person loggedPerson;
@@ -57,8 +58,8 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
               children: [
                 NavigatorWrappedPage(
                   TimetablePageStateContainer(
-                    child: TimetablePage(widget.loggedPerson),
-                    global: AppStateContainer.of(context)
+                    child: TimetablePageManager(widget.loggedPerson),
+                    serviceProvider: AppStateContainer.of(context).serviceProvider
                   )
                 ),
                 NavigatorWrappedPage(

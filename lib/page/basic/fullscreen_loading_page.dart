@@ -5,8 +5,13 @@ class FullscreenLoadingPage extends StatelessWidget
 {
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: CircularProgressIndicator(),
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Загрузка...'),
+      ),
+      body: Center(
+        child: CircularProgressIndicator(),
+      )
     );
   }
 }
