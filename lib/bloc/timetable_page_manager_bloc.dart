@@ -10,51 +10,57 @@ import 'package:lk_client/state/timetable_section_state.dart';
 
 class TimetablePageManagerBloc
     extends AbstractBloc<TimetableSectionState, TimetableSectionEvent> {
-  Stream<TimetableSectionState> get timetableSectionStateStream =>
-      this.stateContoller.stream.where((event) => event is TimetableSectionState);
+  Stream<TimetableSectionState> get timetableSectionStateStream => this
+      .stateContoller
+      .stream
+      .where((event) => event is TimetableSectionState);
 
-  Stream<TimetableSectionEvent> get _timetableSectionEventStream =>
-      this.eventController.stream.where((event) => event is TimetableSectionEvent);
+  Stream<TimetableSectionEvent> get _timetableSectionEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is TimetableSectionEvent);
 
   EducationQueryService educationQueryService;
 
   TimetablePageManagerBloc({@required this.educationQueryService}) {
     this._timetableSectionEventStream.listen((event) {
-
       if (this.currentState is TimetableCustomSelection) {
-        if(event is ProvideEducationData) {
-          this.updateState(WaitForSemesterData(education: event.education));
+        if (event is ProvideEducationData) {
+          this.updateState(WaitForSemesterData(
+              education: event.education,
+              allowSwitchToDefault: event.allowSwitchToDefault));
         } else if (event is ProvideSemesterData) {
-          this.updateState(SelectedCustomTimetable(semester: event.semester, education: event.education));
+          this.updateState(SelectedCustomTimetable(
+              semester: event.semester,
+              education: event.education,
+              allowSwitchToDefault: event.allowSwitchToDefault));
         }
       } else {
-        if (event is TimetableLoadingMethodAutoSelect || event is ForceDefaultTimetableSelection) {
+        if (event is TimetableLoadingMethodAutoSelect ||
+            event is ForceDefaultTimetableSelection) {
           this.updateState(TimetableDefaultSelectionLoading());
           Person person = (event as StartTimetableSelectionRequest).person;
-          try {
-            this.educationQueryService.getEducationsList(person.id).listen((event) {
-              List<Education> eduList = event.payload;
-              if(eduList.length == 1) {
-                this.educationQueryService.getCurrentSemester(eduList[0].id).listen((event) {
-                  this.updateState(SelectedTimetableByDefault(education: eduList[0], semester: event));
-                });
-              } else {
-                if(event is ForceDefaultTimetableSelection) {
-                  this.updateState(TimetableDefaultSelectionError());
-                } else {
-                  this.updateState(WaitForEducationData(currentPerson: person));
-                }
-              }
-            });
-          } on Exception catch(e) {
-            if(event is ForceDefaultTimetableSelection) {
-              this.updateState(TimetableDefaultSelectionError());
+          this
+              .educationQueryService
+              .getEducationsList(person.id)
+              .listen((event) {
+            List<Education> eduList = event.payload;
+            if (eduList.length == 1) {
+              this
+                  .educationQueryService
+                  .getCurrentSemester(eduList[0].id)
+                  .listen((event) {
+                this.updateState(SelectedTimetableByDefault(
+                    education: eduList[0], semester: event));
+              });
             } else {
-              this.updateState(WaitForEducationData(currentPerson: person));
+              throw Exception('Unable to find current semester');
             }
-          }
+          });
         } else if (event is ForceCustomTimetableSelection) {
-          this.updateState(WaitForEducationData(currentPerson: event.person));
+          this.updateState(WaitForEducationData(
+              currentPerson: event.person,
+              allowSwitchToDefault: event.allowSwitchToDefault));
         }
       }
     });

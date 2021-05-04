@@ -11,9 +11,9 @@ import 'package:lk_client/store/global/app_state_container.dart';
 
 class SemesterList extends StatefulWidget {
   final Education _education;
-  final Function _navigateToNextPage;
+  final Function _onSelectAction;
 
-  SemesterList(this._education, this._navigateToNextPage);
+  SemesterList(this._education, this._onSelectAction);
 
   @override
   _SemesterListState createState() => _SemesterListState();
@@ -67,11 +67,7 @@ class _SemesterListState extends State<SemesterList> {
                           title: Text(
                               "${semestersList[index].season} ${semestersList[index].year}"),
                           onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                                builder: (BuildContext context) {
-                              return widget
-                                  ._navigateToNextPage(semestersList[index]);
-                            }));
+                            widget._onSelectAction(semestersList[index]);
                           },
                         ),
                       );

@@ -71,7 +71,7 @@ class _EducationListState extends State<EducationList> {
                                 .group
                                 .speciality
                                 .qualification),
-                            onTap:
+                            onTap: () =>
                                 widget._onSelectAction(educationsList[index]),
                           ),
                         );

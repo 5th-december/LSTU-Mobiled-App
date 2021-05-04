@@ -6,19 +6,26 @@ import 'package:lk_client/model/person/person.dart';
 abstract class TimetableSectionState {}
 
 abstract class TimetableReadyState {
-  Education education;
-  Semester semester;
-  TimetableReadyState({this.education, this.semester});
+  final Education education;
+  final Semester semester;
+  TimetableReadyState({@required this.education, @required this.semester});
 }
 
-class SelectedTimetableByDefault extends TimetableReadyState implements TimetableSectionState {
-  SelectedTimetableByDefault({Education education, Semester semester}): super(education: education, semester: semester);
+class SelectedTimetableByDefault extends TimetableReadyState
+    implements TimetableSectionState {
+  SelectedTimetableByDefault(
+      {@required Education education, @required Semester semester})
+      : super(education: education, semester: semester);
 }
 
-class SelectedCustomTimetable extends TimetableSectionState {
-  Education education;
-  Semester semester;
-  SelectedCustomTimetable({this.education, this.semester});
+class SelectedCustomTimetable extends TimetableReadyState
+    implements TimetableSectionState {
+  bool allowSwitchToDefault;
+  SelectedCustomTimetable(
+      {@required education,
+      @required semester,
+      this.allowSwitchToDefault = true})
+      : super(education: education, semester: semester);
 }
 
 class TimetableDefaultSelectionLoading implements TimetableSectionState {}
@@ -27,12 +34,18 @@ class TimetableDefaultSelectionError implements TimetableSectionState {}
 
 abstract class TimetableCustomSelection {}
 
-class WaitForEducationData implements TimetableSectionState, TimetableCustomSelection {
-  Person currentPerson;
-  WaitForEducationData({@required this.currentPerson});
+class WaitForEducationData
+    implements TimetableSectionState, TimetableCustomSelection {
+  final Person currentPerson;
+  final bool allowSwitchToDefault;
+  WaitForEducationData(
+      {@required this.currentPerson, this.allowSwitchToDefault = true});
 }
 
-class WaitForSemesterData implements TimetableSectionState, TimetableCustomSelection {
-  Education education;
-  WaitForSemesterData({@required this.education});
+class WaitForSemesterData
+    implements TimetableSectionState, TimetableCustomSelection {
+  final Education education;
+  final bool allowSwitchToDefault;
+  WaitForSemesterData(
+      {@required this.education, this.allowSwitchToDefault = true});
 }

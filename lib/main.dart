@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
+import 'package:lk_client/error_handler/access_denied_error_handler.dart';
+import 'package:lk_client/error_handler/data_access_error_handler.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/error_handler/api_system_error_handler.dart';
 import 'package:lk_client/error_handler/duplicate_error_handler.dart';
@@ -32,7 +34,11 @@ Future<void> main() async {
       NotFoundErrorHandler(duplicateErrorHandler);
   ApiSystemErrorHandler apiSystemErrorHandler =
       ApiSystemErrorHandler(notFoundErrorHandler);
-  ErrorJudge apiErrorHandlersChain = new ErrorJudge(apiSystemErrorHandler);
+  AccessDeniedErrorHandler accessDeniedErrorHandler =
+      AccessDeniedErrorHandler(apiSystemErrorHandler);
+  DataAccessErrorHandler dataAccessErrorHandler =
+      DataAccessErrorHandler(accessDeniedErrorHandler);
+  ErrorJudge apiErrorHandlersChain = new ErrorJudge(dataAccessErrorHandler);
 
   // Application level services
 

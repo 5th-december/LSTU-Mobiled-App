@@ -7,15 +7,12 @@ class NotFoundErrorHandler extends ComponentErrorHandler {
         errorSource.containsKey('code') &&
         errorSource['code'] == 404 &&
         errorSource.containsKey('error') &&
-        errorSource['error'] == 'ERR_NOTFOUND' &&
-        errorSource.containsKey('generic_message') &&
-        errorSource.containsKey('error_messages');
+        errorSource['error'] == 'ERR_NOT_FOUND';
   }
 
   @override
   Exception handle(dynamic errorSource) {
-    return new NotFoundException(
-        errorSource['generic_message'], errorSource['error_messages']);
+    return new NotFoundException(message: errorSource['message']);
   }
 
   NotFoundErrorHandler(ComponentErrorHandler next) : super(next: next);
@@ -23,9 +20,5 @@ class NotFoundErrorHandler extends ComponentErrorHandler {
 
 class NotFoundException implements Exception {
   final String message;
-  List<String> notFoundItems;
-
-  NotFoundException(this.message, Map<String, String> items) {
-    this.notFoundItems = items.values;
-  }
+  NotFoundException({this.message});
 }

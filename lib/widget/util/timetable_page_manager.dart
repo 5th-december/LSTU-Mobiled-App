@@ -27,34 +27,41 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._timetablePageManagerBloc == null) {
-      this._timetablePageManagerBloc = TimetablePageStateContainer.of(context).localBlocProvider.timetablePageManagerBloc;
+    if (this._timetablePageManagerBloc == null) {
+      this._timetablePageManagerBloc = TimetablePageStateContainer.of(context)
+          .localBlocProvider
+          .timetablePageManagerBloc;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    this._timetablePageManagerBloc.eventController.sink.add(TimetableLoadingMethodAutoSelect(person: widget.currentPerson));
-    
+    this
+        ._timetablePageManagerBloc
+        .eventController
+        .sink
+        .add(TimetableLoadingMethodAutoSelect(person: widget.currentPerson));
+
     return StreamBuilder(
       stream: this._timetablePageManagerBloc.timetableSectionStateStream,
       builder: (context, snapshot) {
-        if(snapshot.hasData && snapshot.data is TimetableSectionState) {
-          if(snapshot.data is TimetableReadyState) {
+        if (snapshot.hasData && snapshot.data is TimetableSectionState) {
+          if (snapshot.data is TimetableReadyState) {
             return this.getTimetablePage(snapshot.data);
           }
 
-          if(snapshot.data is WaitForEducationData) {
-            final person = (snapshot.data as WaitForEducationData).currentPerson;
+          if (snapshot.data is WaitForEducationData) {
+            final person =
+                (snapshot.data as WaitForEducationData).currentPerson;
             return this.getEducationListPage(person);
           }
 
-          if(snapshot.data is WaitForSemesterData) {
+          if (snapshot.data is WaitForSemesterData) {
             final education = (snapshot.data as WaitForSemesterData).education;
-            return this.getSemesterListPage(education);            
+            return this.getSemesterListPage(education);
           }
 
-          if(snapshot.data is TimetableDefaultSelectionError) {
+          if (snapshot.data is TimetableDefaultSelectionError) {
             return this.getErrorLoadingPage();
           }
         }
@@ -66,29 +73,36 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
 
   Widget getTimetablePage(TimetableReadyState currentState) {
     Widget changeTimetableLoadingTypeAction;
-    if(currentState is SelectedTimetableByDefault) {
+    if (currentState is SelectedTimetableByDefault) {
       changeTimetableLoadingTypeAction = GestureDetector(
         onTap: () {
-          this._timetablePageManagerBloc.eventController.add(ForceCustomTimetableSelection(person: widget.currentPerson));
+          this
+              ._timetablePageManagerBloc
+              .eventController
+              .add(ForceCustomTimetableSelection(person: widget.currentPerson));
         },
-        child: Icon(Icons.calendar_today_outlined, size: 26.0),
+        child: Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: Icon(Icons.calendar_today_outlined, size: 24.0)),
       );
-    } else if (currentState is SelectedCustomTimetable) {
+    } else if (currentState is SelectedCustomTimetable && currentState.allowSwitchToDefault) {
       changeTimetableLoadingTypeAction = GestureDetector(
         onTap: () {
-          this._timetablePageManagerBloc.eventController.add(ForceDefaultTimetableSelection(person: widget.currentPerson));
+          this._timetablePageManagerBloc.eventController.add(
+              ForceDefaultTimetableSelection(person: widget.currentPerson));
         },
-        child: Icon(Icons.stars_outlined, size: 26.0),
+        child: Padding(
+            padding: EdgeInsets.only(right: 12.0),
+            child: Icon(Icons.stars_outlined, size: 24.0)),
       );
     }
 
     return Scaffold(
-      appBar: AppBar(
-        actions: [
-          changeTimetableLoadingTypeAction
-        ],
+      body: TimetablePage(
+        education: currentState.education,
+        semester: currentState.semester,
+        timetableSelector: changeTimetableLoadingTypeAction ?? null,
       ),
-      body: TimetablePage(education: currentState.education, semester: currentState.semester),
     );
   }
 
@@ -96,36 +110,38 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
     return Scaffold(
       appBar: AppBar(title: Text('Период обучения')),
       body: EducationList(person, (Education edu) {
-        this._timetablePageManagerBloc.eventController.sink.add(ProvideEducationData(education: edu));
+        this
+            ._timetablePageManagerBloc
+            .eventController
+            .sink
+            .add(ProvideEducationData(education: edu));
       }),
     );
   }
 
   Widget getSemesterListPage(Education education) {
     return Scaffold(
-      appBar: AppBar(title: Text('Учебный семестр')),
-      body: SemesterList(education, (Semester semester) {
-        this._timetablePageManagerBloc.eventController.sink.add(ProvideSemesterData(education: education, semester: semester));
-      })
-    );
+        appBar: AppBar(title: Text('Учебный семестр')),
+        body: SemesterList(education, (Semester semester) {
+          this._timetablePageManagerBloc.eventController.sink.add(
+              ProvideSemesterData(education: education, semester: semester));
+        }));
   }
 
   Widget getErrorLoadingPage() {
     return Scaffold(
       appBar: AppBar(title: Text('Расписание')),
       body: Center(
-        child: Column(
-          children: [
-            Text('Невозможно определить текущий семестр'),
-            ElevatedButton(
-              child: Text('Указать вручную'),
-              onPressed: () {
-                this._timetablePageManagerBloc.eventController.sink.add(ForceCustomTimetableSelection(person: widget.currentPerson));
-              }
-            )
-          ]
-        )
-      ),
+          child: Column(children: [
+        Text('Невозможно определить текущий семестр'),
+        ElevatedButton(
+            child: Text('Указать вручную'),
+            onPressed: () {
+              this._timetablePageManagerBloc.eventController.sink.add(
+                  ForceCustomTimetableSelection(
+                      person: widget.currentPerson, allowSwitchToDefault: false));
+            })
+      ])),
     );
   }
 }

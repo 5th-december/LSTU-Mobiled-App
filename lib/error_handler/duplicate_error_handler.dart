@@ -7,15 +7,12 @@ class DuplicateErrorHandler extends ComponentErrorHandler {
         errorSource.containsKey('code') &&
         errorSource['code'] == 400 &&
         errorSource.containsKey('error') &&
-        errorSource['error'] == 'ERR_DUPLICATE' &&
-        errorSource.containsKey('generic_message') &&
-        errorSource.containsKey('error_messages');
+        errorSource['error'] == 'ERR_DUPLICATE';
   }
 
   @override
   Exception handle(dynamic errorSource) {
-    return new DuplicateException(
-        errorSource['generic_message'], errorSource['error_messages']);
+    return new DuplicateException(message: errorSource['message']);
   }
 
   DuplicateErrorHandler(ComponentErrorHandler next) : super(next: next);
@@ -23,9 +20,6 @@ class DuplicateErrorHandler extends ComponentErrorHandler {
 
 class DuplicateException implements Exception {
   String message;
-  List<String> duplicates;
 
-  DuplicateException(this.message, Map<String, String> duplicateValues) {
-    this.duplicates = duplicateValues.values;
-  }
+  DuplicateException({this.message});
 }
