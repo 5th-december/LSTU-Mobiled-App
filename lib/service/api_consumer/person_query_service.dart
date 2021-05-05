@@ -29,14 +29,6 @@ class PersonQueryService extends HttpService {
     } else {
       throw apiErrorHandler.apply(response.body);
     }
-
-    response = await this.get('/api/v1/person/info',
-        <String, String>{'p': '5:93535310'}, this.accessKey.token);
-
-    if (response.status == 200) {
-      Person person = Person.fromJson(response.body);
-      yield person;
-    }
   }
 
   Stream<Person> getCurrentPersonIdentifier() async* {

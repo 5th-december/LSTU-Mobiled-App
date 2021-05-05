@@ -1,19 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
+import 'package:lk_client/command/consume_command/discipline_request_command.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/education/timetable_item.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/widget/chunk/list_widget.dart';
+import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
 
 class DisciplineTeachersList extends StatefulWidget {
+  final Discipline discipline;
+  final Education education;
+  final Semester semester;
+
   DisciplineTeachersList(
-    {Key key, @required Discipline discipline, @required Education education, 
-      @required Semester semester}):super(key: key);
+      {Key key,
+      @required this.discipline,
+      @required this.education,
+      @required this.semester})
+      : super(key: key);
 
   @override
   _DisciplineTeachersListState createState() => _DisciplineTeachersListState();
@@ -25,27 +34,45 @@ class _DisciplineTeachersListState extends State<DisciplineTeachersList> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._bloc == null) {
-      DisciplineQueryService queryService = AppStateContainer.of(context).serviceProvider.disciplineQueryService;
+    if (this._bloc == null) {
+      DisciplineQueryService queryService =
+          AppStateContainer.of(context).serviceProvider.disciplineQueryService;
       this._bloc = DisciplineTeachersListLoaderBloc(queryService);
     }
   }
 
   @override
+  dispose() async {
+    Future.delayed(Duration.zero, () async {
+      await this._bloc.dispose();
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return ListWidget<TimetableItem>(
+    this._bloc.eventController.add(StartConsumeEvent<LoadDisciplineTeacherList>(
+        request: LoadDisciplineTeacherList(
+            discipline: widget.discipline,
+            semester: widget.semester,
+            education: widget.education)));
+
+    return StreamLoadingWidget<List<TimetableItem>>(
       loadingStream: _bloc.consumingStateStream,
-      listBuilder: (List<TimetableItem> argumentList) {
+      childBuilder: (List<TimetableItem> argumentList) {
         return Column(
           children: List.generate(
-            argumentList.length, (index) => Card(
-              child: ListTile(
-                trailing: PersonProfilePicture(displayed: argumentList[index].teacher.person, size: 36.0),
-                title: Text('${argumentList[index].teacher.person.surname} ${argumentList[index].teacher.person.name} ${argumentList[index].teacher.person.patronymic}'),
-                subtitle: Text(argumentList[index].lessonType),
-              ),
-            )
-          ),
+              argumentList.length,
+              (index) => Card(
+                    child: ListTile(
+                      trailing: PersonProfilePicture(
+                          displayed: argumentList[index].teacher.person,
+                          size: 36.0),
+                      title: Text(
+                          '${argumentList[index].teacher.person.surname} ${argumentList[index].teacher.person.name} ${argumentList[index].teacher.person.patronymic}'),
+                      subtitle: Text(argumentList[index].lessonType),
+                    ),
+                  )),
         );
       },
     );

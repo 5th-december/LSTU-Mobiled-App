@@ -18,12 +18,15 @@ class DisciplineQueryService extends HttpService {
   ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
 
   DisciplineQueryService(
-      {@required AppConfig appConfig, @required this.apiErrorHandler, @required this.authenticationExtractor})
+      {@required AppConfig appConfig,
+      @required this.apiErrorHandler,
+      @required this.authenticationExtractor})
       : super(appConfig);
 
-  Stream<ConsumingState<Discipline>> getDisciplineItem(String discipline) async* {
+  Stream<ConsumingState<Discipline>> getDisciplineItem(
+      String discipline) async* {
     try {
-      HttpResponse response = await this.get('/api/v1/student/discipline/',
+      HttpResponse response = await this.get('/api/v1/student/discipline',
           <String, String>{'dis': discipline}, this.accessKey.token);
 
       if (response.status == 200) {
@@ -32,7 +35,7 @@ class DisciplineQueryService extends HttpService {
       } else {
         throw this.apiErrorHandler.apply(response.body);
       }
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       yield ConsumingErrorState<Discipline>(error: e);
     }
   }
@@ -42,17 +45,22 @@ class DisciplineQueryService extends HttpService {
     try {
       HttpResponse response = await this.get(
           '/api/v1/student/discipline/teachers',
-          <String, String>{'dis': discipline, 'edu': education, 'sem': semester},
+          <String, String>{
+            'dis': discipline,
+            'edu': education,
+            'sem': semester
+          },
           this.accessKey.token);
 
       if (response.status == 200) {
         ListedResponse<TimetableItem> disciplineTeachersList =
             ListedResponse.fromJson(response.body, TimetableItem.fromJson);
-        yield ConsumingReadyState<ListedResponse<TimetableItem>>(disciplineTeachersList);
+        yield ConsumingReadyState<ListedResponse<TimetableItem>>(
+            disciplineTeachersList);
       } else {
         throw this.apiErrorHandler.apply(response.body);
       }
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       yield ConsumingErrorState<ListedResponse<TimetableItem>>(error: e);
     }
   }

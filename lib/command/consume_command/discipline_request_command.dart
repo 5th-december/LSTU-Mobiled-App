@@ -7,5 +7,13 @@ class LoadDisciplineTeacherList {
   final Discipline discipline;
   final Education education;
   final Semester semester;
-  LoadDisciplineTeacherList({@required this.discipline, @required this.education, @required this.semester});
+  LoadDisciplineTeacherList(
+      {@required this.discipline,
+      @required this.education,
+      @required this.semester});
+}
+
+class LoadDisciplineDetails {
+  final Discipline discipline;
+  LoadDisciplineDetails({@required this.discipline});
 }

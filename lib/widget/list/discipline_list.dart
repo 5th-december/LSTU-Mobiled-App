@@ -8,22 +8,25 @@ import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/widget/chunk/list_widget.dart';
+import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
 
-class DisciplineList extends StatefulWidget 
-{
+class DisciplineList extends StatefulWidget {
   final Semester semester;
   final Education education;
   final Function onItemTap;
 
-  DisciplineList({Key key, @required this.education, @required this.semester, this.onItemTap}): super(key: key);
+  DisciplineList(
+      {Key key,
+      @required this.education,
+      @required this.semester,
+      this.onItemTap})
+      : super(key: key);
 
   @override
   _DisciplineListState createState() => _DisciplineListState();
 }
 
-class _DisciplineListState extends State<DisciplineList> 
-{
+class _DisciplineListState extends State<DisciplineList> {
   SubjectListBloc _subjectListBloc;
 
   @override
@@ -37,26 +40,33 @@ class _DisciplineListState extends State<DisciplineList>
   }
 
   @override
+  dispose() async {
+    Future.delayed(Duration.zero, () async {
+      await this._subjectListBloc.dispose();
+    });
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     this._subjectListBloc.eventController.sink.add(
         StartConsumeEvent<LoadSubjectListCommand>(
-            request: LoadSubjectListCommand(widget.education, widget.semester)));
+            request:
+                LoadSubjectListCommand(widget.education, widget.semester)));
 
-    return ListWidget(
+    return StreamLoadingWidget<List<Discipline>>(
       loadingStream: this._subjectListBloc.subjectListContentStateStream,
-      listBuilder: (List<Discipline> argumentList) {
+      childBuilder: (List<Discipline> argumentList) {
         return ListView.builder(
-          itemCount: argumentList.length,
-          itemBuilder: (BuildContext context, int index) {
-            return Card(
-              child: ListTile(
-                leading: FlutterLogo(size: 36.0),
-                title: Text(argumentList[index].name),
-                onTap: widget.onItemTap(argumentList[index])
-              ),
-            );
-          }
-        );
+            itemCount: argumentList.length,
+            itemBuilder: (BuildContext context, int index) {
+              return Card(
+                child: ListTile(
+                    leading: FlutterLogo(size: 36.0),
+                    title: Text(argumentList[index].name),
+                    onTap: () => widget.onItemTap(argumentList[index])),
+              );
+            });
       },
     );
   }
