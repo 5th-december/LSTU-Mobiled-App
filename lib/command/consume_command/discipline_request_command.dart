@@ -17,3 +17,14 @@ class LoadDisciplineDetails {
   final Discipline discipline;
   LoadDisciplineDetails({@required this.discipline});
 }
+
+class LoadDisciplineTimetable {
+  final Discipline discipline;
+  final Education education;
+  final Semester semester;
+  LoadDisciplineTimetable({
+    @required this.discipline,
+    @required this.education,
+    @required this.semester
+  });
+}

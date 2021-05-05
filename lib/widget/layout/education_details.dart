@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/education_details_bloc.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command/education_request_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
@@ -19,25 +19,25 @@ class EducationDetails extends StatefulWidget {
 }
 
 class _EducationDetailsState extends State<EducationDetails> {
-  EducationDetailsBloc _educationDetailsBloc;
+  EducationDetailsLoaderBloc _bloc;
 
   Person get _person => widget._person;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_educationDetailsBloc == null) {
+    if (_bloc == null) {
       EducationQueryService appEducationQueryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
-      this._educationDetailsBloc =
-          new EducationDetailsBloc(appEducationQueryService);
+      this._bloc =
+          EducationDetailsLoaderBloc(appEducationQueryService);
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._educationDetailsBloc.dispose();
+      await this._bloc.dispose();
     });
     super.dispose();
   }
@@ -72,11 +72,11 @@ class _EducationDetailsState extends State<EducationDetails> {
 
   @override
   Widget build(BuildContext context) {
-    this._educationDetailsBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadCurrentEducationsCommand>(
             request: LoadCurrentEducationsCommand(this._person)));
     return StreamBuilder(
-      stream: this._educationDetailsBloc.educationDetailsStateStream,
+      stream: this._bloc.consumingStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData &&
             snapshot.data is ConsumingReadyState<List<Education>>) {

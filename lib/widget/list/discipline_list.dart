@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/subject_list_bloc.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command/education_request_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
@@ -27,35 +27,35 @@ class DisciplineList extends StatefulWidget {
 }
 
 class _DisciplineListState extends State<DisciplineList> {
-  SubjectListBloc _subjectListBloc;
+  SubjectListLoadingBloc _bloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_subjectListBloc == null) {
+    if (_bloc == null) {
       EducationQueryService queryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
-      this._subjectListBloc = SubjectListBloc(queryService);
+      this._bloc = SubjectListLoadingBloc(queryService);
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._subjectListBloc.dispose();
+      await this._bloc.dispose();
     });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._subjectListBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadSubjectListCommand>(
             request:
                 LoadSubjectListCommand(widget.education, widget.semester)));
 
     return StreamLoadingWidget<List<Discipline>>(
-      loadingStream: this._subjectListBloc.subjectListContentStateStream,
+      loadingStream: this._bloc.consumingStateStream,
       childBuilder: (List<Discipline> argumentList) {
         return ListView.builder(
             itemCount: argumentList.length,

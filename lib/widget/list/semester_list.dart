@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/semester_list_bloc.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command/education_request_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
@@ -20,35 +20,35 @@ class SemesterList extends StatefulWidget {
 }
 
 class _SemesterListState extends State<SemesterList> {
-  SemesterListBloc _semesterListBloc;
+  SemesterListLoadingBloc _bloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (this._semesterListBloc == null) {
+    if (this._bloc == null) {
       EducationQueryService queryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
 
-      this._semesterListBloc = SemesterListBloc(queryService);
+      this._bloc = SemesterListLoadingBloc(queryService);
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._semesterListBloc.dispose();
+      await this._bloc.dispose();
     });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._semesterListBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadSemsterListCommand>(
           request: LoadSemsterListCommand(widget._education)));
 
     return StreamBuilder(
-        stream: _semesterListBloc.semesterListStateStream,
+        stream: _bloc.consumingStateStream,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data is ConsumingReadyState<List<Semester>>) {

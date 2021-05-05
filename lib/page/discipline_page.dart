@@ -5,6 +5,7 @@ import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/widget/layout/discipline_details.dart';
 import 'package:lk_client/widget/list/discipline_teachers_list.dart';
+import 'package:lk_client/widget/list/timetable_horizontal_list.dart';
 
 class DisciplinePage extends StatefulWidget {
   final Discipline discipline;
@@ -36,7 +37,8 @@ class _DisciplinePageState extends State<DisciplinePage> {
               discipline: widget.discipline,
               education: widget.education,
               semester: widget.semester,
-            )
+            ),
+            TimetableHorizontalList(discipline: widget.discipline)
           ],
         ));
   }

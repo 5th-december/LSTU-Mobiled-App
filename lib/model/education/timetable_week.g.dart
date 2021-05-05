@@ -10,9 +10,10 @@ TimetableWeek _$TimetableWeekFromJson(Map<String, dynamic> json) {
   return TimetableWeek(
     current: json['current'] as bool,
     type: json['type'] as String,
-    days: json['days'] == null
-        ? null
-        : TimetableDay.fromJson(json['days'] as Map<String, dynamic>),
+    days: (json['days'] as List)
+        ?.map((e) =>
+            e == null ? null : TimetableDay.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 

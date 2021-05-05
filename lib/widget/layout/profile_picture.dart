@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/profile_picture_bloc.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
@@ -13,13 +13,13 @@ class PersonProfilePicture extends StatefulWidget {
   final Person displayed;
   final double size;
 
-  PersonProfilePicture({@required this.displayed, @required this.size});
+  PersonProfilePicture({Key key, @required this.displayed, @required this.size}): super(key: key);
 
   _PersonProfilePictureState createState() => _PersonProfilePictureState();
 }
 
 class _PersonProfilePictureState extends State<PersonProfilePicture> {
-  ProfilePictureBloc _profilePictureBloc;
+  ProfilePictureLoaderBloc _bloc;
 
   Person get _person => widget.displayed;
   double get _size => widget.size;
@@ -27,29 +27,29 @@ class _PersonProfilePictureState extends State<PersonProfilePicture> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_profilePictureBloc == null) {
+    if (this._bloc == null) {
       PersonQueryService queryService =
           AppStateContainer.of(context).serviceProvider.personQueryService;
-      this._profilePictureBloc = ProfilePictureBloc(queryService);
+      this._bloc = ProfilePictureLoaderBloc(queryService);
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._profilePictureBloc.dispose();
+      await this._bloc.dispose();
     });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._profilePictureBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadProfilePicture>(
             request: LoadProfilePicture(this._person, this._size)));
 
     return StreamBuilder(
-      stream: this._profilePictureBloc.loadProfilePictureStateStream,
+      stream: this._bloc.consumingStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData &&
             snapshot.data is ConsumingReadyState<ProfilePicture>) {

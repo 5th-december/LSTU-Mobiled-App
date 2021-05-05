@@ -10,7 +10,7 @@ class TimetableWeek
 
   final String type;
 
-  final TimetableDay days;
+  final List<TimetableDay> days;
 
   TimetableWeek({this.current, this.type, this.days});
 

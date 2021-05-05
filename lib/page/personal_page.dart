@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:lk_client/bloc/personal_details_bloc.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/consuming_event.dart';
@@ -25,17 +25,17 @@ class PersonalPage extends StatefulWidget {
 }
 
 class _PersonalPageState extends State<PersonalPage> {
-  PersonalDetailsBloc _personalDetailsBloc;
+  PersonalDetailsLoaderBloc _bloc;
 
   Person get _person => widget._person;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (this._personalDetailsBloc == null) {
+    if (this._bloc == null) {
       PersonQueryService queryService =
           AppStateContainer.of(context).serviceProvider.personQueryService;
-      this._personalDetailsBloc = PersonalDetailsBloc(queryService);
+      this._bloc = PersonalDetailsLoaderBloc(queryService);
     }
   }
 
@@ -149,7 +149,7 @@ class _PersonalPageState extends State<PersonalPage> {
   }
 
   Widget build(BuildContext context) {
-    this._personalDetailsBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadPersonDetails>(
             request: LoadPersonDetails(_person)));
 
@@ -158,7 +158,7 @@ class _PersonalPageState extends State<PersonalPage> {
           title: Text('Персональная страница'),
         ),
         body: StreamBuilder(
-          stream: this._personalDetailsBloc.personEntityStateStream,
+          stream: this._bloc.consumingStateStream,
           builder: (context, snapshot) {
             if (snapshot.hasData &&
                 snapshot.data is ConsumingReadyState<Person>) {

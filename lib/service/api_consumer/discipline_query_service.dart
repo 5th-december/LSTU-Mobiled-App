@@ -65,18 +65,26 @@ class DisciplineQueryService extends HttpService {
     }
   }
 
-  Stream<Timetable> getDisciplineTimetable(
-      String discipline, String education, String semester) async* {
-    HttpResponse response = await this.get(
-        '/api/v1/student/discipline/timetable',
-        <String, String>{'dis': discipline, 'edu': education, 'sem': semester},
-        this.accessKey.token);
+  Stream<ConsumingState<Timetable>> getDisciplineTimetable(String discipline, String education, String semester) async* {
+    try {
+      HttpResponse response = await this.get(
+        '/api/v1/student/discipline/timetable', 
+        <String, String> {
+          'dis': discipline,
+          'edu': education,
+          'sem': semester
+        },
+        this.accessKey.token
+      );
 
-    if (response.status == 200) {
-      Timetable selectedDisciplineTimetable = Timetable.fromJson(response.body);
-      yield selectedDisciplineTimetable;
-    } else {
-      throw this.apiErrorHandler.apply(response.body);
+      if(response.status == 200) {
+        Timetable timetable = Timetable.fromJson(response.body);
+        yield ConsumingReadyState<Timetable>(timetable);
+      } else {
+        throw this.apiErrorHandler.apply(response.body);
+      }
+    } on Exception catch(e) {
+      yield ConsumingErrorState<Timetable>(error: e);
     }
   }
 }

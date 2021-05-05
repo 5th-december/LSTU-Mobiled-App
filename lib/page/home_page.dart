@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
-import 'package:lk_client/bloc/user_definition_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
@@ -16,34 +16,34 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  UserDefinitionBloc _userDefinitionBloc;
+  UserDefinitionLoaderBloc _bloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (this._userDefinitionBloc == null) {
+    if (this._bloc == null) {
       PersonQueryService queryService =
           AppStateContainer.of(context).serviceProvider.personQueryService;
-      this._userDefinitionBloc = UserDefinitionBloc(queryService);
+      this._bloc = UserDefinitionLoaderBloc(queryService);
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._userDefinitionBloc.dispose();
+      await this._bloc.dispose();
     });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._userDefinitionBloc.eventController.sink.add(
+    this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadCurrentUserIdentifier>(request:
             LoadCurrentUserIdentifier()));
 
     return StreamBuilder(
-        stream: this._userDefinitionBloc.personDefinitionStateSteream,
+        stream: this._bloc.consumingStateStream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
       if (snapshot.hasData && snapshot.data is ConsumingReadyState<Person>) {
         Person person = (snapshot.data as ConsumingReadyState<Person>).content;
