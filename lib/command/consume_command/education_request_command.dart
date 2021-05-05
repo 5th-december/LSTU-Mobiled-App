@@ -2,28 +2,26 @@ import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/education/semester.dart';
 
-abstract class EducationRequestCommand {}
-
-class LoadUserEducationListCommand extends EducationRequestCommand {
+class LoadUserEducationListCommand {
   final Person person;
 
   LoadUserEducationListCommand(this.person);
 }
 
-class LoadSemsterListCommand extends EducationRequestCommand {
+class LoadSemsterListCommand {
   final Education education;
 
   LoadSemsterListCommand(this.education);
 }
 
-class LoadSubjectListCommand extends EducationRequestCommand {
+class LoadSubjectListCommand {
   final Education education;
   final Semester semester;
 
   LoadSubjectListCommand(this.education, this.semester);
 }
 
-class LoadCurrentEducationsCommand extends EducationRequestCommand {
+class LoadCurrentEducationsCommand {
   final Person person;
 
   LoadCurrentEducationsCommand(this.person);

@@ -1,34 +1,34 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
-import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
 
-class SubjectViewPage extends StatefulWidget {
-  Discipline _currentSubject;
+class DisciplinePage extends StatefulWidget {
+  final Discipline discipline;
+  final Education education;
+  final Semester semester;
 
-  SubjectViewPage(this._currentSubject);
+  DisciplinePage({
+    Key key,
+    @required this.discipline,
+    @required this.education,
+    @required this.semester
+  }): super(key: key);
 
   @override
-  _SubjectViewPageState createState() => _SubjectViewPageState();
+  _DisciplinePageState createState() => _DisciplinePageState();
 }
 
-class _SubjectViewPageState extends State<SubjectViewPage> {
+class _DisciplinePageState extends State<DisciplinePage> {
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text('Дисциплина'),
       ),
-      body: StreamBuilder(
-        stream:
-            AppStateContainer.of(context).blocProvider.authenticationBloc.state,
-        builder: (context, AsyncSnapshot snapshot) {
-          if (snapshot.hasData) {
-            return Text(snapshot.data.toString());
-          } else
-            return Center(child: CircularProgressIndicator());
-        },
-      ),
+      body: Text('Discipline')
     );
   }
 }

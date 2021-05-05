@@ -1,16 +1,14 @@
 import 'package:lk_client/model/person/person.dart';
 
-abstract class UserRequestCommand {}
+class LoadCurrentUserIdentifier {}
 
-class LoadCurrentUserIdentifier extends UserRequestCommand {}
-
-class LoadPersonDetails extends UserRequestCommand {
+class LoadPersonDetails {
   final Person person;
 
   LoadPersonDetails(this.person);
 }
 
-class LoadProfilePicture extends UserRequestCommand {
+class LoadProfilePicture {
   final Person person;
   final double size;
 

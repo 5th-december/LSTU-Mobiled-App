@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/semester_list_bloc.dart';
 import 'package:lk_client/command/consume_command/education_request_command.dart';
-import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
-import 'package:lk_client/state/content_state.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 
 class SemesterList extends StatefulWidget {
@@ -44,16 +44,16 @@ class _SemesterListState extends State<SemesterList> {
   @override
   Widget build(BuildContext context) {
     this._semesterListBloc.eventController.sink.add(
-        StartLoadingContentEvent<LoadSemsterListCommand>(
-            LoadSemsterListCommand(widget._education)));
+        StartConsumeEvent<LoadSemsterListCommand>(
+          request: LoadSemsterListCommand(widget._education)));
 
     return StreamBuilder(
         stream: _semesterListBloc.semesterListStateStream,
         builder: (BuildContext context, AsyncSnapshot<dynamic> snapshot) {
           if (snapshot.hasData) {
-            if (snapshot.data is ContentReadyState<List<Semester>>) {
+            if (snapshot.data is ConsumingReadyState<List<Semester>>) {
               List<Semester> semestersList =
-                  (snapshot.data as ContentReadyState<List<Semester>>).content;
+                  (snapshot.data as ConsumingReadyState<List<Semester>>).content;
 
               return Container(
                 child: ListView.builder(

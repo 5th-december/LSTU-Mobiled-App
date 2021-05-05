@@ -5,15 +5,13 @@ import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/navigator_wrapped_page.dart';
-import 'package:lk_client/page/education_page.dart';
 import 'package:lk_client/page/messenger_page.dart';
 import 'package:lk_client/page/personal_page.dart';
-import 'package:lk_client/page/semester_page.dart';
-import 'package:lk_client/page/subject_list_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/local/timetable_page_state_container.dart';
+import 'package:lk_client/widget/util/subject_page_manager.dart';
 import 'package:lk_client/widget/util/timetable_page_manager.dart';
 
 class PageGlobalManager extends StatefulWidget {
@@ -62,13 +60,7 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
                     serviceProvider: AppStateContainer.of(context).serviceProvider
                   )
                 ),
-                NavigatorWrappedPage(
-                    EducationPage(
-                        widget.loggedPerson,
-                        (Education edu) => SemesterPage(
-                            edu,
-                            (Semester semester) =>
-                                SubjectListPage(edu, semester)))),
+                NavigatorWrappedPage(SubjectPageManager(currentPerson: widget.loggedPerson)),
                 NavigatorWrappedPage(MessengerPage(widget.loggedPerson)),
                 NavigatorWrappedPage(PersonalPage(widget.loggedPerson))
               ],

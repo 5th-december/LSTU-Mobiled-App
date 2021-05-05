@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
@@ -13,6 +14,7 @@ class ServiceProvider {
   final PersonQueryService personQueryService;
   final EducationQueryService educationQueryService;
   final AuthenticationExtractor authenticationExtractor;
+  final DisciplineQueryService disciplineQueryService;
 
   ServiceProvider({
     @required this.jwtManager,
@@ -21,5 +23,6 @@ class ServiceProvider {
     @required this.personQueryService,
     @required this.educationQueryService,
     @required this.authenticationExtractor,
+    @required this.disciplineQueryService
   });
 }

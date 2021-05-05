@@ -18,7 +18,7 @@ class AuthorizationService extends HttpService {
     HttpResponse response = await this.post('api/v1/auth', user.toJson());
 
     if (response.status == 200) {
-      ApiKey token = ApiKey.fromJson(response.body as Map<String, dynamic>);
+      ApiKey token = ApiKey.fromJson(response.body);
       return token;
     }
 
@@ -30,7 +30,7 @@ class AuthorizationService extends HttpService {
         await this.post('api/v1/identify', credentials.toJson());
 
     if (response.status == 200) {
-      ApiKey token = ApiKey.fromJson(response.body as Map<String, dynamic>);
+      ApiKey token = ApiKey.fromJson(response.body);
       return token;
     }
 
@@ -39,12 +39,11 @@ class AuthorizationService extends HttpService {
 
   Future<ApiKey> register(LoginCredentials user) async {
     String jwtToken = await this.appJwtManager.getSavedJwt();
-    // TODO: обработка отсутствия токена в хранилище
     HttpResponse response =
         await this.post('api/v1/reg', user.toJson(), jwtToken);
 
     if (response.status == 200) {
-      ApiKey token = ApiKey.fromJson(response.body as Map<String, dynamic>);
+      ApiKey token = ApiKey.fromJson(response.body);
       return token;
     }
 
@@ -57,7 +56,7 @@ class AuthorizationService extends HttpService {
 
     if (response.status == 200) {
       ApiKey updatedToken =
-          ApiKey.fromJson(response.body as Map<String, dynamic>);
+          ApiKey.fromJson(response.body);
       return updatedToken;
     }
 

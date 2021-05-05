@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/education_details_bloc.dart';
 import 'package:lk_client/command/consume_command/education_request_command.dart';
-import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
-import 'package:lk_client/state/content_state.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 
 class EducationDetails extends StatefulWidget {
@@ -73,15 +73,15 @@ class _EducationDetailsState extends State<EducationDetails> {
   @override
   Widget build(BuildContext context) {
     this._educationDetailsBloc.eventController.sink.add(
-        StartLoadingContentEvent<LoadCurrentEducationsCommand>(
-            LoadCurrentEducationsCommand(this._person)));
+        StartConsumeEvent<LoadCurrentEducationsCommand>(
+            request: LoadCurrentEducationsCommand(this._person)));
     return StreamBuilder(
       stream: this._educationDetailsBloc.educationDetailsStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData &&
-            snapshot.data is ContentReadyState<List<Education>>) {
+            snapshot.data is ConsumingReadyState<List<Education>>) {
           List<Education> currentEducationList =
-              (snapshot.data as ContentReadyState<List<Education>>).content;
+              (snapshot.data as ConsumingReadyState<List<Education>>).content;
 
           return this._buildEducationDetailsView(currentEducationList);
         } else {

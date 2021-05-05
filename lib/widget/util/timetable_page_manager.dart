@@ -9,8 +9,8 @@ import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/state/timetable_section_state.dart';
 import 'package:lk_client/store/local/timetable_page_state_container.dart';
-import 'package:lk_client/widget/layout/education_list.dart';
-import 'package:lk_client/widget/layout/semester_list.dart';
+import 'package:lk_client/widget/list/education_list.dart';
+import 'package:lk_client/widget/list/semester_list.dart';
 
 class TimetablePageManager extends StatefulWidget {
   final Person currentPerson;

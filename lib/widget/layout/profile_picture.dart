@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/profile_picture_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
-import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/person/profile_picture.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
-import 'package:lk_client/state/content_state.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 
 class PersonProfilePicture extends StatefulWidget {
@@ -45,15 +45,15 @@ class _PersonProfilePictureState extends State<PersonProfilePicture> {
   @override
   Widget build(BuildContext context) {
     this._profilePictureBloc.eventController.sink.add(
-        StartLoadingContentEvent<LoadProfilePicture>(
-            LoadProfilePicture(this._person, this._size)));
+        StartConsumeEvent<LoadProfilePicture>(
+            request: LoadProfilePicture(this._person, this._size)));
 
     return StreamBuilder(
       stream: this._profilePictureBloc.loadProfilePictureStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         if (snapshot.hasData &&
-            snapshot.data is ContentReadyState<ProfilePicture>) {
-          var _state = snapshot.data as ContentReadyState<ProfilePicture>;
+            snapshot.data is ConsumingReadyState<ProfilePicture>) {
+          var _state = snapshot.data as ConsumingReadyState<ProfilePicture>;
           ProfilePicture pic = _state.content;
           return Container(
               width: _size,

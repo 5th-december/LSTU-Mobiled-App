@@ -4,11 +4,11 @@ import 'package:intl/intl.dart';
 import 'package:lk_client/bloc/personal_details_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/event/authentication_event.dart';
-import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/modal_page.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
-import 'package:lk_client/state/content_state.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/form/personal_data_form.dart';
 import 'package:lk_client/widget/layout/education_details.dart';
@@ -150,8 +150,8 @@ class _PersonalPageState extends State<PersonalPage> {
 
   Widget build(BuildContext context) {
     this._personalDetailsBloc.eventController.sink.add(
-        StartLoadingContentEvent<LoadPersonDetails>(
-            LoadPersonDetails(_person)));
+        StartConsumeEvent<LoadPersonDetails>(
+            request: LoadPersonDetails(_person)));
 
     return Scaffold(
         appBar: AppBar(
@@ -161,9 +161,9 @@ class _PersonalPageState extends State<PersonalPage> {
           stream: this._personalDetailsBloc.personEntityStateStream,
           builder: (context, snapshot) {
             if (snapshot.hasData &&
-                snapshot.data is ContentReadyState<Person>) {
+                snapshot.data is ConsumingReadyState<Person>) {
               Person loadedPerson =
-                  (snapshot.data as ContentReadyState<Person>).content;
+                  (snapshot.data as ConsumingReadyState<Person>).content;
 
               return ListView(
                 padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 30.0),

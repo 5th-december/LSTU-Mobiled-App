@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
 import 'package:lk_client/bloc/user_definition_bloc.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
-import 'package:lk_client/event/content_event.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
-import 'package:lk_client/state/content_state.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/util/bottom_navigator.dart';
 import 'package:lk_client/widget/util/page_global_manager.dart';
@@ -39,14 +39,14 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     this._userDefinitionBloc.eventController.sink.add(
-        StartLoadingContentEvent<LoadCurrentUserIdentifier>(
+        StartConsumeEvent<LoadCurrentUserIdentifier>(request:
             LoadCurrentUserIdentifier()));
 
     return StreamBuilder(
         stream: this._userDefinitionBloc.personDefinitionStateSteream,
         builder: (BuildContext context, AsyncSnapshot snapshot) {
-      if (snapshot.hasData && snapshot.data is ContentReadyState<Person>) {
-        Person person = (snapshot.data as ContentReadyState<Person>).content;
+      if (snapshot.hasData && snapshot.data is ConsumingReadyState<Person>) {
+        Person person = (snapshot.data as ConsumingReadyState<Person>).content;
 
         return Scaffold(
             body: PageGlobalManager(person),

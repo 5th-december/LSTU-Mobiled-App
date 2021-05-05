@@ -10,6 +10,7 @@ import 'package:lk_client/error_handler/error_judge.dart';
 import 'package:lk_client/error_handler/not_found_error_handler.dart';
 import 'package:lk_client/error_handler/stub_error_handler.dart';
 import 'package:lk_client/error_handler/validation_error_handler.dart';
+import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
@@ -59,8 +60,15 @@ Future<void> main() async {
       appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
   EducationQueryService appEducationQueryService = EducationQueryService(
       appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
+      
+  DisciplineQueryService appDisciplineQueryService = DisciplineQueryService(
+    appConfig: appConfig,
+    authenticationExtractor: appAuthenticationExtractor,
+    apiErrorHandler: apiErrorHandlersChain
+  );
 
   ServiceProvider applicationServiceProvider = ServiceProvider(
+      disciplineQueryService: appDisciplineQueryService,
       appConfig: appConfig,
       jwtManager: appJwt,
       authorizationService: appAuthorizationService,
