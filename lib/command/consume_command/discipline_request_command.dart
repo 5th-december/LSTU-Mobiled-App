@@ -22,9 +22,18 @@ class LoadDisciplineTimetable {
   final Discipline discipline;
   final Education education;
   final Semester semester;
-  LoadDisciplineTimetable({
-    @required this.discipline,
-    @required this.education,
-    @required this.semester
-  });
+  LoadDisciplineTimetable(
+      {@required this.discipline,
+      @required this.education,
+      @required this.semester});
+}
+
+class LoadTeachingMaterialsList {
+  final Discipline discipline;
+  final Education education;
+  final Semester semester;
+  LoadTeachingMaterialsList(
+      {@required this.discipline,
+      @required this.education,
+      @required this.semester});
 }

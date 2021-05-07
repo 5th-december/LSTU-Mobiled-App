@@ -10,7 +10,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) {
   return Attachment(
     mimeType: json['mime_type'] as String,
     attachmentName: json['attachment_name'] as String,
-    attachmentSize: json['attachment_size'] as String,
+    attachmentSize: (json['attachment_size'] as num)?.toDouble(),
     attachment: json['attachment'] as String,
   );
 }

@@ -4,8 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'attachment.g.dart';
 
 @JsonSerializable()
-class Attachment
-{
+class Attachment {
   @JsonKey(name: 'mime_type')
   final String mimeType;
 
@@ -13,12 +12,17 @@ class Attachment
   final String attachmentName;
 
   @JsonKey(name: 'attachment_size')
-  final String attachmentSize;
+  final double attachmentSize;
 
   final String attachment;
 
-  Attachment({this.mimeType, this.attachmentName, this.attachmentSize, this.attachment});
+  Attachment(
+      {this.mimeType,
+      this.attachmentName,
+      this.attachmentSize,
+      this.attachment});
 
-  factory Attachment.fromJson(Map<String, dynamic> json) => _$AttachmentFromJson(json);
+  factory Attachment.fromJson(Map<String, dynamic> json) =>
+      _$AttachmentFromJson(json);
   Map<String, dynamic> toJson() => _$AttachmentToJson(this);
 }

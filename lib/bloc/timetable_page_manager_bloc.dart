@@ -3,9 +3,10 @@ import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/timetable_section_event.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
+import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/person/person.dart';
-import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
+import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/state/timetable_section_state.dart';
 
 class TimetablePageManagerBloc
@@ -44,17 +45,28 @@ class TimetablePageManagerBloc
               .educationQueryService
               .getEducationsList(person.id)
               .listen((event) {
-            List<Education> eduList = event.payload;
-            if (eduList.length == 1) {
-              this
-                  .educationQueryService
-                  .getCurrentSemester(eduList[0].id)
-                  .listen((event) {
-                this.updateState(SelectedTimetableByDefault(
-                    education: eduList[0], semester: event));
-              });
-            } else {
-              throw Exception('Unable to find current semester');
+            if (event is ConsumingReadyState<ListedResponse<Education>>) {
+              List<Education> eduList = event.content.payload;
+              if (eduList.length == 1) {
+                Education loadedEducation = eduList[0];
+                this
+                    .educationQueryService
+                    .getCurrentSemester(loadedEducation.id)
+                    .listen((event) {
+                  if (event is ConsumingReadyState<Semester>) {
+                    Semester loadedSemester = event.content;
+                    this.updateState(SelectedTimetableByDefault(
+                        education: eduList[0], semester: loadedSemester));
+                  } else if (event is ConsumingErrorState<Semester>) {
+                    this.updateState(TimetableDefaultSelectionError());
+                  }
+                });
+              } else {
+                this.updateState(TimetableDefaultSelectionError());
+              }
+            } else if (event
+                is ConsumingErrorState<ListedResponse<Education>>) {
+              this.updateState(TimetableDefaultSelectionError());
             }
           });
         } else if (event is ForceCustomTimetableSelection) {

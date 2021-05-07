@@ -63,11 +63,11 @@ class _DisciplineTeachersListState extends State<DisciplineTeachersList> {
         return Column(
           children: List.generate(
               argumentList.length,
-              (index) => Card(
+              (index) => Container(
                     child: ListTile(
-                      trailing: PersonProfilePicture(
+                      /*trailing: PersonProfilePicture(
                           displayed: argumentList[index].teacher.person,
-                          size: 36.0),
+                          size: 36.0),*/
                       title: Text(
                           '${argumentList[index].teacher.person.surname} ${argumentList[index].teacher.person.name} ${argumentList[index].teacher.person.patronymic}'),
                       subtitle: Text(argumentList[index].lessonType),

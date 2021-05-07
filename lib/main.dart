@@ -21,8 +21,11 @@ import 'package:lk_client/store/global/bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 import 'app.dart';
 import 'store/global/app_state_container.dart';
+import 'package:flutter/rendering.dart';
 
 Future<void> main() async {
+  // Debug
+  //debugPaintSizeEnabled = true;
   WidgetsFlutterBinding.ensureInitialized();
 
   // API exceptions handlers chain of responsibility
@@ -60,12 +63,11 @@ Future<void> main() async {
       appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
   EducationQueryService appEducationQueryService = EducationQueryService(
       appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
-      
+
   DisciplineQueryService appDisciplineQueryService = DisciplineQueryService(
-    appConfig: appConfig,
-    authenticationExtractor: appAuthenticationExtractor,
-    apiErrorHandler: apiErrorHandlersChain
-  );
+      appConfig: appConfig,
+      authenticationExtractor: appAuthenticationExtractor,
+      apiErrorHandler: apiErrorHandlersChain);
 
   ServiceProvider applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,

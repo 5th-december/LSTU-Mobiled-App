@@ -44,7 +44,7 @@ class _EducationListState extends State<EducationList> {
   Widget build(BuildContext context) {
     this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadUserEducationListCommand>(
-            request:LoadUserEducationListCommand(widget._currentPerson)));
+            request: LoadUserEducationListCommand(widget._currentPerson)));
 
     return StreamBuilder(
         stream: this._bloc.consumingStateStream,
@@ -52,13 +52,14 @@ class _EducationListState extends State<EducationList> {
           if (snapshot.hasData) {
             if (snapshot.data is ConsumingReadyState<List<Education>>) {
               List<Education> educationsList =
-                  (snapshot.data as ConsumingReadyState<List<Education>>).content;
+                  (snapshot.data as ConsumingReadyState<List<Education>>)
+                      .content;
 
               return Container(
-                  child: ListView.builder(
+                  child: ListView.separated(
                       itemCount: educationsList.length,
                       itemBuilder: (BuildContext context, int index) {
-                        return Card(
+                        return Container(
                           child: ListTile(
                             leading: FlutterLogo(
                               size: 50,
@@ -75,7 +76,9 @@ class _EducationListState extends State<EducationList> {
                                 widget._onSelectAction(educationsList[index]),
                           ),
                         );
-                      }));
+                      },
+                      separatorBuilder: (BuildContext context, int index) =>
+                          Divider()));
             }
           }
 

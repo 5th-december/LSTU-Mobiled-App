@@ -5,6 +5,7 @@ import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/widget/layout/discipline_details.dart';
 import 'package:lk_client/widget/list/discipline_teachers_list.dart';
+import 'package:lk_client/widget/list/teach_materials_list.dart';
 import 'package:lk_client/widget/list/timetable_horizontal_list.dart';
 
 class DisciplinePage extends StatefulWidget {
@@ -30,7 +31,7 @@ class _DisciplinePageState extends State<DisciplinePage> {
         appBar: AppBar(
           title: Text('Дисциплина'),
         ),
-        body: Column(
+        body: ListView(
           children: [
             DisciplineDetails(discipline: widget.discipline),
             DisciplineTeachersList(
@@ -38,7 +39,27 @@ class _DisciplinePageState extends State<DisciplinePage> {
               education: widget.education,
               semester: widget.semester,
             ),
-            TimetableHorizontalList(discipline: widget.discipline)
+            TimetableHorizontalList(
+                discipline: widget.discipline,
+                semester: widget.semester,
+                education: widget.education),
+            ElevatedButton(
+                onPressed: () => {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return Scaffold(
+                          appBar: AppBar(
+                            title: Text('Материалы дисциплины'),
+                          ),
+                          body: TeachMaterialsList(
+                            education: widget.education,
+                            semester: widget.semester,
+                            discipline: widget.discipline,
+                          ),
+                        );
+                      }))
+                    },
+                child: Text('Материалы'))
           ],
         ));
   }

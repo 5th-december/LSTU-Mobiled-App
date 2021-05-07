@@ -57,16 +57,17 @@ class _DisciplineListState extends State<DisciplineList> {
     return StreamLoadingWidget<List<Discipline>>(
       loadingStream: this._bloc.consumingStateStream,
       childBuilder: (List<Discipline> argumentList) {
-        return ListView.builder(
+        return ListView.separated(
             itemCount: argumentList.length,
             itemBuilder: (BuildContext context, int index) {
-              return Card(
+              return Container(
                 child: ListTile(
                     leading: FlutterLogo(size: 36.0),
                     title: Text(argumentList[index].name),
                     onTap: () => widget.onItemTap(argumentList[index])),
               );
-            });
+            },
+            separatorBuilder: (BuildContext context, int index) => Divider());
       },
     );
   }

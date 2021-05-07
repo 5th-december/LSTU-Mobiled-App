@@ -19,7 +19,7 @@ class EducationDetails extends StatefulWidget {
 }
 
 class _EducationDetailsState extends State<EducationDetails> {
-  EducationDetailsLoaderBloc _bloc;
+  EducationListLoaderBloc _bloc;
 
   Person get _person => widget._person;
 
@@ -30,7 +30,7 @@ class _EducationDetailsState extends State<EducationDetails> {
       EducationQueryService appEducationQueryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
       this._bloc =
-          EducationDetailsLoaderBloc(appEducationQueryService);
+          EducationListLoaderBloc(appEducationQueryService);
     }
   }
 

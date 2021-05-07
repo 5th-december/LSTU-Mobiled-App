@@ -12,33 +12,32 @@ import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/chunk/card_timetable_week.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
 
-class TimetableHorizontalList extends StatefulWidget
-{
+class TimetableHorizontalList extends StatefulWidget {
   final Discipline discipline;
   final Education education;
   final Semester semester;
 
   TimetableHorizontalList(
-    {Key key, 
-    @required this.discipline, 
-    @override this.semester, 
-    @override this.education})
-    : super(key: key);
+      {Key key,
+      @required this.discipline,
+      @required this.semester,
+      @required this.education})
+      : super(key: key);
 
   @override
-  _TimetableHorizontalListState createState() => _TimetableHorizontalListState();
+  _TimetableHorizontalListState createState() =>
+      _TimetableHorizontalListState();
 }
 
-class _TimetableHorizontalListState extends State<TimetableHorizontalList>
-{
+class _TimetableHorizontalListState extends State<TimetableHorizontalList> {
   DisciplineTimetableLoadingBloc _bloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._bloc == null) {
-      DisciplineQueryService queryService = 
-        AppStateContainer.of(context).serviceProvider.disciplineQueryService;
+    if (this._bloc == null) {
+      DisciplineQueryService queryService =
+          AppStateContainer.of(context).serviceProvider.disciplineQueryService;
       this._bloc = DisciplineTimetableLoadingBloc(queryService);
     }
   }
@@ -46,31 +45,29 @@ class _TimetableHorizontalListState extends State<TimetableHorizontalList>
   @override
   Widget build(BuildContext context) {
     this._bloc.eventController.sink.add(
-      StartConsumeEvent<LoadDisciplineTimetable>(
-        request: LoadDisciplineTimetable(
-          discipline: widget.discipline,
-          education: widget.education,
-          semester: widget.semester
-        )
-      )
-    );
+        StartConsumeEvent<LoadDisciplineTimetable>(
+            request: LoadDisciplineTimetable(
+                discipline: widget.discipline,
+                education: widget.education,
+                semester: widget.semester)));
 
     return StreamLoadingWidget<Timetable>(
       loadingStream: this._bloc.consumingStateStream,
       childBuilder: (Timetable timetable) {
         return Container(
-          padding: EdgeInsets.only(top: 12.0),
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: timetable.weeks.map((TimetableWeek week) => 
-                  CardTimetableWeek(week: week)).toList(),
-              )
-            )
-          )
-        );
+            padding: EdgeInsets.only(top: 12.0),
+            child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: IntrinsicHeight(
+                    child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: timetable.weeks
+                      .map((TimetableWeek week) => CardTimetableWeek(
+                            week: week,
+                            isSingle: timetable.weeks.length == 1,
+                          ))
+                      .toList(),
+                ))));
       },
     );
   }

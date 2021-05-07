@@ -45,7 +45,7 @@ class _SemesterListState extends State<SemesterList> {
   Widget build(BuildContext context) {
     this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadSemsterListCommand>(
-          request: LoadSemsterListCommand(widget._education)));
+            request: LoadSemsterListCommand(widget._education)));
 
     return StreamBuilder(
         stream: _bloc.consumingStateStream,
@@ -53,13 +53,14 @@ class _SemesterListState extends State<SemesterList> {
           if (snapshot.hasData) {
             if (snapshot.data is ConsumingReadyState<List<Semester>>) {
               List<Semester> semestersList =
-                  (snapshot.data as ConsumingReadyState<List<Semester>>).content;
+                  (snapshot.data as ConsumingReadyState<List<Semester>>)
+                      .content;
 
               return Container(
-                child: ListView.builder(
+                child: ListView.separated(
                     itemCount: semestersList.length,
                     itemBuilder: (BuildContext context, int index) {
-                      return Card(
+                      return Container(
                         child: ListTile(
                           leading: FlutterLogo(
                             size: 50,
@@ -71,7 +72,9 @@ class _SemesterListState extends State<SemesterList> {
                           },
                         ),
                       );
-                    }),
+                    },
+                    separatorBuilder: (BuildContext context, int index) =>
+                        Divider()),
               );
             }
           }
