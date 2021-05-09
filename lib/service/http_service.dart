@@ -14,7 +14,7 @@ class HttpResponse {
   HttpResponse({this.status, this.body});
 }
 
-abstract class HttpService {
+class ApiEndpointConsumer {
   final AppConfig _configuration;
 
   final defaultHeaders = {
@@ -22,7 +22,7 @@ abstract class HttpService {
     HttpHeaders.acceptHeader: 'application/json',
   };
 
-  HttpService(this._configuration);
+  ApiEndpointConsumer(this._configuration);
 
   Future<HttpResponse> post(String url, Map<String, dynamic> body,
       [String apiJwtToken]) async {
@@ -38,19 +38,15 @@ abstract class HttpService {
       headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
     }
 
-    try {
-      final response =
-          await http.post(uri, headers: headers, body: jsonEncode(body));
+    final response =
+        await http.post(uri, headers: headers, body: jsonEncode(body));
 
-      if (response.headers['content-type'] != 'application/json') {
-        throw new Exception('Undefined response type');
-      }
-
-      final responseBody = jsonDecode(response.body);
-      return new HttpResponse(status: response.statusCode, body: responseBody);
-    } on Exception {
-      rethrow;
+    if (response.headers['content-type'] != 'application/json') {
+      throw new Exception('Undefined response type');
     }
+
+    final responseBody = jsonDecode(response.body);
+    return new HttpResponse(status: response.statusCode, body: responseBody);
   }
 
   Future<HttpResponse> get(String url, Map<String, dynamic> params,
@@ -74,5 +70,24 @@ abstract class HttpService {
 
     final responseBody = jsonDecode(response.body);
     return new HttpResponse(status: response.statusCode, body: responseBody);
+  }
+
+  Future<http.ByteStream> consumeResourseAsStream(
+      String url, Map<String, String> params,
+      {String method = 'GET', int expectedCode = 200}) async {
+    final _client = http.Client();
+    http.Request request = http.Request(
+        method,
+        this._configuration.useHttps
+            ? Uri.https(this._configuration.apiBase, url, params)
+            : Uri.http(this._configuration.apiBase, url, params));
+
+    http.StreamedResponse response = await _client.send(request);
+
+    if (response.statusCode != expectedCode) {
+      throw new Exception('Error');
+    }
+
+    return response.stream;
   }
 }
