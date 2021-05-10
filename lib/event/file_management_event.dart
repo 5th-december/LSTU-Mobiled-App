@@ -8,8 +8,8 @@ class FileCheckExistenceEvent extends FileManagementEvent {
   FileCheckExistenceEvent({@required this.fileName, @required this.filePath});
 }
 
-class FileDownloadEvent extends FileManagementEvent {
+class FileStartDownloadEvent extends FileManagementEvent {
   final String filePath;
   final String fileName;
-  FileDownloadEvent({@required this.fileName, @required this.filePath});
+  FileStartDownloadEvent({@required this.fileName, @required this.filePath});
 }

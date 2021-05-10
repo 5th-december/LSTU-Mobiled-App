@@ -18,8 +18,8 @@ class ApiEndpointConsumer {
   final AppConfig _configuration;
 
   final defaultHeaders = {
-    HttpHeaders.contentTypeHeader: 'application/json; charset=UTF-8',
-    HttpHeaders.acceptHeader: 'application/json',
+    HttpHeaders.contentTypeHeader: ContentType.json.value,
+    HttpHeaders.acceptHeader: ContentType.json.value,
   };
 
   ApiEndpointConsumer(this._configuration);
@@ -41,7 +41,7 @@ class ApiEndpointConsumer {
     final response =
         await http.post(uri, headers: headers, body: jsonEncode(body));
 
-    if (response.headers['content-type'] != 'application/json') {
+    if (response.headers[HttpHeaders.contentTypeHeader] != ContentType.json.value) {
       throw new Exception('Undefined response type');
     }
 
@@ -64,7 +64,7 @@ class ApiEndpointConsumer {
     }
 
     final response = await http.get(uri, headers: headers);
-    if (response.headers['content-type'] != 'application/json') {
+    if (response.headers[HttpHeaders.contentTypeHeader] != ContentType.json.value) {
       throw new Exception('Undefined response type');
     }
 
@@ -72,20 +72,48 @@ class ApiEndpointConsumer {
     return new HttpResponse(status: response.statusCode, body: responseBody);
   }
 
+  Future<void> produceResourseAsStream(
+    String url, Map<String, String> params, Stream producer,
+    {String method = 'POST', List<int> expectedCodes = const[]}) async {
+    final client = http.Client();
+    
+    http.StreamedRequest request = http.StreamedRequest(
+      method,
+      this._configuration.useHttps
+            ? Uri.https(this._configuration.apiBase, url, params)
+            : Uri.http(this._configuration.apiBase, url, params)
+    );
+    request.headers.addAll({HttpHeaders.contentTypeHeader: ContentType.binary.value});
+    producer.listen((chunk) {
+      request.sink.add(chunk);
+    }, onDone: () {
+      request.sink.close();
+    });
+
+    http.StreamedResponse response = await client.send(request);
+
+    if(expectedCodes.length != 0 && !expectedCodes.contains(response.statusCode)) {
+      throw new Exception('Uploading error');
+    }
+
+    return response.stream;
+  }
+
   Future<http.ByteStream> consumeResourseAsStream(
       String url, Map<String, String> params,
-      {String method = 'GET', int expectedCode = 200}) async {
-    final _client = http.Client();
+      {String method = 'GET', List<int> expectedCodes = const[]}) async {
+    final client = http.Client();
+
     http.Request request = http.Request(
         method,
         this._configuration.useHttps
             ? Uri.https(this._configuration.apiBase, url, params)
             : Uri.http(this._configuration.apiBase, url, params));
 
-    http.StreamedResponse response = await _client.send(request);
+    http.StreamedResponse response = await client.send(request);
 
-    if (response.statusCode != expectedCode) {
-      throw new Exception('Error');
+    if (expectedCodes.length != 0 && !expectedCodes.contains(response.statusCode)) {
+      throw new Exception('Downloading error');
     }
 
     return response.stream;

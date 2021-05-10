@@ -12,10 +12,14 @@ import 'package:lk_client/error_handler/stub_error_handler.dart';
 import 'package:lk_client/error_handler/validation_error_handler.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
+import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';
+import 'package:lk_client/service/file_local_manager.dart';
+import 'package:lk_client/service/file_transfer_manager.dart';
+import 'package:lk_client/service/http_service.dart';
 import 'package:lk_client/service/jwt_manager.dart';
 import 'package:lk_client/store/global/bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
@@ -50,8 +54,10 @@ Future<void> main() async {
   final appEnv = 'dev';
   AppConfig appConfig = await AppConfig.configure(env: appEnv);
   JwtManager appJwt = JwtManager.instance;
+  ApiEndpointConsumer appApiEndpointConsumer = ApiEndpointConsumer(appConfig);
+
   AuthorizationService appAuthorizationService =
-      AuthorizationService(appConfig, apiErrorHandlersChain, appJwt);
+      AuthorizationService(appApiEndpointConsumer, apiErrorHandlersChain, appJwt);
 
   AuthenticationBloc appAuthenticationBloc =
       AuthenticationBloc(appJwt, appAuthorizationService);
@@ -60,18 +66,28 @@ Future<void> main() async {
       AuthenticationExtractor(appAuthenticationBloc);
 
   PersonQueryService appPersonQueryService = PersonQueryService(
-      appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
+      appApiEndpointConsumer, appAuthenticationExtractor, apiErrorHandlersChain);
   EducationQueryService appEducationQueryService = EducationQueryService(
-      appConfig, appAuthenticationExtractor, apiErrorHandlersChain);
+      appApiEndpointConsumer, appAuthenticationExtractor, apiErrorHandlersChain);
 
   DisciplineQueryService appDisciplineQueryService = DisciplineQueryService(
-      appConfig: appConfig,
-      authenticationExtractor: appAuthenticationExtractor,
-      apiErrorHandler: apiErrorHandlersChain);
+      appApiEndpointConsumer,apiErrorHandlersChain,appAuthenticationExtractor);
+
+  FileLocalManager appFileLocalManager = FileLocalManager();
+
+  FileTransferManager appFileTransferManager = FileTransferManager(
+    appConfig, appApiEndpointConsumer, appFileLocalManager);
+
+  FileTransferService appFileTransferService = FileTransferService(appFileTransferManager);
+
+  appFileTransferService.downloadTeachingMaterialsAttachment(teachingMaterialId, filename);
 
   ServiceProvider applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,
       appConfig: appConfig,
+      fileTransferService: appFileTransferService,
+      fileLocalManager: appFileLocalManager,
+      fileTransferManager: appFileTransferManager,
       jwtManager: appJwt,
       authorizationService: appAuthorizationService,
       personQueryService: appPersonQueryService,

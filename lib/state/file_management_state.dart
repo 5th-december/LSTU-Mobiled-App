@@ -20,7 +20,7 @@ class FileDownloadErrorState extends FileManagementState {
 
 class FileDownloadReadyState extends FileManagementState {
   final String filePath;
-  final double fileSize;
+  final int fileSize;
   final String fileName;
   FileDownloadReadyState(
       {@required this.fileName,

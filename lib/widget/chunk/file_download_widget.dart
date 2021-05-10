@@ -1,3 +1,5 @@
+import 'dart:html';
+
 import 'package:flutter/widgets.dart';
 
 class FileDownloadWidget extends StatefulWidget {
@@ -7,4 +9,7 @@ class FileDownloadWidget extends StatefulWidget {
   _FileDownloadWidgetState createState() => _FileDownloadWidgetState();
 }
 
-class _FileDownloadWidgetState extends State<FileDownloadWidget> {}
+class _FileDownloadWidgetState extends State<FileDownloadWidget> {
+  @override
+  Widget build(BuildContext context) {}
+}

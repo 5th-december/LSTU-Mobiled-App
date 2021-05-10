@@ -10,19 +10,18 @@ import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/http_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class PersonQueryService extends HttpService {
+class PersonQueryService {
   final ComponentErrorHandler apiErrorHandler;
   final AuthenticationExtractor authenticationExtractor;
+  final ApiEndpointConsumer apiEndpointConsumer;
 
   ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
 
-  PersonQueryService(
-      AppConfig config, this.authenticationExtractor, this.apiErrorHandler)
-      : super(config);
+  PersonQueryService(this.apiEndpointConsumer, this.authenticationExtractor, this.apiErrorHandler);
 
   Stream<ConsumingState<Person>> getPersonProperties(String person) async* {
     try {
-      HttpResponse response = await this.get('/api/v1/person/info',
+      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/info',
           <String, String>{'p': person}, this.accessKey.token);
 
       if (response.status == 200) {
@@ -39,7 +38,7 @@ class PersonQueryService extends HttpService {
   Stream<ConsumingState<Person>> getCurrentPersonIdentifier() async* {
     try {
       HttpResponse response =
-          await this.get('/api/v1/whoami', {}, this.accessKey.token);
+          await this.apiEndpointConsumer.get('/api/v1/whoami', {}, this.accessKey.token);
 
       if (response.status == 200) {
         Person person = Person.fromJson(response.body);
@@ -55,7 +54,7 @@ class PersonQueryService extends HttpService {
   Stream<ConsumingState<ProfilePicture>> getPersonProfilePicture(
       String person, String size) async* {
     try {
-      HttpResponse response = await this.get('/api/v1/person/pic',
+      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/pic',
           <String, String>{'p': person, 'size': size}, this.accessKey.token);
 
       if (response.status == 200) {
@@ -72,7 +71,7 @@ class PersonQueryService extends HttpService {
   Future<bool> editPersonProfile(PersonalData updatedProfileData) async {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
-    HttpResponse response = await this.post(
+    HttpResponse response = await this.apiEndpointConsumer.post(
         '/api/v1/person/info', updateProfileSerialized, this.accessKey.token);
 
     if (response.status == 200) {

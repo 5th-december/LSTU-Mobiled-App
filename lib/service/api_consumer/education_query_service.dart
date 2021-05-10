@@ -9,20 +9,20 @@ import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/http_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class EducationQueryService extends HttpService {
+class EducationQueryService {
   final ComponentErrorHandler apiErrorHandler;
   final AuthenticationExtractor authenticationExtractor;
+  final ApiEndpointConsumer apiEndpointConsumer;
 
   ApiKey get accessKey => authenticationExtractor.getAuthenticationData();
 
-  EducationQueryService(AppConfig configurator, this.authenticationExtractor,
-      this.apiErrorHandler)
-      : super(configurator);
+  EducationQueryService(this.apiEndpointConsumer, this.authenticationExtractor,
+      this.apiErrorHandler);
 
   Stream<ConsumingState<ListedResponse<Education>>> getEducationsList(
       String person) async* {
     try {
-      HttpResponse response = await this.get('/api/v1/student/edu/list',
+      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/student/edu/list',
           <String, String>{'p': person}, this.accessKey.token);
 
       if (response.status == 200) {
@@ -41,7 +41,7 @@ class EducationQueryService extends HttpService {
   Stream<ConsumingState<ListedResponse<Semester>>> getSemesterList(
       String educationId) async* {
     try {
-      HttpResponse response = await this.get('/api/v1/student/edu/semesters',
+      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/student/edu/semesters',
           <String, String>{'edu': educationId}, this.accessKey.token);
 
       if (response.status == 200) {
@@ -59,7 +59,7 @@ class EducationQueryService extends HttpService {
   Stream<ConsumingState<ListedResponse<Discipline>>> getSubjectList(
       String educationId, String semesterId) async* {
     try {
-      HttpResponse response = await this.get(
+      HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/discipline/list',
           <String, String>{'edu': educationId, 'sem': semesterId},
           this.accessKey.token);
@@ -80,7 +80,7 @@ class EducationQueryService extends HttpService {
   Stream<ConsumingState<Semester>> getCurrentSemester(
       String educationId) async* {
     try {
-      HttpResponse response = await this.get(
+      HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/semesters/current',
           <String, String>{'edu': educationId},
           this.accessKey.token);
