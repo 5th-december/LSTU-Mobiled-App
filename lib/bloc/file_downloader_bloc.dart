@@ -16,31 +16,30 @@ class FileDownloaderBloc
       .stream
       .where((event) => event is FileManagementEvent);
 
-  FileDownloaderBloc(AppConfig config, FileLocalManager fileLocalManager, FileTransferService fileTransferService) {
+  FileDownloaderBloc(AppConfig config, FileLocalManager fileLocalManager,
+      FileTransferService fileTransferService) {
     this.updateState(FileManagementInitState());
 
     this._downloaderEventStream.listen((FileManagementEvent event) async {
-      if(event is FileCheckExistenceEvent) {
+      if (event is FileCheckExistenceEvent) {
         this.updateState(CheckingExistenceState());
         String basePath = await fileLocalManager.getDefaultSaverDirectory();
 
-        bool isExists = await fileLocalManager.isFileExists(filePath: fileLocalManager.getFilePath(basePath, event.fileName));
+        bool isExists = await fileLocalManager.isFileExists(
+            filePath: fileLocalManager.getFilePath(basePath, event.fileName));
 
-        if(isExists) {
+        if (isExists) {
           this.updateState(FileDownloadReadyState(
-            fileName: event.fileName, 
-            fileSize: await fileLocalManager.getFileSize(), 
-            filePath: fileLocalManager.getFilePath(basePath, event.fileName)
-          ));
-        }
-        else {
+              fileName: event.fileName,
+              fileSize: await fileLocalManager.getFileSize(),
+              filePath:
+                  fileLocalManager.getFilePath(basePath, event.fileName)));
+        } else {
           this.updateState(FileNotExistsState());
         }
       }
 
-      if(event is FileStartDownloadEvent) {
-        
-      }
+      if (event is FileStartDownloadEvent) {}
     });
   }
 }

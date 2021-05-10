@@ -56,8 +56,8 @@ Future<void> main() async {
   JwtManager appJwt = JwtManager.instance;
   ApiEndpointConsumer appApiEndpointConsumer = ApiEndpointConsumer(appConfig);
 
-  AuthorizationService appAuthorizationService =
-      AuthorizationService(appApiEndpointConsumer, apiErrorHandlersChain, appJwt);
+  AuthorizationService appAuthorizationService = AuthorizationService(
+      appApiEndpointConsumer, apiErrorHandlersChain, appJwt);
 
   AuthenticationBloc appAuthenticationBloc =
       AuthenticationBloc(appJwt, appAuthorizationService);
@@ -66,21 +66,26 @@ Future<void> main() async {
       AuthenticationExtractor(appAuthenticationBloc);
 
   PersonQueryService appPersonQueryService = PersonQueryService(
-      appApiEndpointConsumer, appAuthenticationExtractor, apiErrorHandlersChain);
+      appApiEndpointConsumer,
+      appAuthenticationExtractor,
+      apiErrorHandlersChain);
   EducationQueryService appEducationQueryService = EducationQueryService(
-      appApiEndpointConsumer, appAuthenticationExtractor, apiErrorHandlersChain);
+      appApiEndpointConsumer,
+      appAuthenticationExtractor,
+      apiErrorHandlersChain);
 
   DisciplineQueryService appDisciplineQueryService = DisciplineQueryService(
-      appApiEndpointConsumer,apiErrorHandlersChain,appAuthenticationExtractor);
+      appApiEndpointConsumer,
+      apiErrorHandlersChain,
+      appAuthenticationExtractor);
 
   FileLocalManager appFileLocalManager = FileLocalManager();
 
   FileTransferManager appFileTransferManager = FileTransferManager(
-    appConfig, appApiEndpointConsumer, appFileLocalManager);
+      appConfig, appApiEndpointConsumer, appFileLocalManager);
 
-  FileTransferService appFileTransferService = FileTransferService(appFileTransferManager);
-
-  appFileTransferService.downloadTeachingMaterialsAttachment(teachingMaterialId, filename);
+  FileTransferService appFileTransferService =
+      FileTransferService(appFileTransferManager);
 
   ServiceProvider applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,
