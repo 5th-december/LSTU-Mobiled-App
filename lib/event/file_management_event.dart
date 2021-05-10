@@ -2,20 +2,25 @@ import 'package:flutter/foundation.dart';
 
 abstract class FileManagementEvent {}
 
-class FileCheckExistenceEvent extends FileManagementEvent {
-  final String basePath;
-  final String fileName;
+class FileFindLocallyEvent extends FileManagementEvent {
   final String filePath;
-  FileCheckExistenceEvent({this.fileName, this.basePath, this.filePath});
+  FileFindLocallyEvent({@required this.filePath});
 }
 
-class FileStartDownloadEvent extends FileManagementEvent {
+class FileFindInDirectoryEvent extends FileManagementEvent {
   final String basePath;
   final String fileName;
-  FileStartDownloadEvent({@required this.fileName, @required this.basePath});
+  FileFindInDirectoryEvent({@required this.basePath, @required this.fileName});
 }
 
-class FileStartUploadEvent extends FileManagementEvent {
+class FileStartDownloadEvent<T> extends FileManagementEvent {
+  final T command;
   final String filePath;
-  FileStartUploadEvent({@required this.filePath});
+  FileStartDownloadEvent({@required this.filePath, @required this.command});
+}
+
+class FileStartUploadEvent<T> extends FileManagementEvent {
+  final T command;
+  final String filePath;
+  FileStartUploadEvent({@required this.filePath, @required this.command});
 }

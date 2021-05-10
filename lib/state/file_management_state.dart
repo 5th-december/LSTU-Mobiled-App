@@ -4,26 +4,30 @@ abstract class FileManagementState {}
 
 class FileManagementInitState extends FileManagementState {}
 
-class CheckingExistenceState extends FileManagementState {}
+class FileFindLocallyProgressState extends FileManagementState {}
 
-class FileNotExistsState extends FileManagementState {}
+class FileNotFoundLocallyState extends FileManagementState {}
 
-class FileDownloadProgressState extends FileManagementState {
-  final double downloadRate;
-  FileDownloadProgressState({this.downloadRate});
+class FileFoundLocallyState extends FileManagementState {}
+
+class FileOperationProgressState extends FileManagementState {
+  final double rate;
+  FileOperationProgressState({this.rate});
 }
 
-class FileDownloadErrorState extends FileManagementState {
+class FileOperationErrorState extends FileManagementState {
   final Exception error;
-  FileDownloadErrorState(this.error);
+  FileOperationErrorState({this.error});
 }
 
 class FileDownloadReadyState extends FileManagementState {
   final String filePath;
-  final int fileSize;
   final String fileName;
+  final int fileSize;
   FileDownloadReadyState(
-      {@required this.fileName,
-      @required this.fileSize,
-      @required this.filePath});
+      {@required this.filePath,
+      @required this.fileName,
+      @required this.fileSize});
 }
+
+class FileUploadReadyState extends FileManagementState {}

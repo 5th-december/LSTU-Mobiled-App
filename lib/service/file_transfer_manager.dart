@@ -7,14 +7,14 @@ import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/service/http_service.dart';
 import 'package:path_provider/path_provider.dart';
 
-class FileOperationStatus {
+abstract class FileOperationStatus {
   final String filePath;
   FileOperationStatus(this.filePath);
 }
 
 class FileOperationProgress extends FileOperationStatus {
-  final double downloadRate;
-  FileOperationProgress(String filePath, this.downloadRate) : super(filePath);
+  final double rate;
+  FileOperationProgress(String filePath, this.rate) : super(filePath);
 }
 
 class FileOperationDone extends FileOperationStatus {

@@ -26,4 +26,6 @@ class FileLocalManager {
     File testingFile = File(filePath);
     return await testingFile.length();
   }
+
+  String getFileName(String filePath) => filePath.split('/')?.last;
 }
