@@ -19,70 +19,80 @@ abstract class AbstractFileTransferBloc
 
   FileTransferService transferService;
 
-  Stream<FileOperationStatus> startUploadingOperation(MultipartRequestCommand command, String filePath);
+  Stream<FileOperationStatus> startUploadingOperation(
+      MultipartRequestCommand command, String filePath);
 
-  Stream<FileOperationStatus> startDownloadingOperation(MultipartRequestCommand command, String filePath);
+  Stream<FileOperationStatus> startDownloadingOperation(
+      MultipartRequestCommand command, String filePath);
 
-  AbstractFileTransferBloc(AppConfig config, FileLocalManager fileLocalManager, this.transferService) {
-    this.updateState(FileManagementInitState());
-
+  AbstractFileTransferBloc(AppConfig config, FileLocalManager fileLocalManager,
+      this.transferService) {
     this._downloaderEventStream.listen((FileManagementEvent event) async {
+      if (event is FileManagementInitEvent) {
+        this.updateState(FileManagementInitState());
+      }
+
       if (event is FileFindLocallyEvent || event is FileFindInDirectoryEvent) {
         this.updateState(FileFindLocallyProgressState());
 
         String filePath = '';
-        if(event is FileFindLocallyEvent) {
+        if (event is FileFindLocallyEvent) {
           filePath = event.filePath;
-        } else if(event is FileFindInDirectoryEvent){
-          filePath = fileLocalManager.getFilePath(event.basePath, event.fileName);
+        } else if (event is FileFindInDirectoryEvent) {
+          filePath =
+              fileLocalManager.getFilePath(event.basePath, event.fileName);
         }
 
         bool isExists = await fileLocalManager.isFileExists(filePath: filePath);
 
         if (isExists) {
-          this.updateState(FileFoundLocallyState());
+          this.updateState(FileFoundLocallyState(filePath: filePath));
         } else {
-          this.updateState(FileNotFoundLocallyState());
+          this.updateState(FileNotFoundLocallyState(filePath: filePath));
         }
-        
       }
 
-      if (event is FileStartDownloadEvent<MultipartRequestCommand> && currentState is FileNotFoundLocallyState) {
-        this.startDownloadingOperation(event.command, event.filePath).listen((iOEvent) async {
-          if(iOEvent is FileOperationProgress) {
+      if (event is FileStartDownloadEvent<MultipartRequestCommand> &&
+          currentState is FileNotFoundLocallyState) {
+        this
+            .startDownloadingOperation(event.command, event.filePath)
+            .listen((iOEvent) async {
+          if (iOEvent is FileOperationProgress) {
             this.updateState(FileOperationProgressState(rate: iOEvent.rate));
-          } else if(iOEvent is FileOperationError) {
+          } else if (iOEvent is FileOperationError) {
             this.updateState(FileOperationErrorState());
-          } else if(iOEvent is FileOperationDone) {
-            bool isExists = await fileLocalManager.isFileExists(filePath: event.filePath);
+          } else if (iOEvent is FileOperationDone) {
+            bool isExists =
+                await fileLocalManager.isFileExists(filePath: event.filePath);
 
-            if(!isExists) {
+            if (!isExists) {
               this.updateState(FileOperationErrorState());
               return;
             }
 
-            this.updateState(
-              FileDownloadReadyState(
+            this.updateState(FileDownloadReadyState(
                 filePath: event.filePath,
                 fileName: fileLocalManager.getFileName(event.filePath),
-                fileSize: await fileLocalManager.getFileSize(filePath: event.filePath)
-              )
-            );
-          } 
+                fileSize: await fileLocalManager.getFileSize(
+                    filePath: event.filePath)));
+          }
         });
       }
 
-      if (event is FileStartUploadEvent<MultipartRequestCommand> && 
-        (currentState is FileFoundLocallyState || currentState is FileDownloadReadyState)) {
-          this.startUploadingOperation(event.command, event.filePath).listen((event) {
-            if(event is FileOperationProgress) {
-              this.updateState(FileOperationProgressState(rate: event.rate));
-            } else if (event is FileOperationError) {
-              this.updateState(FileOperationErrorState());
-            } else if (event is FileOperationDone) {
-              this.updateState(FileUploadReadyState());
-            }
-          });
+      if (event is FileStartUploadEvent<MultipartRequestCommand> &&
+          (currentState is FileFoundLocallyState ||
+              currentState is FileDownloadReadyState)) {
+        this
+            .startUploadingOperation(event.command, event.filePath)
+            .listen((event) {
+          if (event is FileOperationProgress) {
+            this.updateState(FileOperationProgressState(rate: event.rate));
+          } else if (event is FileOperationError) {
+            this.updateState(FileOperationErrorState());
+          } else if (event is FileOperationDone) {
+            this.updateState(FileUploadReadyState());
+          }
+        });
       }
     });
   }

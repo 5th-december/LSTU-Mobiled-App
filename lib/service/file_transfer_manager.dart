@@ -54,8 +54,8 @@ class FileTransferManager {
       fileWriteSink.close();
       await downloadedFile.delete();
       notifier.sink.add(FileOperationError(filePath));
-    }, onDone: () {
-      fileWriteSink.close();
+    }, onDone: () async {
+      await fileWriteSink.close();
       notifier.sink.add(FileOperationDone(filePath));
       notifier.close();
     });

@@ -20,16 +20,16 @@ class DisciplineQueryService {
 
   ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
 
-  DisciplineQueryService(
-      this.apiEndpointConsumer,
-      this.apiErrorHandler,
+  DisciplineQueryService(this.apiEndpointConsumer, this.apiErrorHandler,
       this.authenticationExtractor);
 
   Stream<ConsumingState<Discipline>> getDisciplineItem(
       String discipline) async* {
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/student/discipline',
-          <String, String>{'dis': discipline}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/student/discipline',
+          <String, String>{'dis': discipline},
+          this.accessKey.token);
 
       if (response.status == 200) {
         Discipline discipline = Discipline.fromJson(response.body);
@@ -95,7 +95,7 @@ class DisciplineQueryService {
           String discipline, String education, String semester) async* {
     try {
       HttpResponse response = await this.apiEndpointConsumer.get(
-          '/api/v1/student/discipline/materials/list',
+          '/api/v1/materials/list',
           <String, String>{
             'dis': discipline,
             'edu': education,

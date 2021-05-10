@@ -32,6 +32,8 @@ dependencies:
   json_serializable: 3.5.1
   validators: 3.0.0
   path_provider: ^2.0.1
+  permission_handler: any
+  ext_storage: any
   file_picker: ^3.0.1
 
 

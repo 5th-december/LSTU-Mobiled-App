@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 
 abstract class FileManagementEvent {}
 
+class FileManagementInitEvent extends FileManagementEvent {}
+
 class FileFindLocallyEvent extends FileManagementEvent {
   final String filePath;
   FileFindLocallyEvent({@required this.filePath});

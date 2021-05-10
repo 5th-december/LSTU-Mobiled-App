@@ -9,23 +9,23 @@ class FileLocalManager {
 
   String getFilePath(String basePath, String fileName) => "$basePath/$fileName";
 
+  String getFileName(String filePath) => filePath.split('/')?.last;
+
   Future<bool> isFileExists(
       {String basePath, String fileName, String filePath}) async {
     filePath =
-        filePath == null ? filePath : this.getFilePath(basePath, fileName);
+        filePath != null ? filePath : this.getFilePath(basePath, fileName);
 
-    File testingFile = File(filePath);
-    return await testingFile.exists();
+    return await FileSystemEntity.type(filePath) != FileSystemEntityType.notFound;
   }
 
   Future<int> getFileSize(
       {String basePath, String fileName, String filePath}) async {
     filePath =
-        filePath == null ? filePath : this.getFilePath(basePath, fileName);
+        filePath != null ? filePath : this.getFilePath(basePath, fileName);
 
     File testingFile = File(filePath);
     return await testingFile.length();
   }
 
-  String getFileName(String filePath) => filePath.split('/')?.last;
 }

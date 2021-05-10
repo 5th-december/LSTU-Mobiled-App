@@ -17,12 +17,15 @@ class PersonQueryService {
 
   ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
 
-  PersonQueryService(this.apiEndpointConsumer, this.authenticationExtractor, this.apiErrorHandler);
+  PersonQueryService(this.apiEndpointConsumer, this.authenticationExtractor,
+      this.apiErrorHandler);
 
   Stream<ConsumingState<Person>> getPersonProperties(String person) async* {
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/info',
-          <String, String>{'p': person}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/person',
+          <String, String>{'p': person},
+          this.accessKey.token);
 
       if (response.status == 200) {
         Person person = Person.fromJson(response.body);
@@ -37,8 +40,9 @@ class PersonQueryService {
 
   Stream<ConsumingState<Person>> getCurrentPersonIdentifier() async* {
     try {
-      HttpResponse response =
-          await this.apiEndpointConsumer.get('/api/v1/whoami', {}, this.accessKey.token);
+      HttpResponse response = await this
+          .apiEndpointConsumer
+          .get('/api/v1/whoami', {}, this.accessKey.token);
 
       if (response.status == 200) {
         Person person = Person.fromJson(response.body);
@@ -54,8 +58,10 @@ class PersonQueryService {
   Stream<ConsumingState<ProfilePicture>> getPersonProfilePicture(
       String person, String size) async* {
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/pic',
-          <String, String>{'p': person, 'size': size}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/person/pic',
+          <String, String>{'p': person, 'size': size},
+          this.accessKey.token);
 
       if (response.status == 200) {
         ProfilePicture pictureData = ProfilePicture.fromJson(response.body);
@@ -72,7 +78,7 @@ class PersonQueryService {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
     HttpResponse response = await this.apiEndpointConsumer.post(
-        '/api/v1/person/info', updateProfileSerialized, this.accessKey.token);
+        '/api/v1/person/props', updateProfileSerialized, this.accessKey.token);
 
     if (response.status == 200) {
       return true;

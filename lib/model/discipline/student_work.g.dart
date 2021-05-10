@@ -16,6 +16,9 @@ StudentWork _$StudentWorkFromJson(Map<String, dynamic> json) {
     workName: json['work_name'] as String,
     workTheme: json['work_theme'] as String,
     workMaxScore: json['work_max_score'] as num,
+    answer: json['answer'] == null
+        ? null
+        : WorkAnswer.fromJson(json['answer'] as Map<String, dynamic>),
   );
 }
 
@@ -27,4 +30,5 @@ Map<String, dynamic> _$StudentWorkToJson(StudentWork instance) =>
       'work_name': instance.workName,
       'work_theme': instance.workTheme,
       'work_max_score': instance.workMaxScore,
+      'answer': instance.answer,
     };

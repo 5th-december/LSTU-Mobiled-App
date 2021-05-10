@@ -9,6 +9,7 @@ import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/chunk/file_download_widget.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
 
 class TeachMaterialsList extends StatefulWidget {
@@ -56,16 +57,35 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
                 discipline: widget.discipline,
                 education: widget.education,
                 semester: widget.semester)));
-                
+
     return StreamLoadingWidget<List<TeachingMaterial>>(
       loadingStream: this._bloc.consumingStateStream,
       childBuilder: (List<TeachingMaterial> teachingMaterials) {
         return ListView.separated(
             itemBuilder: (BuildContext context, int index) {
+              String teachingMaterialInfo = '';
+              if (teachingMaterials[index].attachment != null) {
+                String fileExtension = teachingMaterials[index]
+                        .attachment
+                        .attachmentName
+                        .split('.')
+                        ?.last ??
+                    '';
+                double fileSize = double.parse(
+                    teachingMaterials[index].attachment.attachmentSize);
+                String sizeTitle = fileSize > 1024
+                    ? (fileSize / 1024).toStringAsFixed(2) + ' Мб.'
+                    : fileSize.toStringAsFixed(2) + ' Кб.';
+                teachingMaterialInfo = "Файл $fileExtension, $sizeTitle";
+              } else if (teachingMaterials[index].externalLink != null) {
+                teachingMaterialInfo = 'Внешний ресурс';
+              }
               return Container(
                 child: ListTile(
                   title: Text(teachingMaterials[index].materialName),
-                  subtitle: Text(teachingMaterials[index].materialType),
+                  subtitle: Text(teachingMaterialInfo),
+                  trailing:
+                      FileDownloadWidget(material: teachingMaterials[index]),
                 ),
               );
             },

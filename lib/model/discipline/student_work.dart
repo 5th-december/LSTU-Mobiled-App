@@ -1,11 +1,11 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:lk_client/model/discipline/work_answer.dart';
 import 'package:lk_client/model/education/teacher.dart';
 
 part 'student_work.g.dart';
 
 @JsonSerializable()
-class StudentWork
-{
+class StudentWork {
   final String id;
 
   final Teacher teacher;
@@ -22,8 +22,18 @@ class StudentWork
   @JsonKey(name: 'work_max_score')
   final num workMaxScore;
 
-  StudentWork({this.id, this.teacher, this.workType, this.workName, this.workTheme, this.workMaxScore});
+  final WorkAnswer answer;
 
-  factory StudentWork.fromJson(Map<String, dynamic> json) => _$StudentWorkFromJson(json);
+  StudentWork(
+      {this.id,
+      this.teacher,
+      this.workType,
+      this.workName,
+      this.workTheme,
+      this.workMaxScore,
+      this.answer});
+
+  factory StudentWork.fromJson(Map<String, dynamic> json) =>
+      _$StudentWorkFromJson(json);
   Map<String, dynamic> toJson() => _$StudentWorkToJson(this);
 }

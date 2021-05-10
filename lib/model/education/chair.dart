@@ -6,8 +6,7 @@ import 'package:lk_client/model/person/person.dart';
 part 'chair.g.dart';
 
 @JsonSerializable()
-class Chair
-{
+class Chair {
   final String id;
 
   @JsonKey(name: 'chair_name')
@@ -18,15 +17,14 @@ class Chair
 
   final Faculty faculty;
 
-  final Person person;
+  final Person chairman;
 
-  Chair({
-    @required this.id,
-    @required this.chairName,
-    this.chairNameAbbr,
-    this.faculty,
-    this.person
-  });
+  Chair(
+      {@required this.id,
+      @required this.chairName,
+      this.chairNameAbbr,
+      this.faculty,
+      this.chairman});
 
   factory Chair.fromJson(Map<String, dynamic> json) => _$ChairFromJson(json);
   Map<String, dynamic> toJson() => _$ChairToJson(this);

@@ -22,8 +22,10 @@ class EducationQueryService {
   Stream<ConsumingState<ListedResponse<Education>>> getEducationsList(
       String person) async* {
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/student/edu/list',
-          <String, String>{'p': person}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/student/edu/list',
+          <String, String>{'p': person},
+          this.accessKey.token);
 
       if (response.status == 200) {
         ListedResponse<Education> personEducationsList =
@@ -41,8 +43,10 @@ class EducationQueryService {
   Stream<ConsumingState<ListedResponse<Semester>>> getSemesterList(
       String educationId) async* {
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/student/edu/semesters',
-          <String, String>{'edu': educationId}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/student/edu/semesters/list',
+          <String, String>{'edu': educationId},
+          this.accessKey.token);
 
       if (response.status == 200) {
         ListedResponse<Semester> personSemesterList =

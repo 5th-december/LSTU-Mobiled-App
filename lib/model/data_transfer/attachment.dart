@@ -5,22 +5,16 @@ part 'attachment.g.dart';
 
 @JsonSerializable()
 class Attachment {
-  @JsonKey(name: 'mime_type')
-  final String mimeType;
-
   @JsonKey(name: 'attachment_name')
   final String attachmentName;
 
   @JsonKey(name: 'attachment_size')
-  final double attachmentSize;
+  final String attachmentSize;
 
+  @JsonKey(name: 'b64attachment')
   final String attachment;
 
-  Attachment(
-      {this.mimeType,
-      this.attachmentName,
-      this.attachmentSize,
-      this.attachment});
+  Attachment({this.attachmentName, this.attachmentSize, this.attachment});
 
   factory Attachment.fromJson(Map<String, dynamic> json) =>
       _$AttachmentFromJson(json);
