@@ -5,6 +5,7 @@ import 'package:lk_client/bloc/file_transfer_bloc.dart';
 import 'package:lk_client/command/consume_command/multipart_request_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
+import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/service/file_transfer_manager.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
@@ -57,12 +58,12 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
                   },
                   child: Icon(Icons.download_outlined),
                 );
-              } else if (state is FileNotFoundLocallyState) {
+              } else if (state is FileUnlocatedState) {
                 this._bloc.eventController.add(
                     FileStartDownloadEvent<LoadTeachingMaterialAttachment>(
                         command:
                             LoadTeachingMaterialAttachment(widget.material.id),
-                        filePath: state.filePath));
+                        file: LocalFilesystemObject.fromBasePath(state.filePath)));
               } else if (state is FileOperationProgressState) {
                 int percent = ((state.rate /
                             1024.0 *

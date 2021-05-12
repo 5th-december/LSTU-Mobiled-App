@@ -7,16 +7,19 @@ abstract class FileManagementState {
 
 class FileManagementInitState extends FileManagementState {}
 
-class FileFindLocallyProgressState extends FileManagementState {
-  FileFindLocallyProgressState({String filePath}) : super(filePath: filePath);
+class FileLocationProgressState extends FileManagementState {
+  FileLocationProgressState({String filePath}) : super(filePath: filePath);
 }
 
-class FileNotFoundLocallyState extends FileManagementState {
-  FileNotFoundLocallyState({String filePath}) : super(filePath: filePath);
+class FileUnlocatedState extends FileManagementState {
+  final bool w;
+  FileUnlocatedState({String filePath, this.w}) : super(filePath: filePath);
 }
 
-class FileFoundLocallyState extends FileManagementState {
-  FileFoundLocallyState({String filePath}) : super(filePath: filePath);
+class FileLocatedState extends FileManagementState {
+  final bool r;
+  final bool w;
+  FileLocatedState({String filePath, this.r, this.w}) : super(filePath: filePath);
 }
 
 class FileOperationProgressState extends FileManagementState {

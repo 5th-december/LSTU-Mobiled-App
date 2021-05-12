@@ -13,6 +13,7 @@ import 'package:lk_client/error_handler/validation_error_handler.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
+import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
@@ -87,6 +88,12 @@ Future<void> main() async {
   FileTransferService appFileTransferService =
       FileTransferService(appFileTransferManager);
 
+  MessengerQueryService appMessengerQueryService = MessengerQueryService(
+    apiEndpointConsumer: appApiEndpointConsumer,
+    apiErrorHandler: apiErrorHandlersChain,
+    authenticationExtractor: appAuthenticationExtractor
+  );
+
   ServiceProvider applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,
       appConfig: appConfig,
@@ -95,6 +102,7 @@ Future<void> main() async {
       fileTransferManager: appFileTransferManager,
       jwtManager: appJwt,
       authorizationService: appAuthorizationService,
+      messengerQueryService: appMessengerQueryService,
       personQueryService: appPersonQueryService,
       educationQueryService: appEducationQueryService);
 

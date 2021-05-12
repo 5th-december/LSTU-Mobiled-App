@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
+import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
@@ -21,6 +22,7 @@ class ServiceProvider {
   final FileLocalManager fileLocalManager;
   final FileTransferManager fileTransferManager;
   final FileTransferService fileTransferService;
+  final MessengerQueryService messengerQueryService;
 
   ServiceProvider({
     @required this.jwtManager,
@@ -32,6 +34,7 @@ class ServiceProvider {
     @required this.disciplineQueryService,
     @required this.fileLocalManager,
     @required this.fileTransferManager,
-    @required this.fileTransferService
+    @required this.fileTransferService,
+    @required this.messengerQueryService
   });
 }

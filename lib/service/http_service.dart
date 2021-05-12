@@ -24,13 +24,13 @@ class ApiEndpointConsumer {
 
   ApiEndpointConsumer(this._configuration);
 
-  Future<HttpResponse> post(String url, Map<String, dynamic> body,
+  Future<HttpResponse> post(String url, Map<String, dynamic> params,  Map<String, dynamic> body, 
       [String apiJwtToken]) async {
     Uri uri;
     if (_configuration.useHttps == true) {
-      uri = Uri.https(_configuration.apiBase, url);
+      uri = Uri.https(_configuration.apiBase, url, params);
     } else {
-      uri = Uri.http(_configuration.apiBase, url);
+      uri = Uri.http(_configuration.apiBase, url, params);
     }
 
     Map<String, String> headers = defaultHeaders;

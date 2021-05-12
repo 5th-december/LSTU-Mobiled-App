@@ -1,11 +1,8 @@
-import 'dart:convert';
-
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/model/person/profile_picture.dart';
 import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
-import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/http_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
@@ -78,7 +75,7 @@ class PersonQueryService {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
     HttpResponse response = await this.apiEndpointConsumer.post(
-        '/api/v1/person/props', updateProfileSerialized, this.accessKey.token);
+        '/api/v1/person/props', {}, updateProfileSerialized, this.accessKey.token);
 
     if (response.status == 200) {
       return true;

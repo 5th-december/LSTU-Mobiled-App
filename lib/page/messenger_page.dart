@@ -1,8 +1,10 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/widget/chunk/attached_message_input_widget.dart';
 
 class MessengerPage extends StatefulWidget {
-  Person currentUser;
+  final Person currentUser;
 
   MessengerPage(this.currentUser);
   
@@ -12,6 +14,9 @@ class MessengerPage extends StatefulWidget {
 
 class _MessengerPageState extends State<MessengerPage> {
   Widget build(BuildContext context) {
-    return Center(child: Text('This is messenger page'));
+    return Scaffold(
+      appBar: AppBar(title: Text('Сообщения')),
+      body: Center(child: AttachedMessageInputWidget()),
+    );
   }
 }

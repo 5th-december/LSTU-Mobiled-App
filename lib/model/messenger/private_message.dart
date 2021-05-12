@@ -3,11 +3,12 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:lk_client/model/data_transfer/attachment.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/model/validatable.dart';
 
 part 'private_message.g.dart';
 
 @JsonSerializable()
-class PrivateMessage
+class PrivateMessage extends Validatable
 {
   final String id;
 
@@ -30,6 +31,22 @@ class PrivateMessage
   final List<ExternalLink> links;
 
   final List<Attachment> attachments;
+
+  @override
+  ValidationErrorBox validate() {
+    List<ValidationError> errors = [];
+    if(null == this.messageText || '' == this.messageText) {
+      errors.add(ValidationError(path: 'messageText', 
+        message: 'Нельзя отправить пустое сообщение'));
+    }
+
+    if(2048 < this.messageText.length) {
+      errors.add(ValidationError(path: 'messageText', 
+        message: 'Длина сообщения превышает максимально допустимую 2048 символов'));
+    }
+
+    return ValidationErrorBox(errors);
+  }
 
   PrivateMessage({
     this.id, 

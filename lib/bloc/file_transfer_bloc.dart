@@ -6,8 +6,8 @@ import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/service/file_transfer_manager.dart';
 
 class TeachingMaterialDocumentTransferBloc extends AbstractFileTransferBloc{
-    TeachingMaterialDocumentTransferBloc(AppConfig config, FileLocalManager fileLocalManager, FileTransferService fileTransferService):
-      super(config, fileLocalManager, fileTransferService);
+    TeachingMaterialDocumentTransferBloc(AppConfig config, FileLocalManager fileLocalManager, FileTransferService fileTransferService)
+      : super(config, fileLocalManager, fileTransferService);
 
     @override
     Stream<FileOperationStatus> startUploadingOperation(MultipartRequestCommand command, String filePath) {
@@ -21,4 +21,20 @@ class TeachingMaterialDocumentTransferBloc extends AbstractFileTransferBloc{
     }
 
     
+}
+
+class PrivateMessageSendDocumentTransferBloc extends AbstractFileTransferBloc {
+  PrivateMessageSendDocumentTransferBloc(AppConfig config, FileLocalManager fileLocalManager, FileTransferService fileTransferService)
+    : super(config, fileLocalManager, fileTransferService);
+
+  @override
+  Stream<FileOperationStatus> startDownloadingOperation(MultipartRequestCommand command, String filePath) {
+    return null;
+  }
+
+  @override
+  Stream<FileOperationStatus> startUploadingOperation(MultipartRequestCommand command, String filePath) {
+    UploadPrivateMessageAttachment _command = command as UploadPrivateMessageAttachment;
+    return this.transferService.uploadPrivateMessageAttachment(_command.message.id, filePath);
+  }
 }

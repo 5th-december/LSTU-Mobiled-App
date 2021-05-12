@@ -32,30 +32,35 @@ abstract class AbstractFileTransferBloc
         this.updateState(FileManagementInitState());
       }
 
-      if (event is FileFindLocallyEvent || event is FileFindInDirectoryEvent) {
-        this.updateState(FileFindLocallyProgressState());
+      if (event is FileFindLocallyEvent ||
+        event is FileFindInDirectoryEvent ||
+        event is FileFindInDefaultDocumentLocationEvent
+      ){
+        this.updateState(FileLocationProgressState());
 
-        String filePath = '';
-        if (event is FileFindLocallyEvent) {
-          filePath = event.filePath;
-        } else if (event is FileFindInDirectoryEvent) {
-          filePath =
-              fileLocalManager.getFilePath(event.basePath, event.fileName);
-        }
-
-        bool isExists = await fileLocalManager.isFileExists(filePath: filePath);
+        bool isExists = await fileLocalManager.isFileExists(filePath: event.file.filePath);
 
         if (isExists) {
-          this.updateState(FileFoundLocallyState(filePath: filePath));
+          final Map<String, bool> permissions = await fileLocalManager.getPremissions(event.file.filePath);
+          this.updateState(FileLocatedState(filePath: event.file.filePath, w: permissions['w'], r: permissions['r']));
         } else {
-          this.updateState(FileNotFoundLocallyState(filePath: filePath));
+          final String basePath = fileLocalManager.getFileBase(event.file.filePath);
+          final Map<String, bool> permissions = await fileLocalManager.getPremissions(basePath);
+          this.updateState(FileUnlocatedState(filePath: event.file.filePath, w: permissions['w']));
         }
       }
 
       if (event is FileStartDownloadEvent<MultipartRequestCommand> &&
-          currentState is FileNotFoundLocallyState) {
+          ((currentState is FileUnlocatedState && (currentState as FileUnlocatedState).w) ||
+          (currentState is FileLocatedState && (currentState as FileLocatedState).w))
+          ) {
+
+        if(currentState is FileLocatedState) {
+          fileLocalManager.deleteFile(event.file.filePath);
+        }
+
         this
-            .startDownloadingOperation(event.command, event.filePath)
+            .startDownloadingOperation(event.command, event.file.filePath)
             .listen((iOEvent) async {
           if (iOEvent is FileOperationProgress) {
             this.updateState(FileOperationProgressState(rate: iOEvent.rate));
@@ -63,7 +68,7 @@ abstract class AbstractFileTransferBloc
             this.updateState(FileOperationErrorState());
           } else if (iOEvent is FileOperationDone) {
             bool isExists =
-                await fileLocalManager.isFileExists(filePath: event.filePath);
+                await fileLocalManager.isFileExists(filePath: event.file.filePath);
 
             if (!isExists) {
               this.updateState(FileOperationErrorState());
@@ -71,19 +76,18 @@ abstract class AbstractFileTransferBloc
             }
 
             this.updateState(FileDownloadReadyState(
-                filePath: event.filePath,
-                fileName: fileLocalManager.getFileName(event.filePath),
-                fileSize: await fileLocalManager.getFileSize(
-                    filePath: event.filePath)));
+                filePath: event.file.filePath,
+                fileName: fileLocalManager.getFileName(event.file.filePath),
+                fileSize: await fileLocalManager.getSize(event.file.filePath)));
           }
         });
       }
 
       if (event is FileStartUploadEvent<MultipartRequestCommand> &&
-          (currentState is FileFoundLocallyState ||
+          ((currentState is FileLocatedState && (currentState as FileLocatedState).r) || 
               currentState is FileDownloadReadyState)) {
         this
-            .startUploadingOperation(event.command, event.filePath)
+            .startUploadingOperation(event.command, event.file.filePath)
             .listen((event) {
           if (event is FileOperationProgress) {
             this.updateState(FileOperationProgressState(rate: event.rate));
