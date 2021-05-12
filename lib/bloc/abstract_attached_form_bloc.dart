@@ -51,6 +51,7 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
         } else if (tEvent is ProducingReadyState<TQ, TR>) {
           if(sendingFile == null) {
             this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(data: _event.resourse, response: tEvent.response));
+            return;
           }
           this.updateState(ProducingLoadingState<TQ>());
           TR fileRequestResponse = tEvent.response;

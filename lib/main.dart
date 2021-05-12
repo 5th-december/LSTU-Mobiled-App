@@ -86,7 +86,7 @@ Future<void> main() async {
       appConfig, appApiEndpointConsumer, appFileLocalManager);
 
   FileTransferService appFileTransferService =
-      FileTransferService(appFileTransferManager);
+      FileTransferService(appFileTransferManager, appAuthenticationExtractor);
 
   MessengerQueryService appMessengerQueryService = MessengerQueryService(
     apiEndpointConsumer: appApiEndpointConsumer,

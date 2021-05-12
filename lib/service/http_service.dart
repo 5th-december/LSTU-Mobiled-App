@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:lk_client/model/authentication/api_key.dart';
 
@@ -73,22 +74,26 @@ class ApiEndpointConsumer {
   }
 
   Future<void> produceResourseAsStream(
-    String url, Map<String, String> params, Stream producer,
-    {String method = 'POST', List<int> expectedCodes = const[]}) async {
+    String url, Map<String, String> params, int fileCount, List<String> paramNames, List<String> fileNames, 
+    List<Stream<List<int>>> fileSources, List<int> fileSizes,
+    {String method = 'POST', List<int> expectedCodes = const[200, 201], String apiJwtToken}) async {
     final client = http.Client();
     
-    http.StreamedRequest request = http.StreamedRequest(
+    http.MultipartRequest request = http.MultipartRequest(
       method,
       this._configuration.useHttps
             ? Uri.https(this._configuration.apiBase, url, params)
             : Uri.http(this._configuration.apiBase, url, params)
     );
-    request.headers.addAll({HttpHeaders.contentTypeHeader: ContentType.binary.value});
-    producer.listen((chunk) {
-      request.sink.add(chunk);
-    }, onDone: () {
-      request.sink.close();
+
+    request.headers.addAll({
+      HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"
     });
+    
+    for (int i = 0; i!= fileCount; ++i) {
+      http.MultipartFile file = http.MultipartFile(paramNames[i], fileSources[i], fileSizes[i], filename: fileNames[i]);
+      request.files.add(file);
+    }
 
     http.StreamedResponse response = await client.send(request);
 
@@ -101,7 +106,7 @@ class ApiEndpointConsumer {
 
   Future<http.ByteStream> consumeResourseAsStream(
       String url, Map<String, String> params,
-      {String method = 'GET', List<int> expectedCodes = const[]}) async {
+      {String method = 'GET', List<int> expectedCodes = const[200, 201], String apiJwtToken}) async {
     final client = http.Client();
 
     http.Request request = http.Request(
@@ -109,6 +114,10 @@ class ApiEndpointConsumer {
         this._configuration.useHttps
             ? Uri.https(this._configuration.apiBase, url, params)
             : Uri.http(this._configuration.apiBase, url, params));
+
+    request.headers.addAll({
+      HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"
+    });
 
     http.StreamedResponse response = await client.send(request);
 

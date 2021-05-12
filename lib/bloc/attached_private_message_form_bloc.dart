@@ -29,12 +29,18 @@ class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMes
 
   @override
   Stream<FileManagementState> sendMultipartData(LocalFilesystemObject loadingFile, PrivateMessage argument) {
-    // TODO: Кидать event проверки сущетствования файла и повестить listener на события, 
-    // если найдено, кидать start upload
     this.privateMessageDocumentTransferBloc.eventController.sink.add(
-      FileStartUploadEvent<UploadPrivateMessageAttachment>(
-        file: loadingFile, command: UploadPrivateMessageAttachment(message: argument)
-    ));
+      FileFindLocallyEvent(file: loadingFile)
+    );
+    this.privateMessageDocumentTransferBloc.downloaderStateStream.listen((event) {
+      if(event is FileLocatedState) {
+        this.privateMessageDocumentTransferBloc.eventController.sink.add(
+          FileStartUploadEvent<UploadPrivateMessageAttachment>(
+            file: loadingFile, command: UploadPrivateMessageAttachment(message: argument)
+        ));
+      }
+    });
+    
     return this.privateMessageDocumentTransferBloc.downloaderStateStream;
   }
 }
