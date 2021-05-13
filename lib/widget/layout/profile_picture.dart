@@ -55,13 +55,14 @@ class _PersonProfilePictureState extends State<PersonProfilePicture> {
             snapshot.data is ConsumingReadyState<ProfilePicture>) {
           var _state = snapshot.data as ConsumingReadyState<ProfilePicture>;
           ProfilePicture pic = _state.content;
-          return Container(
+          return SizedBox(
               width: _size,
               height: _size,
+              child: Container (
               decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                      fit: BoxFit.fill, image: MemoryImage(pic.toBinary()))));
+                      fit: BoxFit.fill, image: MemoryImage(pic.toBinary())))));
         }
 
         return Center(child: CircularProgressIndicator());

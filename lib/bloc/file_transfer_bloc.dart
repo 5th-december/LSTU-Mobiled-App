@@ -20,7 +20,6 @@ class TeachingMaterialDocumentTransferBloc extends AbstractFileTransferBloc{
       return this.transferService.downloadTeachingMaterialsAttachment(_command.teachingMaterial, filePath);
     }
 
-    
 }
 
 class PrivateMessageSendDocumentTransferBloc extends AbstractFileTransferBloc {

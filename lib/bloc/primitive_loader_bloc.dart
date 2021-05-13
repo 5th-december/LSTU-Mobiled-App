@@ -3,7 +3,7 @@ import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class PrimitiveLoaderBloc<TC, TR, TP>
+abstract class PrimitiveLoaderBloc<TC, TR, TP>
     extends AbstractBloc<ConsumingState, ConsumingEvent> {
   Stream<ConsumingEvent> get _startConsumingEventStream => this
       .eventController
@@ -13,10 +13,11 @@ class PrimitiveLoaderBloc<TC, TR, TP>
   Stream<ConsumingState> get consumingStateStream =>
       this.stateContoller.stream.where((event) => event is ConsumingState<TP>);
 
-  PrimitiveLoaderBloc(
-      {@required Function loaderFunc,
-      @required Function commandArgumentTranslator,
-      Function valueTranslator}) {
+  Function loaderFunc;
+  dynamic commandArgumentTranslator(Function loaderFunc, TC command);
+  TP valueTranslator(TR argument);
+
+  PrimitiveLoaderBloc() {
     if (valueTranslator == null && TR != TP) {
       throw new TypeError();
     }
@@ -26,7 +27,7 @@ class PrimitiveLoaderBloc<TC, TR, TP>
 
       this.updateState(ConsumingLoadingState<TP>());
 
-      var loader = commandArgumentTranslator(loaderFunc, command);
+      var loader = commandArgumentTranslator(this.loaderFunc, command);
       if (loader is Stream<ConsumingState<TR>>) {
         loader.listen((event) {
           if (event is ConsumingReadyState<TR>) {
@@ -41,7 +42,7 @@ class PrimitiveLoaderBloc<TC, TR, TP>
       } else if (loader is Future<TR>) {
         loader
             .then((value) => this.updateState(ConsumingReadyState<TP>(
-                valueTranslator != null ? valueTranslator(event) : event)))
+                valueTranslator != null ? valueTranslator(value) : value)))
             .onError((error, stackTrace) =>
                 this.updateState(ConsumingErrorState<TP>(error: error)));
       }

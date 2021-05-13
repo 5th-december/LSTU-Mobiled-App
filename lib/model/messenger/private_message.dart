@@ -60,6 +60,6 @@ class PrivateMessage extends Validatable
     this.attachments
   });
 
-  factory PrivateMessage.fromJson(Map<String, dynamic> json) => _$PrivateMessageFromJson(json);
+  static PrivateMessage fromJson(Map<String, dynamic> json) => _$PrivateMessageFromJson(json);
   Map<String, dynamic> toJson() => _$PrivateMessageToJson(this);
 }

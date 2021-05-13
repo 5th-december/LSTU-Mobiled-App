@@ -20,6 +20,6 @@ class Dialog
 
   Dialog({this.id, this.companion, this.hasUnread, this.lastMessage});
 
-  factory Dialog.fromJson(Map<String, dynamic> json) => _$DialogFromJson(json);
+  static Dialog fromJson(Map<String, dynamic> json) => _$DialogFromJson(json);
   Map<String, dynamic> toJson() => _$DialogToJson(this);
 }

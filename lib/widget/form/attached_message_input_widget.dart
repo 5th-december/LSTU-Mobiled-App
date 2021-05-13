@@ -14,7 +14,9 @@ import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 
 class AttachedMessageInputWidget extends StatefulWidget {
-  AttachedMessageInputWidget({Key key}): super(key: key);
+  final DialogModel.Dialog dialog;
+
+  AttachedMessageInputWidget({Key key, this.dialog}): super(key: key);
 
   @override
   _AttachedMessageInputWidgetState createState() => _AttachedMessageInputWidgetState();
@@ -49,37 +51,41 @@ class _AttachedMessageInputWidgetState extends State<AttachedMessageInputWidget>
         String attachmentPath = '';
 
         return Column(
-          children: [ Row(
-            children: [
-              ElevatedButton(
-                child: Text('Attachment'), onPressed: () async {
-                  attachmentPath = (await FilePicker.platform.pickFiles(allowMultiple: false)).paths[0];
-                },
-              ),
-              Expanded(
-                child: TextFormField(
-                  controller: controller,
+          children: [ 
+            Row(
+              children: [
+                ElevatedButton(
+                  child: Text('Attachment'), onPressed: () async {
+                    attachmentPath = (await FilePicker.platform.pickFiles(allowMultiple: false)).paths[0];
+                  },
                 ),
-              ),
-              ElevatedButton(
-                child: Text('Send'), onPressed: () {
-                  PrivateMessage message = PrivateMessage(messageText: controller.text);
-                  LocalFilesystemObject file;
-                  if(attachmentPath != '') {
-                    file = LocalFilesystemObject.fromBasePath(attachmentPath);
-                  }
-                  AttachedFileContent<PrivateMessage> content = AttachedFileContent<PrivateMessage>(
-                    content: message, file: file ?? null
-                  );
-                  DialogModel.Dialog d = DialogModel.Dialog(id: '5:103076406');
-                  SendNewPrivateMessage command = SendNewPrivateMessage(dialog: d);
-                  this._bloc.eventController.sink.add(
-                    ProduceResourceEvent<AttachedFileContent<PrivateMessage>, SendNewPrivateMessage>(command: command, resource: content)
-                  );
-                },
-              )
-            ],
-          )]
+                Expanded(
+                  child: TextFormField(
+                    controller: controller,
+                  ),
+                ),
+                ElevatedButton(
+                  child: Text('Send'), onPressed: () {
+                    PrivateMessage message = PrivateMessage(messageText: controller.text);
+
+                    LocalFilesystemObject file;
+                    if(attachmentPath != '') {
+                      file = LocalFilesystemObject.fromBasePath(attachmentPath);
+                    }
+
+                    AttachedFileContent<PrivateMessage> content = AttachedFileContent<PrivateMessage>(
+                      content: message, file: file ?? null
+                    );
+
+                    SendNewPrivateMessage command = SendNewPrivateMessage(dialog: widget.dialog);
+                    this._bloc.eventController.sink.add(
+                      ProduceResourceEvent<AttachedFileContent<PrivateMessage>, SendNewPrivateMessage>(command: command, resource: content)
+                    );
+                  },
+                )
+              ],
+            )
+          ]
         );
       }
     );
