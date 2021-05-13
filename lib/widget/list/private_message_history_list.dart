@@ -83,6 +83,7 @@ class _PrivateMessageHistoryListState extends State<PrivateMessageHistoryList> {
                 messageAttachment: (msg.attachments != null && msg.attachments.length != 0) ? msg.attachments[0] : null,
                 messageExternalLink: (msg.links != null && msg.links.length != 0) ? msg.links[0] : null,
                 sentByMe: msg.meSender ?? false,
+                sentTime: msg.sendTime,
               ),
             );
           }

@@ -50,42 +50,66 @@ class _AttachedMessageInputWidgetState extends State<AttachedMessageInputWidget>
       builder: (BuildContext context, AsyncSnapshot snapshot) {
         String attachmentPath = '';
 
-        return Column(
-          children: [ 
-            Row(
-              children: [
-                ElevatedButton(
-                  child: Text('Attachment'), onPressed: () async {
-                    attachmentPath = (await FilePicker.platform.pickFiles(allowMultiple: false)).paths[0];
-                  },
-                ),
-                Expanded(
-                  child: TextFormField(
-                    controller: controller,
+
+        return Container(
+          padding: EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          height: 70,
+          width: double.infinity,
+          color: Colors.white,
+          child: Column(
+            children: [ 
+              Row(
+                children: [
+                  IconButton(
+                    iconSize: 30.0,
+                    color: Colors.grey.shade700,
+                    icon: const Icon(Icons.attachment_outlined), 
+                    onPressed: () async {
+                      attachmentPath = (await FilePicker.platform.pickFiles(allowMultiple: false)).paths[0];
+                    },
                   ),
-                ),
-                ElevatedButton(
-                  child: Text('Send'), onPressed: () {
-                    PrivateMessage message = PrivateMessage(messageText: controller.text);
+                  SizedBox(width: 7.0,),
+                  Expanded(
+                    child: TextFormField(
+                      controller: controller,
+                      decoration: InputDecoration(
+                        hintText: 'Ваше сообщение',
+                        hintStyle: TextStyle(color: Colors.black45, fontWeight: FontWeight.w400),
+                        border: InputBorder.none
+                      ),
+                    ),
+                  ),
+                  Ink(
+                    decoration: ShapeDecoration(
+                      color: Colors.blue.shade600,
+                      shape: CircleBorder()
+                    ),
+                    child: IconButton(
+                      icon: Icon(Icons.send_rounded, size: 38.0,),
+                      color: Colors.white,
+                      onPressed: () {
+                        PrivateMessage message = PrivateMessage(messageText: controller.text);
 
-                    LocalFilesystemObject file;
-                    if(attachmentPath != '') {
-                      file = LocalFilesystemObject.fromBasePath(attachmentPath);
-                    }
+                        LocalFilesystemObject file;
+                        if(attachmentPath != '') {
+                          file = LocalFilesystemObject.fromBasePath(attachmentPath);
+                        }
 
-                    AttachedFileContent<PrivateMessage> content = AttachedFileContent<PrivateMessage>(
-                      content: message, file: file ?? null
-                    );
+                        AttachedFileContent<PrivateMessage> content = AttachedFileContent<PrivateMessage>(
+                          content: message, file: file ?? null
+                        );
 
-                    SendNewPrivateMessage command = SendNewPrivateMessage(dialog: widget.dialog);
-                    this._bloc.eventController.sink.add(
-                      ProduceResourceEvent<AttachedFileContent<PrivateMessage>, SendNewPrivateMessage>(command: command, resource: content)
-                    );
-                  },
-                )
-              ],
-            )
-          ]
+                        SendNewPrivateMessage command = SendNewPrivateMessage(dialog: widget.dialog);
+                        this._bloc.eventController.sink.add(
+                          ProduceResourceEvent<AttachedFileContent<PrivateMessage>, SendNewPrivateMessage>(command: command, resource: content)
+                        );
+                      },
+                    )
+                  )
+                ],
+              )
+            ]
+          )
         );
       }
     );

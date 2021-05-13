@@ -3,14 +3,14 @@ import 'package:flutter/widgets.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
 
-class PrivateChatAppBar extends StatelessWidget implements PreferredSizeWidget
+class PrivateChatAppBar extends StatelessWidget with PreferredSizeWidget
 {
   final Person companion;
   
   PrivateChatAppBar({Key key, this.companion}): super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(20.0);
+  Size get preferredSize => Size.fromHeight(AppBar().preferredSize.height);
   
   @override
   Widget build(BuildContext context) {
@@ -27,24 +27,24 @@ class PrivateChatAppBar extends StatelessWidget implements PreferredSizeWidget
                   onPressed: (){
                     Navigator.pop(context);
                   },
-                  icon: Icon(Icons.arrow_back,color: Colors.black,),
+                  icon: Icon(Icons.arrow_back_ios_rounded,color: Colors.black,),
                 ),
-                SizedBox(width: 2,),
-                PersonProfilePicture(
-                  displayed: this.companion,
-                  size: 20,
-                ),
-                SizedBox(width: 12,),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Text("${companion.name} ${companion.surname}")
-                    ],
-                  ),
+                    children: [
+                      PersonProfilePicture(
+                        displayed: this.companion,
+                        size: this.preferredSize.height * 0.65,
+                      ),
+                      SizedBox(width: 12,),
+                      Text(
+                        "${companion.name} ${companion.surname}", 
+                        style: TextStyle(color: Colors.grey.shade900, fontWeight: FontWeight.w600, fontSize: 18.0),
+                      )
+                    ]
+                  )
                 ),
-                Icon(Icons.settings,color: Colors.black54,),
               ],
             ),
           ),

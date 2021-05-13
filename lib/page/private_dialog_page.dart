@@ -23,14 +23,13 @@ class _PrivateDialogPageState extends State<PrivateDialogPage> {
       appBar: PrivateChatAppBar(companion: widget.companion),
       body: Stack(
         children: [
-          PrivateMessageHistoryList(dialog: widget.dialog),
+          Container(
+            padding: EdgeInsets.only(bottom: 75),
+            child: PrivateMessageHistoryList(dialog: widget.dialog),
+          ),
           Align(
             alignment: Alignment.bottomLeft,
-            child: Container(
-              padding: EdgeInsets.only(left: 15, right: 15, bottom: 15),
-              height: 60,
-              child: AttachedMessageInputWidget(dialog: widget.dialog),
-            ),
+            child: AttachedMessageInputWidget(dialog: widget.dialog)
           ),
         ]
       ),
