@@ -17,7 +17,7 @@ class DialogListBloc extends AbstractEndlessScrollingBloc<Dialog, LoadDialogList
 
     await for (ConsumingState<ListedResponse<Dialog>> event in this._bloc.consumingStateStream) {
       if(event is ConsumingErrorState<ListedResponse<Dialog>>) {
-        throw new Exception('Data not loaded');
+        throw new Exception('Data was not loaded');
       } else if(event is ConsumingReadyState<ListedResponse<Dialog>>) {
         return event.content;
       }

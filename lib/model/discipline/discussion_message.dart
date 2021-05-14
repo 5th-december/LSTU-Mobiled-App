@@ -24,6 +24,6 @@ class DiscussionMessage
 
   DiscussionMessage({this.id, this.sender, this.created, this.msg, this.attachments, this.externalLinks});
 
-  factory DiscussionMessage.fromJson(Map<String, dynamic> json) => _$DiscussionMessageFromJson(json);
+  static DiscussionMessage fromJson(Map<String, dynamic> json) => _$DiscussionMessageFromJson(json);
   Map<String, dynamic> toJson() => _$DiscussionMessageToJson(this);
 }

@@ -1,3 +1,4 @@
+import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/model/person/person.dart';
@@ -41,3 +42,13 @@ class LoadDialogListCommand {
   LoadDialogListCommand(this.count, this.offset);
 }
 
+class LoadDisciplineDiscussionListCommand {
+  final Discipline discipline;
+  final Education education;
+  final Semester semester;
+  final int count;
+  final int offset;
+  LoadDisciplineDiscussionListCommand({
+    this.discipline, this.count, this.offset, this.education, this.semester
+  });
+}

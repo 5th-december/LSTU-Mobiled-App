@@ -3,6 +3,7 @@ import 'package:lk_client/command/consume_command/discipline_request_command.dar
 import 'package:lk_client/command/consume_command/education_request_command.dart';
 import 'package:lk_client/command/consume_command/user_request_command.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
+import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
@@ -190,4 +191,18 @@ class DialogListLoadingBloc extends PrimitiveLoaderBloc
 
   @override
   ListedResponse<Dialog> valueTranslator(ListedResponse<Dialog> argument) => argument;
+}
+
+class DiscussionLoadingBloc extends PrimitiveLoaderBloc
+  <LoadDisciplineDiscussionListCommand, ListedResponse<DiscussionMessage>, ListedResponse<DiscussionMessage>> {
+  DiscussionLoadingBloc(MessengerQueryService messengerQueryService) {
+    loaderFunc = messengerQueryService.getDiscussionMessagesList;
+  }
+
+  @override
+  Stream<ConsumingState<ListedResponse<DiscussionMessage>>> commandArgumentTranslator(loaderFunc, LoadDisciplineDiscussionListCommand command) =>
+    loaderFunc(command.discipline.id, command.education.id, command.semester.id, command.count.toString(), command.offset.toString());
+
+  @override
+  ListedResponse<DiscussionMessage> valueTranslator(ListedResponse<DiscussionMessage> argument) => argument;
 }
