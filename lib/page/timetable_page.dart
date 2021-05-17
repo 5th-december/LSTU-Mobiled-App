@@ -2,7 +2,10 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
+import 'package:lk_client/model/education/timetable_week.dart';
 import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/widget/list/exams_list.dart';
+import 'package:lk_client/widget/list/timetable_list.dart';
 
 class TimetablePage extends StatefulWidget {
   final Education education;
@@ -39,13 +42,31 @@ class _TimetablePageState extends State<TimetablePage>
         bottom: TabBar(
           controller: this._tabController,
           tabs: [
-            Tab(icon: Icon(Icons.directions_car)),
-            Tab(icon: Icon(Icons.gesture_rounded)),
-            Tab(icon: Icon(Icons.access_alarm_outlined)),
+            Tab(icon: Text('Белая')),
+            Tab(icon: Text('Зеленая')),
+            Tab(icon: Text('Экзамены')),
           ],
         ),
       ),
-      body: Center(child: Text('This is a timetable page')),
+      body: TabBarView(
+        controller: this._tabController,
+        children: [
+          TimetableList(
+            education: widget.education,
+            semester: widget.semester,
+            week: TimetableWeek(type: 'white'),
+          ),
+          TimetableList(
+            education: widget.education,
+            semester: widget.semester,
+            week: TimetableWeek(type: 'green'),
+          ),
+          ExamsList(
+            education: widget.education, 
+            semester: widget.semester
+          )
+        ]
+      )
     );
   }
 }

@@ -1,8 +1,10 @@
 import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/exam.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
+import 'package:lk_client/model/education/timetable.dart';
 import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
@@ -99,4 +101,46 @@ class EducationQueryService {
       yield ConsumingErrorState<Semester>(error: e);
     }
   }
+
+  Stream<ConsumingState<Timetable>> getCurrentTimetable(
+    String educationId, String semesterId, String weekType) async* {
+    try {
+      HttpResponse response = await this.apiEndpointConsumer.get(
+        '/api/v1/student/timetable',
+        <String,String>{'edu': educationId, 'sem': semesterId, 'week': weekType},
+        this.accessKey.token
+      );
+
+      if(response.status == 200) {
+        Timetable loadedTimetable = Timetable.fromJson(response.body);
+        yield ConsumingReadyState<Timetable>(loadedTimetable);
+      } else {
+        yield ConsumingErrorState<Timetable>(error: this.apiErrorHandler.apply(response.body));
+      }
+    } on Exception catch (e) {
+      yield ConsumingErrorState<Timetable>(error: e);
+    }
+  }
+
+  Stream<ConsumingState<ListedResponse<Exam>>> getExamsTimetable
+    (String educationId, String semesterId) async* {
+    try {
+      HttpResponse response = await this.apiEndpointConsumer.get(
+        '/api/v1/student/timetable/exams/list',
+        <String, String>{'edu': educationId, 'sem': semesterId},
+        this.accessKey.token
+      );
+
+      if(response.status == 200) {
+        ListedResponse<Exam> loadedExamsList = ListedResponse.fromJson(response.body, Exam.fromJson);
+        yield ConsumingReadyState<ListedResponse<Exam>>(loadedExamsList);
+      } else {
+        yield ConsumingErrorState<ListedResponse<Exam>>(error: this.apiErrorHandler.apply(response.body));
+      }
+
+    } on Exception catch(e) {
+      yield ConsumingErrorState<ListedResponse<Exam>>(error: e);
+    }
+  }
 }
+

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/bloc/navigation_bloc.dart';
-import 'package:lk_client/command/consume_command/user_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';

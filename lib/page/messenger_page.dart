@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/model/person/person.dart';
-import 'package:lk_client/widget/form/attached_message_input_widget.dart';
+import 'package:lk_client/page/person_finder_page.dart';
 import 'package:lk_client/widget/list/dialog_list.dart';
 
 class MessengerPage extends StatefulWidget {
@@ -16,7 +16,17 @@ class MessengerPage extends StatefulWidget {
 class _MessengerPageState extends State<MessengerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Сообщения')),
+      appBar: AppBar(
+        title: Text('Сообщения'),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.person_add_alt_1_rounded), 
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (BuildContext context) => PersonFinderPage())
+            )
+          )
+        ],
+      ),
       body: DialogList()
     );
   }

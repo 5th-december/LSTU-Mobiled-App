@@ -75,11 +75,23 @@ class MessengerQueryService {
   Future<DiscussionMessage> sendNewDiscussionMessage
     (DiscussionMessage discussionMessage, String educationId, String disciplineId, String semesterId) async {
     HttpResponse response = await this.apiEndpointConsumer.post('/api/v1/discussion', 
-    {'edu': educationId, 'dis': disciplineId, 'sem': semesterId}, discussionMessage.toJson(), this.accessKey.token);
+      {'edu': educationId, 'dis': disciplineId, 'sem': semesterId}, discussionMessage.toJson(), this.accessKey.token);
 
     if(response.status == 201) {
       DiscussionMessage createdMessage = DiscussionMessage.fromJson(response.body);
       return createdMessage;
+    }
+
+    throw this.apiErrorHandler.apply(response.body);
+  }
+
+  Future<Dialog> createNewDialog(String companionId) async {
+    HttpResponse response = await this.apiEndpointConsumer.post('/api/v1/messenger/dialog', 
+      {'p': companionId}, const {}, this.accessKey.token);
+
+    if(response.status == 201) {
+      Dialog dialog = Dialog.fromJson(response.body);
+      return dialog;
     }
 
     throw this.apiErrorHandler.apply(response.body);

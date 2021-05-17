@@ -1,18 +1,19 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/discussion_list_bloc.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/command/consume_command/education_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
-import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
+import 'package:lk_client/state/endless_scrolling_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/chunk/centered_loader.dart';
+import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
 import 'package:lk_client/widget/chunk/message_bubble_widget.dart';
 import 'package:lk_client/widget/list/endless_scrolling_widget.dart';
 
@@ -47,50 +48,69 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
     }
   }
 
-  EndlessScrollingLoadChunkEvent<LoadDisciplineDiscussionListCommand> getLoadCommand
-    ([ListedResponse<DiscussionMessage> currentState]) {
-      final int lastLoaded = currentState?.nextOffset ?? 0;
-      LoadDisciplineDiscussionListCommand command = LoadDisciplineDiscussionListCommand(
-        count: 50,
-        offset: lastLoaded,
-        semester: widget.semester,
-        education: widget.education,
-        discipline: widget.discipline
-      );
-      return EndlessScrollingLoadChunkEvent<LoadDisciplineDiscussionListCommand>(command: command);
-    }
-
   Widget build(BuildContext context) {
-    return EndlessScrollingWidget<DiscussionMessage, LoadDisciplineDiscussionListCommand>(
-      bloc: _bloc, 
-      getLoadCommand: getLoadCommand,
-      buildList: (ListedResponse<DiscussionMessage> dataList, [Function loadMoreList]) {
-        ScrollController scrollController = ScrollController();
-        final int scrollDistance = 200;
+    this._bloc.eventController.sink.add(
+      EndlessScrollingLoadEvent<LoadDisciplineDiscussionListCommand>(
+        command: LoadDisciplineDiscussionListCommand(
+          count: 50, 
+          offset: 0,
+          discipline: widget.discipline,
+          education: widget.education,
+          semester: widget.semester
+        )
+      )
+    );
 
-        scrollController.addListener(() {
-          final maxScroll = scrollController.position.maxScrollExtent;
-          final currentScroll = scrollController.position.pixels;
-          if(loadMoreList != null && maxScroll - currentScroll <= scrollDistance) {
-            loadMoreList();
-          }
-        });
+    ScrollController scrollController = ScrollController();
+    final int scrollDistance = 200;
+
+    EndlessScrollingLoadNextChunkEvent<LoadDisciplineDiscussionListCommand> nextChunkQueryEvent;
+    bool needsAutoloading = false;
+
+    scrollController.addListener(() {
+      final maxScroll = scrollController.position.maxScrollExtent;
+      final currentScroll = scrollController.position.pixels;
+      if(needsAutoloading && nextChunkQueryEvent != null && maxScroll - currentScroll <= scrollDistance) {
+        this._bloc.eventController.sink.add(nextChunkQueryEvent);
+      }
+    });
+
+    return EndlessScrollingWidget<DiscussionMessage, LoadDisciplineDiscussionListCommand>(
+      bloc: _bloc,
+      buildList: (EndlessScrollingState<DiscussionMessage> state) {
+        
+        if(state is EndlessScrollingChunkReadyState) {
+          LoadDisciplineDiscussionListCommand nextChunkCommand = (state as EndlessScrollingChunkReadyState).nextChunkCommand;
+          nextChunkQueryEvent = EndlessScrollingLoadNextChunkEvent<LoadDisciplineDiscussionListCommand>(command: nextChunkCommand);
+          needsAutoloading = true;
+        } else {
+          needsAutoloading = false;
+        }
+
+        if(state.entityList.length == 0){
+           if(state is EndlessScrollingLoadingState) {
+             return CenteredLoader();
+           }
+
+           if(state is EndlessScrollingErrorState) {
+             return Center(child: Text('Ошибка загрузки обсуждений'));
+           }
+
+           return Center(child: Text('Нет сообщений'));
+        }
+
+        List<DiscussionMessage> loadedMessages = state.entityList;
 
         return ListView.builder(
-          itemCount: dataList.payload.length,
+          itemCount: (state is EndlessScrollingChunkReadyState || state is EndlessScrollingLoadingState) ? loadedMessages.length + 1 : loadedMessages.length,
+          reverse: true,
           controller: scrollController,
           itemBuilder: (BuildContext context, int index) {
-            if(index >= dataList.payload.length) 
-            {
-              return Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator()
-                ],
-              );
+            if(index >= loadedMessages.length) {
+              return ListLoadingBottomIndicator();
             }
 
-            DiscussionMessage msg = dataList.payload[index];
+            DiscussionMessage msg = loadedMessages[index];
 
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
@@ -100,6 +120,7 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
                 messageExternalLink: (msg.externalLinks != null && msg.externalLinks.length != 0) ? msg.externalLinks[0]: null,
                 sentByMe: msg.sender.id == widget.loggedPerson.id,
                 sentTime: msg.created,
+                sender: msg.sender,
               )
             );
           }

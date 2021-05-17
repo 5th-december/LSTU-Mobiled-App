@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/command/consume_command/discipline_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/education/education.dart';
@@ -10,7 +10,6 @@ import 'package:lk_client/model/education/timetable_item.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
-import 'package:lk_client/widget/layout/profile_picture.dart';
 
 class DisciplineTeachersList extends StatefulWidget {
   final Discipline discipline;

@@ -1,21 +1,10 @@
-import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/producing_event.dart';
+import 'package:lk_client/model/util/attached_file_content.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/state/producing_state.dart';
 
-class AttachedFileContent<T> {
-  final T content;
-  final LocalFilesystemObject file;
-  AttachedFileContent({@required this.content,this.file});
-}
-
-/*
-TQ - класс объекта метаданных
-TR - класс объекта ответа 
-TC - класс команды
-*/
 abstract class AbstractAttachedFormBloc<TQ, TR, TC>
   extends AbstractBloc<ProducingState, ProducingEvent> {
   Stream<ProducingState> get attachedFormStateStream =>
@@ -33,7 +22,7 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
   AbstractAttachedFormBloc() {
     this._attachedFormInitEventStream.listen((ProducingEvent event) {
       final _event = event as ProducerInitEvent<AttachedFileContent<TQ>>;
-      this.updateState(ProducingInitState(initData: _event.resourse));
+      this.updateState(ProducingInitState<TR>());
     });
 
     this._attachedFormProduceEventStream.listen((ProducingEvent event) {

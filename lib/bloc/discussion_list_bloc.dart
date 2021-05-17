@@ -1,6 +1,8 @@
+import 'dart:math';
+
 import 'package:lk_client/bloc/abstract_endless_scrolling_bloc.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/command/consume_command/education_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/listed_response.dart';
@@ -10,6 +12,29 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
   DiscussionLoadingBloc _bloc;
 
   DiscussionListBloc(this._bloc);
+
+  @override
+  bool hasMoreChunks(ListedResponse<DiscussionMessage> fresh) {
+    return fresh.remains > 0;
+  }
+
+  @override
+  List<DiscussionMessage> copyPreviousToNew(List<DiscussionMessage> previous, List<DiscussionMessage> fresh) {
+    List<DiscussionMessage> refresh = List<DiscussionMessage>.from(previous);
+    refresh.addAll(fresh);
+    return refresh;
+  }
+
+  @override
+  LoadDisciplineDiscussionListCommand getNextChunkCommand(LoadDisciplineDiscussionListCommand previousCommand, ListedResponse<DiscussionMessage> fresh) {
+    return LoadDisciplineDiscussionListCommand(
+      discipline: previousCommand.discipline,
+      education: previousCommand.education,
+      semester: previousCommand.semester,
+      count: min(previousCommand.count, fresh.remains),
+      offset: previousCommand.offset + fresh.count
+    );
+  }
 
   @override
   Future<ListedResponse<DiscussionMessage>> loadListElementChunk(LoadDisciplineDiscussionListCommand command) async {
@@ -22,16 +47,5 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
         return event.content;
       }
     }
-  }
-
-  @override
-  bool hasMoreChunks(ListedResponse<DiscussionMessage> fresh) {
-    return fresh.remains > 0;
-  }
-
-  @override
-  ListedResponse<DiscussionMessage> copyPreviousToNew(ListedResponse<DiscussionMessage> previous, ListedResponse<DiscussionMessage> fresh) {
-    fresh.payload.insertAll(0, previous.payload);
-    return fresh;
   }
 }

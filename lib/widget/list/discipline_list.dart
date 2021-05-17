@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/command/consume_command/education_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';

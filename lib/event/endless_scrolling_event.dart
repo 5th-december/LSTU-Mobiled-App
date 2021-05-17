@@ -2,7 +2,12 @@ import 'package:flutter/foundation.dart';
 
 abstract class EndlessScrollingEvent<C> {}
 
-class EndlessScrollingLoadChunkEvent<C> extends EndlessScrollingEvent<C> {
+class EndlessScrollingLoadEvent<C> extends EndlessScrollingEvent<C> {
   C command;
-  EndlessScrollingLoadChunkEvent({@required this.command});
+  EndlessScrollingLoadEvent({@required this.command});
+}
+
+class EndlessScrollingLoadNextChunkEvent<C> extends EndlessScrollingEvent<C> {
+  C command;
+  EndlessScrollingLoadNextChunkEvent({@required this.command});
 }

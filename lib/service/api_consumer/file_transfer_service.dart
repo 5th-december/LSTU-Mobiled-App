@@ -21,4 +21,9 @@ class FileTransferService {
     yield* this.fileTransferManager.progressedUpload
       ('/api/v1/messenger/doc', <String, String>{'pmsg': privateMessageId}, this.accessKey.token, filePath);
   }
+
+  Stream<FileOperationStatus> uploadDiscussionMessageAttachment(String discussionMessageId, String filePath) async* {
+    yield* this.fileTransferManager.progressedUpload
+      ('/api/v1/discussion/doc', {'msg': discussionMessageId}, this.accessKey.toString(), filePath);
+  }
 }

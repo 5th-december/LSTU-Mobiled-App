@@ -20,6 +20,6 @@ class Exam
 
   Exam({this.discipline, this.teacherName, this.examTime, this.room, this.campus});
 
-  factory Exam.fromJson(Map<String, dynamic> json) => _$ExamFromJson(json);
+  static Exam fromJson(Map<String, dynamic> json) => _$ExamFromJson(json);
   Map<String, dynamic> toJson() => _$ExamToJson(this);
 }

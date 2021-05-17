@@ -2,8 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_attached_form_bloc.dart';
 import 'package:lk_client/bloc/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/private_message_form_bloc.dart';
-import 'package:lk_client/command/consume_command/multipart_request_command.dart';
-import 'package:lk_client/command/produce_command/private_message_produce_command.dart';
+import 'package:lk_client/command/consume_command.dart';
+import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
@@ -21,6 +21,13 @@ class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMes
   });
 
   @override
+  dispose() {
+    this.privateMessageDocumentTransferBloc.dispose();
+    this.privateMessageFormBloc.dispose();
+    return super.dispose();
+  }
+
+  @override
   Stream<ProducingState<PrivateMessage>> sendFormData(PrivateMessage request, SendNewPrivateMessage command) {
     this.privateMessageFormBloc.eventController.sink.add(
       ProduceResourceEvent<PrivateMessage, SendNewPrivateMessage>(resource: request, command: command));
@@ -32,7 +39,7 @@ class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMes
     this.privateMessageDocumentTransferBloc.eventController.sink.add(
       FileFindLocallyEvent(file: loadingFile)
     );
-    this.privateMessageDocumentTransferBloc.downloaderStateStream.listen((event) {
+    this.privateMessageDocumentTransferBloc.binaryTransferStateStream.listen((event) {
       if(event is FileLocatedState) {
         this.privateMessageDocumentTransferBloc.eventController.sink.add(
           FileStartUploadEvent<UploadPrivateMessageAttachment>(
@@ -41,6 +48,6 @@ class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMes
       }
     });
     
-    return this.privateMessageDocumentTransferBloc.downloaderStateStream;
+    return this.privateMessageDocumentTransferBloc.binaryTransferStateStream;
   }
 }

@@ -49,8 +49,10 @@ class MessageBubbleWidget extends StatelessWidget {
                 messageBodyChildren.add(SizedBox(height: 4,));
               }
               
-              messageBodyChildren.add(Text(this.messageText, style: TextStyle(fontSize: 16, color: Colors.grey.shade900),));
-              messageBodyChildren.add(SizedBox(height: 3,));
+              if(this.messageText != null) {
+                messageBodyChildren.add(Text(this.messageText, style: TextStyle(fontSize: 16, color: Colors.grey.shade900),));
+                messageBodyChildren.add(SizedBox(height: 3));
+              }
 
               final addZeros = (value) => value.toString().length == 1 ? '0' + value.toString() : value.toString();
               messageBodyChildren.add(

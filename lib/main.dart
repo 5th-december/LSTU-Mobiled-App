@@ -26,7 +26,6 @@ import 'package:lk_client/store/global/bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 import 'app.dart';
 import 'store/global/app_state_container.dart';
-import 'package:flutter/rendering.dart';
 
 Future<void> main() async {
   // Debug

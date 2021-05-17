@@ -37,6 +37,7 @@ class _SubjectPageManagerState extends State<SubjectPageManager> {
                         return DisciplinePage(
                             discipline: selectedDiscipline,
                             semester: selectedSemester,
+                            person: widget.currentPerson,
                             education: selectedEducation);
                       })));
             });

@@ -1,3 +1,4 @@
+import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/model/person/profile_picture.dart';
@@ -68,6 +69,34 @@ class PersonQueryService {
       }
     } on Exception catch (e) {
       yield ConsumingErrorState<ProfilePicture>(error: e);
+    }
+  }
+
+  Stream<ConsumingState<ListedResponse<Person>>> getPersonList
+    (String query, String count, String offset) async* {
+    Map<String, dynamic> queryParams = <String, dynamic>{};
+
+    if(query != null) {
+      queryParams['q'] = query;
+    }
+
+    if(count != null && offset != null) {
+      queryParams['c'] = count;
+      queryParams['of'] = offset;
+    }
+
+    try {
+      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/list', 
+        queryParams, this.accessKey.token);
+
+      if(response.status == 200) {
+        ListedResponse<Person> personList = ListedResponse.fromJson(response.body, Person.fromJson);
+        yield ConsumingReadyState<ListedResponse<Person>>(personList);
+      } else {
+        yield ConsumingErrorState<ListedResponse<Person>>(error: this.apiErrorHandler.apply(response.body));
+      }
+    } on Exception catch (e) {
+      yield ConsumingErrorState<ListedResponse<Person>>(error: e);
     }
   }
 

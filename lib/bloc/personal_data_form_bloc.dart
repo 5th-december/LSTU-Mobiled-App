@@ -1,9 +1,8 @@
 import 'package:lk_client/bloc/abstract_bloc.dart';
-import 'package:lk_client/command/produce_command/user_produce_command.dart';
+import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/error_handler/validation_error_handler.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/person/personal_data.dart';
-import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/validatable.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/producing_state.dart';

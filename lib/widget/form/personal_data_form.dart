@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/personal_data_form_bloc.dart';
-import 'package:lk_client/command/produce_command/user_produce_command.dart';
+import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/model/person/person.dart';

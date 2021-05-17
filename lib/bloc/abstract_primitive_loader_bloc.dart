@@ -3,7 +3,7 @@ import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-abstract class PrimitiveLoaderBloc<TC, TR, TP>
+abstract class AbstractPrimitiveLoaderBloc<TC, TR, TP>
     extends AbstractBloc<ConsumingState, ConsumingEvent> {
   Stream<ConsumingEvent> get _startConsumingEventStream => this
       .eventController
@@ -17,7 +17,7 @@ abstract class PrimitiveLoaderBloc<TC, TR, TP>
   dynamic commandArgumentTranslator(Function loaderFunc, TC command);
   TP valueTranslator(TR argument);
 
-  PrimitiveLoaderBloc() {
+  AbstractPrimitiveLoaderBloc() {
     if (valueTranslator == null && TR != TP) {
       throw new TypeError();
     }

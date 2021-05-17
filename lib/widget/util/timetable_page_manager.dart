@@ -8,7 +8,7 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/fullscreen_loading_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/state/timetable_section_state.dart';
-import 'package:lk_client/store/local/timetable_page_state_container.dart';
+import 'package:lk_client/store/local/timetable_page_provider.dart';
 import 'package:lk_client/widget/list/education_list.dart';
 import 'package:lk_client/widget/list/semester_list.dart';
 
@@ -28,9 +28,7 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (this._timetablePageManagerBloc == null) {
-      this._timetablePageManagerBloc = TimetablePageStateContainer.of(context)
-          .localBlocProvider
-          .timetablePageManagerBloc;
+      this._timetablePageManagerBloc = TimetablePageProvider.of(context).timetablePageManagerBloc;
     }
   }
 

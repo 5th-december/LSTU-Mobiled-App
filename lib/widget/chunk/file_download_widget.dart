@@ -2,11 +2,10 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/file_transfer_bloc.dart';
-import 'package:lk_client/command/consume_command/multipart_request_command.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
-import 'package:lk_client/service/file_transfer_manager.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
@@ -41,7 +40,7 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
 
     if (widget.material.attachment != null) {
       return StreamBuilder(
-          stream: this._bloc.downloaderStateStream,
+          stream: this._bloc.binaryTransferStateStream,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               FileManagementState state =
@@ -63,7 +62,7 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
                     FileStartDownloadEvent<LoadTeachingMaterialAttachment>(
                         command:
                             LoadTeachingMaterialAttachment(widget.material.id),
-                        file: LocalFilesystemObject.fromBasePath(state.filePath)));
+                        file: LocalFilesystemObject.fromFilePath(state.filePath)));
               } else if (state is FileOperationProgressState) {
                 int percent = ((state.rate /
                             1024.0 *

@@ -1,11 +1,10 @@
-import 'package:lk_client/bloc/primitive_loader_bloc.dart';
-import 'package:lk_client/command/consume_command/discipline_request_command.dart';
-import 'package:lk_client/command/consume_command/education_request_command.dart';
-import 'package:lk_client/command/consume_command/user_request_command.dart';
+import 'package:lk_client/bloc/abstract_primitive_loader_bloc.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/exam.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/education/timetable.dart';
 import 'package:lk_client/model/education/timetable_item.dart';
@@ -20,7 +19,7 @@ import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class DisciplineTeachersListLoaderBloc extends PrimitiveLoaderBloc
+class DisciplineTeachersListLoaderBloc extends AbstractPrimitiveLoaderBloc
   <LoadDisciplineTeacherList,
     ListedResponse<TimetableItem>,
     List<TimetableItem>> {
@@ -36,7 +35,7 @@ class DisciplineTeachersListLoaderBloc extends PrimitiveLoaderBloc
   List<TimetableItem> valueTranslator(ListedResponse<TimetableItem> argument) => argument.payload;
 }
 
-class DisciplineDetailsLoaderBloc extends PrimitiveLoaderBloc
+class DisciplineDetailsLoaderBloc extends AbstractPrimitiveLoaderBloc
   <LoadDisciplineDetails, Discipline, Discipline> {
   DisciplineDetailsLoaderBloc(DisciplineQueryService queryService) {
     this.loaderFunc = queryService.getDisciplineItem;
@@ -50,7 +49,7 @@ class DisciplineDetailsLoaderBloc extends PrimitiveLoaderBloc
   Discipline valueTranslator(Discipline argument) => argument;
 }
 
-class ProfilePictureLoaderBloc extends PrimitiveLoaderBloc<LoadProfilePicture,
+class ProfilePictureLoaderBloc extends AbstractPrimitiveLoaderBloc<LoadProfilePicture,
     ProfilePicture, ProfilePicture> {
   ProfilePictureLoaderBloc(PersonQueryService queryService) {
     this.loaderFunc = queryService.getPersonProfilePicture;
@@ -67,7 +66,7 @@ class ProfilePictureLoaderBloc extends PrimitiveLoaderBloc<LoadProfilePicture,
 }
 
 class PersonalDetailsLoaderBloc
-    extends PrimitiveLoaderBloc<LoadPersonDetails, Person, Person> {
+    extends AbstractPrimitiveLoaderBloc<LoadPersonDetails, Person, Person> {
   PersonalDetailsLoaderBloc(PersonQueryService queryService) {
     this.loaderFunc = queryService.getPersonProperties;
   }
@@ -81,7 +80,7 @@ class PersonalDetailsLoaderBloc
 }
 
 class UserDefinitionLoaderBloc
-    extends PrimitiveLoaderBloc<LoadCurrentUserIdentifier, Person, Person> {
+    extends AbstractPrimitiveLoaderBloc<LoadCurrentUserIdentifier, Person, Person> {
   UserDefinitionLoaderBloc(PersonQueryService queryService) {
     loaderFunc = queryService.getCurrentPersonIdentifier;
   }
@@ -93,7 +92,7 @@ class UserDefinitionLoaderBloc
   Person valueTranslator(Person argument) => argument;
 }
 
-class EducationListLoaderBloc extends PrimitiveLoaderBloc<
+class EducationListLoaderBloc extends AbstractPrimitiveLoaderBloc<
     LoadUserEducationListCommand, ListedResponse<Education>, List<Education>> {
   EducationListLoaderBloc(EducationQueryService queryService) {
     loaderFunc = queryService.getEducationsList;
@@ -107,8 +106,8 @@ class EducationListLoaderBloc extends PrimitiveLoaderBloc<
   List<Education> valueTranslator(ListedResponse<Education> argument) => argument.payload;
 }
 
-class SemesterListLoadingBloc extends PrimitiveLoaderBloc<
-    LoadSemsterListCommand, ListedResponse<Semester>, List<Semester>> {
+class SemesterListLoadingBloc extends AbstractPrimitiveLoaderBloc
+    <LoadSemsterListCommand, ListedResponse<Semester>, List<Semester>> {
   SemesterListLoadingBloc(EducationQueryService queryService) {
     loaderFunc = queryService.getSemesterList;
   }
@@ -121,8 +120,8 @@ class SemesterListLoadingBloc extends PrimitiveLoaderBloc<
   List<Semester> valueTranslator(ListedResponse<Semester> argument) => argument.payload;
 }
 
-class SubjectListLoadingBloc extends PrimitiveLoaderBloc<LoadSubjectListCommand,
-    ListedResponse<Discipline>, List<Discipline>> {
+class SubjectListLoadingBloc extends AbstractPrimitiveLoaderBloc
+  <LoadSubjectListCommand, ListedResponse<Discipline>, List<Discipline>> {
   SubjectListLoadingBloc(EducationQueryService queryService) {
     loaderFunc = queryService.getSubjectList;
   }
@@ -136,7 +135,7 @@ class SubjectListLoadingBloc extends PrimitiveLoaderBloc<LoadSubjectListCommand,
 }
 
 class DisciplineTimetableLoadingBloc
-    extends PrimitiveLoaderBloc<LoadDisciplineTimetable, Timetable, Timetable> {
+    extends AbstractPrimitiveLoaderBloc<LoadDisciplineTimetable, Timetable, Timetable> {
   DisciplineTimetableLoadingBloc(DisciplineQueryService queryService) {
     loaderFunc = queryService.getDisciplineTimetable;
   }
@@ -149,10 +148,8 @@ class DisciplineTimetableLoadingBloc
   Timetable valueTranslator(Timetable argument) => argument;
 }
 
-class TeachingMaterialListLoadingBloc extends PrimitiveLoaderBloc<
-    LoadTeachingMaterialsList,
-    ListedResponse<TeachingMaterial>,
-    List<TeachingMaterial>> {
+class TeachingMaterialListLoadingBloc extends AbstractPrimitiveLoaderBloc
+  <LoadTeachingMaterialsList, ListedResponse<TeachingMaterial>, List<TeachingMaterial>> {
   TeachingMaterialListLoadingBloc(DisciplineQueryService queryService) {
     loaderFunc = queryService.getTeachingMaterialsList;
   }
@@ -165,7 +162,7 @@ class TeachingMaterialListLoadingBloc extends PrimitiveLoaderBloc<
   List<TeachingMaterial> valueTranslator(ListedResponse<TeachingMaterial> argument) => argument.payload;
 }
 
-class PrivateChatMessagesListLoadingBloc extends PrimitiveLoaderBloc
+class PrivateChatMessagesListLoadingBloc extends AbstractPrimitiveLoaderBloc
     <LoadPrivateChatMessagesListCommand, ListedResponse<PrivateMessage>, ListedResponse<PrivateMessage>> {
   PrivateChatMessagesListLoadingBloc(MessengerQueryService messengerQueryService) {
     loaderFunc = messengerQueryService.getPrivateChatMessagesList;
@@ -179,7 +176,7 @@ class PrivateChatMessagesListLoadingBloc extends PrimitiveLoaderBloc
   ListedResponse<PrivateMessage> valueTranslator(ListedResponse argument) => argument;
 }
 
-class DialogListLoadingBloc extends PrimitiveLoaderBloc
+class DialogListLoadingBloc extends AbstractPrimitiveLoaderBloc
   <LoadDialogListCommand, ListedResponse<Dialog>, ListedResponse<Dialog>> {
   DialogListLoadingBloc(MessengerQueryService messengerQueryService) {
     loaderFunc = messengerQueryService.getDialogList;
@@ -193,7 +190,7 @@ class DialogListLoadingBloc extends PrimitiveLoaderBloc
   ListedResponse<Dialog> valueTranslator(ListedResponse<Dialog> argument) => argument;
 }
 
-class DiscussionLoadingBloc extends PrimitiveLoaderBloc
+class DiscussionLoadingBloc extends AbstractPrimitiveLoaderBloc
   <LoadDisciplineDiscussionListCommand, ListedResponse<DiscussionMessage>, ListedResponse<DiscussionMessage>> {
   DiscussionLoadingBloc(MessengerQueryService messengerQueryService) {
     loaderFunc = messengerQueryService.getDiscussionMessagesList;
@@ -205,4 +202,31 @@ class DiscussionLoadingBloc extends PrimitiveLoaderBloc
 
   @override
   ListedResponse<DiscussionMessage> valueTranslator(ListedResponse<DiscussionMessage> argument) => argument;
+}
+
+class TimetableLoadingBloc extends AbstractPrimitiveLoaderBloc<LoadTimetableCommand, Timetable, Timetable> {
+  TimetableLoadingBloc(EducationQueryService educationQueryService) {
+    loaderFunc = educationQueryService.getCurrentTimetable;
+  }
+
+  @override
+  Stream<ConsumingState<Timetable>> commandArgumentTranslator(loaderFunc, LoadTimetableCommand command) =>
+    loaderFunc(command.education.id, command.semester.id, command.weekType.type);
+
+  @override
+  Timetable valueTranslator(Timetable argument) => argument;
+}
+
+class ExamsTimetableLoadingBloc extends AbstractPrimitiveLoaderBloc<LoadExamsTimetableCommand, ListedResponse<Exam>, List<Exam>>
+{
+  ExamsTimetableLoadingBloc(EducationQueryService educationQueryService) {
+    loaderFunc = educationQueryService.getExamsTimetable;
+  }
+
+  @override
+  Stream<ConsumingState<ListedResponse<Exam>>> commandArgumentTranslator(loaderFunc, LoadExamsTimetableCommand command) =>
+    loaderFunc(command.education.id, command.semester.id);
+
+  @override
+  List<Exam> valueTranslator(ListedResponse<Exam> argument) => argument.payload;
 }

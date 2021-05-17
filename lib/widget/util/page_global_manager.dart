@@ -10,7 +10,8 @@ import 'package:lk_client/page/personal_page.dart';
 import 'package:lk_client/page/timetable_page.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/store/local/timetable_page_state_container.dart';
+import 'package:lk_client/store/local/messenger_page_provider.dart';
+import 'package:lk_client/store/local/timetable_page_provider.dart';
 import 'package:lk_client/widget/util/subject_page_manager.dart';
 import 'package:lk_client/widget/util/timetable_page_manager.dart';
 
@@ -54,14 +55,9 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
             return IndexedStack(
               index: event.selectedIndex,
               children: [
-                NavigatorWrappedPage(
-                  TimetablePageStateContainer(
-                    child: TimetablePageManager(widget.loggedPerson),
-                    serviceProvider: AppStateContainer.of(context).serviceProvider
-                  )
-                ),
+                TimetablePageProvider(child: NavigatorWrappedPage(TimetablePageManager(widget.loggedPerson))),
                 NavigatorWrappedPage(SubjectPageManager(currentPerson: widget.loggedPerson)),
-                NavigatorWrappedPage(MessengerPage(widget.loggedPerson)),
+                MessengerPageProvider(child: NavigatorWrappedPage(MessengerPage(widget.loggedPerson))),
                 NavigatorWrappedPage(PersonalPage(widget.loggedPerson))
               ],
             );
