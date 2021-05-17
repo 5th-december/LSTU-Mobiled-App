@@ -1,7 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/bloc/abstract_endless_scrolling_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/person/person.dart';

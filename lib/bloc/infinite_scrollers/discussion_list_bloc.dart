@@ -1,6 +1,6 @@
 import 'dart:math';
 
-import 'package:lk_client/bloc/abstract_endless_scrolling_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
 import 'package:lk_client/bloc/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
