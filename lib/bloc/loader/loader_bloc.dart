@@ -1,4 +1,4 @@
-import 'package:lk_client/bloc/abstract_primitive_loader_bloc.dart';
+import 'package:lk_client/bloc/loader/abstract_primitive_loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "841070652935",
+    "project_id": "lstu-app",
+    "storage_bucket": "lstu-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:841070652935:android:f811eae26c3f70748d44a2",
+        "android_client_info": {
+          "package_name": "ru.lipetsk.stu.lkapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "841070652935-sjkca463h5u9tig9inpeqtbn9mk2lvf5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAGAEhQkdvRxrTL6FBVhK88O6UuNY99Hzs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "841070652935-sjkca463h5u9tig9inpeqtbn9mk2lvf5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

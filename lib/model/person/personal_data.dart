@@ -7,11 +7,11 @@ part 'personal_data.g.dart';
 
 @JsonSerializable()
 class PersonalData extends Validatable {
-  final String phone;
+  String phone;
 
-  final String email;
+  String email;
 
-  final String messenger;
+  String messenger;
 
   PersonalData({this.phone, this.email, this.messenger});
 
@@ -68,13 +68,9 @@ class PersonalData extends Validatable {
 
   factory PersonalData.fromPerson(Person person) {
     PersonalData pd = PersonalData(
-      email: person.email,
-      messenger: person.messenger,
-      phone: person.phone
-    );
+        email: person.email, messenger: person.messenger, phone: person.phone);
 
     return pd;
-    
   }
 
   factory PersonalData.fromJson(Map<String, dynamic> json) =>

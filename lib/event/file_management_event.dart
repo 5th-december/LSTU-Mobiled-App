@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/bloc/abstract_attached_form_bloc.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
 
 abstract class FileManagementEvent {

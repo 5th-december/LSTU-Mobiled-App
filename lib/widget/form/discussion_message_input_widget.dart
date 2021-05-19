@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/attached_discussion_form_bloc.dart';
-import 'package:lk_client/bloc/discussion_message_form_bloc.dart';
-import 'package:lk_client/bloc/file_transfer_bloc.dart';
+import 'package:lk_client/bloc/attached/attached_discussion_form_bloc.dart';
+import 'package:lk_client/bloc/attached/discussion_message_form_bloc.dart';
+import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';

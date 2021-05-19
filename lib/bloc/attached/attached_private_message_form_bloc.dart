@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/bloc/abstract_attached_form_bloc.dart';
-import 'package:lk_client/bloc/file_transfer_bloc.dart';
-import 'package:lk_client/bloc/private_message_form_bloc.dart';
+import 'package:lk_client/bloc/attached/abstract_attached_form_bloc.dart';
+import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
+import 'package:lk_client/bloc/attached/private_message_form_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/event/file_management_event.dart';

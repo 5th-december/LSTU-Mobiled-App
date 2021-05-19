@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
 import 'package:lk_client/error_handler/access_denied_error_handler.dart';
 import 'package:lk_client/error_handler/data_access_error_handler.dart';

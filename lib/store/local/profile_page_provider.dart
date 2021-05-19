@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/bloc/personal_data_form_bloc.dart';
+import 'package:lk_client/bloc/attached/personal_data_form_bloc.dart';
+import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 
@@ -12,6 +12,12 @@ class ProfilePageProvider extends StatefulWidget
 
   @override
   State<ProfilePageProvider> createState() => ProfilePageProviderState();
+
+  static ProfilePageProviderState of(BuildContext context) {
+    ProfilePageInherited inherited = context
+      .dependOnInheritedWidgetOfExactType<ProfilePageInherited>();
+    return inherited.pageState;
+  }
 }
 
 class ProfilePageInherited extends InheritedWidget 

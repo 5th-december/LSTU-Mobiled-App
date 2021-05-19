@@ -1,12 +1,11 @@
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/attached_private_message_form_bloc.dart';
-import 'package:lk_client/bloc/file_transfer_bloc.dart';
-import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/bloc/private_message_form_bloc.dart';
-import 'package:lk_client/bloc/private_message_list_bloc.dart';
+import 'package:lk_client/bloc/attached/attached_private_message_form_bloc.dart';
+import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
+import 'package:lk_client/bloc/attached/private_message_form_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
+import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
-import 'package:lk_client/store/local/person_finder_page_provider.dart';
 
 class PrivateDialogPageProvider extends StatefulWidget
 {

@@ -1,4 +1,4 @@
-import 'package:lk_client/bloc/abstract_file_transfer_bloc.dart';
+import 'package:lk_client/bloc/attached/abstract_file_transfer_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
 import 'package:lk_client/service/app_config.dart';

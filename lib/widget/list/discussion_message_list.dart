@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/discussion_list_bloc.dart';
-import 'package:lk_client/bloc/loader_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/discussion_list_bloc.dart';
+import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/model/discipline/discipline.dart';

@@ -1,7 +1,7 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/file_transfer_bloc.dart';
+import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';

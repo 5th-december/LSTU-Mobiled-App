@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/abstract_endless_scrolling_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
 import 'package:lk_client/state/endless_scrolling_state.dart';
 
 class EndlessScrollingWidget<T, C> extends StatefulWidget {

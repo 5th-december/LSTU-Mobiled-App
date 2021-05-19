@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
-import 'package:lk_client/bloc/dialog_list_bloc.dart';
-import 'package:lk_client/bloc/loader_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/dialog_list_bloc.dart';
+import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 

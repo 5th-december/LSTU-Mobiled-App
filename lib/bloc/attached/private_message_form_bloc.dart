@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/bloc/abstract_form_bloc.dart';
+import 'package:lk_client/bloc/attached/abstract_form_bloc.dart';
 import 'package:lk_client/command/produce_command.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/model/validatable.dart';

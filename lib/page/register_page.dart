@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/form/register_form.dart';

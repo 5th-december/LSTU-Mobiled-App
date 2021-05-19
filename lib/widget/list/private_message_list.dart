@@ -1,15 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/loader_bloc.dart';
-import 'package:lk_client/bloc/private_message_list_bloc.dart';
+import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as DialogModel;
 import 'package:lk_client/model/messenger/private_message.dart';
-import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/state/endless_scrolling_state.dart';
-import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/local/private_dialog_page_provider.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';

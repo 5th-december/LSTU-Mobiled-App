@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/authentication_bloc.dart';
-import 'package:lk_client/bloc/login_bloc.dart';
+import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
+import 'package:lk_client/bloc/authentication/login_bloc.dart';
 import 'package:lk_client/event/login_event.dart';
 import 'package:lk_client/model/authentication/login_credentials.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';

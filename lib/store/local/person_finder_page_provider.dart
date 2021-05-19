@@ -1,8 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/dialog_creator_bloc.dart';
-import 'package:lk_client/bloc/person_list_bloc.dart';
-import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
-import 'package:lk_client/service/api_consumer/person_query_service.dart';
+import 'package:lk_client/bloc/infinite_scrollers/person_list_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 
