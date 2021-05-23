@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
+import 'package:lk_client/model/discipline/student_work.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/education/timetable.dart';
 import 'package:lk_client/model/education/timetable_item.dart';
@@ -112,6 +113,28 @@ class DisciplineQueryService {
       }
     } on Exception catch (e) {
       yield ConsumingErrorState<ListedResponse<TeachingMaterial>>(error: e);
+    }
+  }
+
+  Stream<ConsumingState<ListedResponse<StudentWork>>> getStudentWorkList(
+      String education, String semester, String discipline) async* {
+    try {
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/student/tasks/list',
+          {'dis': discipline, 'edu': education, 'sem': semester},
+          this.accessKey.token);
+
+      if (response.status == 200) {
+        ListedResponse<StudentWork> loadedStudentWorks =
+            ListedResponse.fromJson(response.body, StudentWork.fromJson);
+        yield ConsumingReadyState<ListedResponse<StudentWork>>(
+            loadedStudentWorks);
+      } else {
+        yield ConsumingErrorState<ListedResponse<StudentWork>>(
+            error: this.apiErrorHandler.apply(response.body));
+      }
+    } on Exception catch (e) {
+      yield ConsumingErrorState<ListedResponse<StudentWork>>(error: e);
     }
   }
 }

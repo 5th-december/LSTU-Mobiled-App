@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/bloc/attached/personal_data_form_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
@@ -10,35 +9,28 @@ import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/state/producing_state.dart';
-import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
 
 class PersonEditPage extends StatefulWidget {
   final Person person;
+  final PersonalDataFormBloc personalDataFormBloc;
+  final PersonalDetailsLoaderBloc personalDetailsLoaderBloc;
 
-  PersonEditPage({Key key, @required this.person}) : super(key: key);
+  PersonEditPage(
+      {Key key,
+      @required this.person,
+      @required this.personalDataFormBloc,
+      @required this.personalDetailsLoaderBloc})
+      : super(key: key);
 
   @override
   _PersonEditPageState createState() => _PersonEditPageState();
 }
 
 class _PersonEditPageState extends State<PersonEditPage> {
-  PersonalDataFormBloc _personalDataFormBloc;
-  PersonalDetailsLoaderBloc _personalDetailsLoaderBloc;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (this._personalDataFormBloc == null) {
-      this._personalDataFormBloc =
-          ProfilePageProvider.of(context).personalDataFormBloc;
-    }
-
-    if (this._personalDetailsLoaderBloc == null) {
-      this._personalDetailsLoaderBloc =
-          ProfilePageProvider.of(context).personalDetailsLoaderBloc;
-    }
-  }
+  PersonalDataFormBloc get _personalDataFormBloc => widget.personalDataFormBloc;
+  PersonalDetailsLoaderBloc get _personalDetailsLoaderBloc =>
+      widget.personalDetailsLoaderBloc;
 
   @override
   Widget build(BuildContext context) {

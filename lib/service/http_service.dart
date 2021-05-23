@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:async';
-
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:lk_client/model/authentication/api_key.dart';
 
 import 'package:lk_client/service/app_config.dart';
 
@@ -25,7 +22,8 @@ class ApiEndpointConsumer {
 
   ApiEndpointConsumer(this._configuration);
 
-  Future<HttpResponse> post(String url, Map<String, dynamic> params,  Map<String, dynamic> body, 
+  Future<HttpResponse> post(
+      String url, Map<String, dynamic> params, Map<String, dynamic> body,
       [String apiJwtToken]) async {
     Uri uri;
     if (_configuration.useHttps == true) {
@@ -42,7 +40,8 @@ class ApiEndpointConsumer {
     final response =
         await http.post(uri, headers: headers, body: jsonEncode(body));
 
-    if (response.headers[HttpHeaders.contentTypeHeader] != ContentType.json.value) {
+    if (response.headers[HttpHeaders.contentTypeHeader] !=
+        ContentType.json.value) {
       throw new Exception('Undefined response type');
     }
 
@@ -65,7 +64,8 @@ class ApiEndpointConsumer {
     }
 
     final response = await http.get(uri, headers: headers);
-    if (response.headers[HttpHeaders.contentTypeHeader] != ContentType.json.value) {
+    if (response.headers[HttpHeaders.contentTypeHeader] !=
+        ContentType.json.value) {
       throw new Exception('Undefined response type');
     }
 
@@ -74,30 +74,38 @@ class ApiEndpointConsumer {
   }
 
   Future<void> produceResourseAsStream(
-    String url, Map<String, String> params, int fileCount, List<String> paramNames, List<String> fileNames, 
-    List<Stream<List<int>>> fileSources, List<int> fileSizes,
-    {String method = 'POST', List<int> expectedCodes = const[200, 201], String apiJwtToken}) async {
+      String url,
+      Map<String, String> params,
+      int fileCount,
+      List<String> paramNames,
+      List<String> fileNames,
+      List<Stream<List<int>>> fileSources,
+      List<int> fileSizes,
+      {String method = 'POST',
+      List<int> expectedCodes = const [200, 201],
+      String apiJwtToken}) async {
     final client = http.Client();
-    
-    http.MultipartRequest request = http.MultipartRequest(
-      method,
-      this._configuration.useHttps
-            ? Uri.https(this._configuration.apiBase, url, params)
-            : Uri.http(this._configuration.apiBase, url, params)
-    );
 
-    request.headers.addAll({
-      HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"
-    });
-    
-    for (int i = 0; i!= fileCount; ++i) {
-      http.MultipartFile file = http.MultipartFile(paramNames[i], fileSources[i], fileSizes[i], filename: fileNames[i]);
+    http.MultipartRequest request = http.MultipartRequest(
+        method,
+        this._configuration.useHttps
+            ? Uri.https(this._configuration.apiBase, url, params)
+            : Uri.http(this._configuration.apiBase, url, params));
+
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"});
+
+    for (int i = 0; i != fileCount; ++i) {
+      http.MultipartFile file = http.MultipartFile(
+          paramNames[i], fileSources[i], fileSizes[i],
+          filename: fileNames[i]);
       request.files.add(file);
     }
 
     http.StreamedResponse response = await client.send(request);
 
-    if(expectedCodes.length != 0 && !expectedCodes.contains(response.statusCode)) {
+    if (expectedCodes.length != 0 &&
+        !expectedCodes.contains(response.statusCode)) {
       throw new Exception('Uploading error');
     }
 
@@ -106,7 +114,9 @@ class ApiEndpointConsumer {
 
   Future<http.ByteStream> consumeResourseAsStream(
       String url, Map<String, String> params,
-      {String method = 'GET', List<int> expectedCodes = const[200, 201], String apiJwtToken}) async {
+      {String method = 'GET',
+      List<int> expectedCodes = const [200, 201],
+      String apiJwtToken}) async {
     final client = http.Client();
 
     http.Request request = http.Request(
@@ -115,13 +125,13 @@ class ApiEndpointConsumer {
             ? Uri.https(this._configuration.apiBase, url, params)
             : Uri.http(this._configuration.apiBase, url, params));
 
-    request.headers.addAll({
-      HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"
-    });
+    request.headers
+        .addAll({HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"});
 
     http.StreamedResponse response = await client.send(request);
 
-    if (expectedCodes.length != 0 && !expectedCodes.contains(response.statusCode)) {
+    if (expectedCodes.length != 0 &&
+        !expectedCodes.contains(response.statusCode)) {
       throw new Exception('Downloading error');
     }
 

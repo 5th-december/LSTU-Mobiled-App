@@ -5,7 +5,9 @@ import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
+import 'package:lk_client/page/achievements_page.dart';
 import 'package:lk_client/page/person_edit_page.dart';
+import 'package:lk_client/page/publications_page.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
@@ -189,13 +191,21 @@ class _PersonalPageState extends State<PersonalPage> {
                                       padding: EdgeInsets.only(top: 8.0),
                                       child: ElevatedButton(
                                           onPressed: () {
-                                            Navigator.of(context).push(
-                                                MaterialPageRoute(
-                                                    builder: (BuildContext
-                                                            context) =>
-                                                        PersonEditPage(
-                                                            person:
-                                                                loadedPerson)));
+                                            final personalDetailsLoaderBloc =
+                                                ProfilePageProvider.of(context)
+                                                    .personalDetailsLoaderBloc;
+                                            final personalDataFormBloc =
+                                                ProfilePageProvider.of(context)
+                                                    .personalDataFormBloc;
+                                            Navigator.of(context).push(MaterialPageRoute(
+                                                builder: (BuildContext
+                                                        context) =>
+                                                    PersonEditPage(
+                                                        personalDataFormBloc:
+                                                            personalDataFormBloc,
+                                                        personalDetailsLoaderBloc:
+                                                            personalDetailsLoaderBloc,
+                                                        person: loadedPerson)));
                                           },
                                           child: Text('Редактировать')))
                                 ],
@@ -226,6 +236,33 @@ class _PersonalPageState extends State<PersonalPage> {
                         )
                       ],
                     ),
+                  ),
+                  Divider(),
+                  ListView(
+                    shrinkWrap: true,
+                    children: [
+                      Container(
+                        child: ListTile(
+                          title: Text('Личные достижения'),
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      AchievementsPage(
+                                        person: widget._person,
+                                      ))),
+                        ),
+                      ),
+                      Container(
+                        child: ListTile(
+                          title: Text('Публикации'),
+                          onTap: () => Navigator.of(context).push(
+                              MaterialPageRoute(
+                                  builder: (BuildContext context) =>
+                                      PublicationsPage(
+                                          person: widget._person))),
+                        ),
+                      )
+                    ],
                   )
                 ],
               );

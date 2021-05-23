@@ -10,7 +10,7 @@ class WorkAnswer {
   final num score;
 
   @JsonKey(name: 'answer_attachments')
-  final WorkAnswerAttachment answerAttachments;
+  final List<WorkAnswerAttachment> answerAttachments;
 
   WorkAnswer({this.score, this.answerAttachments});
 

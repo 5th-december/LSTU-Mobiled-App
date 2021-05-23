@@ -1,46 +1,65 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lk_client/bloc/attached/abstract_file_transfer_bloc.dart';
 import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
-import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
+import 'package:lk_client/model/data_transfer/attachment.dart';
+import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
-import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/file_management_state.dart';
-import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/store/global/service_provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class FileDownloadWidget extends StatefulWidget {
-  final TeachingMaterial material;
+// Доставляет контент в file download widget в независимом от типа запроса виде
+abstract class DownloadMaterial {
+  final AbstractFileTransferBloc bloc;
+  DownloadMaterial({@required this.bloc});
+}
 
-  FileDownloadWidget({Key key, @required this.material}) : super(key: key);
+class DownloadFileMaterial extends DownloadMaterial {
+  final Attachment attachment;
+  DownloadFileMaterial({@required this.attachment, @required bloc})
+      : super(bloc: bloc);
+}
+
+class DownloadExternalLinkMaterial extends DownloadMaterial {
+  final ExternalLink externalLink;
+  DownloadExternalLinkMaterial({@required this.externalLink, @required bloc})
+      : super(bloc: bloc);
+}
+
+class TeachingMaterialDownloadManagerCreator {
+  static DownloadMaterial initialize(
+      TeachingMaterial material, TeachingMaterialDocumentTransferBloc bloc) {
+    if (material.attachment != null) {
+      return DownloadFileMaterial(bloc: bloc, attachment: material.attachment);
+    } else if (material.externalLink != null) {
+      return DownloadExternalLinkMaterial(
+          bloc: bloc, externalLink: material.externalLink);
+    }
+    throw Exception('Undefined attachment type');
+  }
+}
+
+class FileDownloadWidget extends StatefulWidget {
+  final DownloadMaterial manager;
+
+  FileDownloadWidget({Key key, @required this.manager}) : super(key: key);
 
   @override
   _FileDownloadWidgetState createState() => _FileDownloadWidgetState();
 }
 
 class _FileDownloadWidgetState extends State<FileDownloadWidget> {
-  TeachingMaterialDocumentTransferBloc _bloc;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (this._bloc == null) {
-      final ServiceProvider provider =
-          AppStateContainer.of(context).serviceProvider;
-      this._bloc = TeachingMaterialDocumentTransferBloc(provider.appConfig,
-          provider.fileLocalManager, provider.fileTransferService);
-    }
-  }
+  DownloadMaterial get manager => widget.manager;
 
   @override
   Widget build(BuildContext context) {
-    this._bloc.eventController.add(FileManagementInitEvent());
+    this.manager.bloc.eventController.add(FileManagementInitEvent());
 
-    if (widget.material.attachment != null) {
+    if (manager is DownloadFileMaterial) {
       return StreamBuilder(
-          stream: this._bloc.binaryTransferStateStream,
+          stream: this.manager.bloc.binaryTransferStateStream,
           builder: (BuildContext context, AsyncSnapshot snapshot) {
             if (snapshot.hasData) {
               FileManagementState state =
@@ -51,29 +70,33 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
                   onPressed: () async {
                     String basePath =
                         await FilePicker.platform.getDirectoryPath();
-                    this._bloc.eventController.add(FileFindInDirectoryEvent(
-                        basePath: basePath,
-                        fileName: widget.material.attachment.attachmentName));
+                    this.manager.bloc.eventController.add(
+                        FileFindInDirectoryEvent(
+                            basePath: basePath,
+                            fileName: (manager as DownloadFileMaterial)
+                                .attachment
+                                .attachmentName));
                   },
                   child: Icon(Icons.download_outlined),
                 );
-              } else if (state is FileUnlocatedState) {
-                this._bloc.eventController.add(
-                    FileStartDownloadEvent<LoadTeachingMaterialAttachment>(
-                        command:
-                            LoadTeachingMaterialAttachment(widget.material.id),
-                        file: LocalFilesystemObject.fromFilePath(state.filePath)));
-              } else if (state is FileOperationProgressState) {
+              }
+
+              if (state is FileOperationProgressState) {
                 int percent = ((state.rate /
                             1024.0 *
-                            double.parse(
-                                widget.material.attachment.attachmentSize)) *
+                            double.parse((manager as DownloadFileMaterial)
+                                .attachment
+                                .attachmentSize)) *
                         100.0)
                     .round();
                 return Text("$percent%");
-              } else if (state is FileOperationErrorState) {
+              }
+
+              if (state is FileOperationErrorState) {
                 return Icon(Icons.error_outlined);
-              } else if (state is FileDownloadReadyState) {
+              }
+
+              if (state is FileDownloadReadyState) {
                 return TextButton(
                   onPressed: () async {
                     return;
@@ -85,10 +108,12 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
 
             return SizedBox.shrink();
           });
-    } else if (widget.material.externalLink != null) {
+    } else if (manager is DownloadExternalLinkMaterial) {
       return TextButton(
         onPressed: () async {
-          final String link = widget.material.externalLink.linkContent;
+          final String link = (manager as DownloadExternalLinkMaterial)
+              .externalLink
+              .linkContent;
           await canLaunch(link)
               ? await launch(link)
               : throw Exception('Can not open link');

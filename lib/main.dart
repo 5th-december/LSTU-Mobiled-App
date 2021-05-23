@@ -10,6 +10,7 @@ import 'package:lk_client/error_handler/error_judge.dart';
 import 'package:lk_client/error_handler/not_found_error_handler.dart';
 import 'package:lk_client/error_handler/stub_error_handler.dart';
 import 'package:lk_client/error_handler/validation_error_handler.dart';
+import 'package:lk_client/service/api_consumer/achievement_query_service.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
@@ -88,10 +89,14 @@ Future<void> main() async {
       FileTransferService(appFileTransferManager, appAuthenticationExtractor);
 
   MessengerQueryService appMessengerQueryService = MessengerQueryService(
-    apiEndpointConsumer: appApiEndpointConsumer,
-    apiErrorHandler: apiErrorHandlersChain,
-    authenticationExtractor: appAuthenticationExtractor
-  );
+      apiEndpointConsumer: appApiEndpointConsumer,
+      apiErrorHandler: apiErrorHandlersChain,
+      authenticationExtractor: appAuthenticationExtractor);
+
+  AchievementQueryService appAchievementQueryService = AchievementQueryService(
+      apiEndpointConsumer: appApiEndpointConsumer,
+      authenticationExtractor: appAuthenticationExtractor,
+      apiErrorHandler: apiErrorHandlersChain);
 
   ServiceProvider applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,
@@ -103,6 +108,7 @@ Future<void> main() async {
       authorizationService: appAuthorizationService,
       messengerQueryService: appMessengerQueryService,
       personQueryService: appPersonQueryService,
+      achievementQueryService: appAchievementQueryService,
       educationQueryService: appEducationQueryService);
 
   // send start event to app authentication bloc in order to

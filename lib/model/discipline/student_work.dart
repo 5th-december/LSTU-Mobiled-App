@@ -33,7 +33,7 @@ class StudentWork {
       this.workMaxScore,
       this.answer});
 
-  factory StudentWork.fromJson(Map<String, dynamic> json) =>
+  static StudentWork fromJson(Map<String, dynamic> json) =>
       _$StudentWorkFromJson(json);
   Map<String, dynamic> toJson() => _$StudentWorkToJson(this);
 }

@@ -84,8 +84,8 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
                 child: ListTile(
                   title: Text(teachingMaterials[index].materialName),
                   subtitle: Text(teachingMaterialInfo),
-                  trailing:
-                      FileDownloadWidget(material: teachingMaterials[index]),
+                  //trailing:
+                  //    FileDownloadWidget(material: teachingMaterials[index]),
                 ),
               );
             },

@@ -28,7 +28,8 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (this._timetablePageManagerBloc == null) {
-      this._timetablePageManagerBloc = TimetablePageProvider.of(context).timetablePageManagerBloc;
+      this._timetablePageManagerBloc =
+          TimetablePageProvider.of(context).timetablePageManagerBloc;
     }
   }
 
@@ -81,9 +82,10 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
         },
         child: Padding(
             padding: EdgeInsets.only(right: 12.0),
-            child: Icon(Icons.calendar_today_outlined, size: 24.0)),
+            child: Icon(Icons.calendar_today_rounded, size: 24.0)),
       );
-    } else if (currentState is SelectedCustomTimetable && currentState.allowSwitchToDefault) {
+    } else if (currentState is SelectedCustomTimetable &&
+        currentState.allowSwitchToDefault) {
       changeTimetableLoadingTypeAction = GestureDetector(
         onTap: () {
           this._timetablePageManagerBloc.eventController.add(
@@ -91,7 +93,7 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
         },
         child: Padding(
             padding: EdgeInsets.only(right: 12.0),
-            child: Icon(Icons.stars_outlined, size: 24.0)),
+            child: Icon(Icons.favorite_border_rounded, size: 24.0)),
       );
     }
 
@@ -137,7 +139,8 @@ class _TimetablePageManagerState extends State<TimetablePageManager> {
             onPressed: () {
               this._timetablePageManagerBloc.eventController.sink.add(
                   ForceCustomTimetableSelection(
-                      person: widget.currentPerson, allowSwitchToDefault: false));
+                      person: widget.currentPerson,
+                      allowSwitchToDefault: false));
             })
       ])),
     );

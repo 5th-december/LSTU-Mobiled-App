@@ -4,8 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'achievement.g.dart';
 
 @JsonSerializable()
-class Achievement
-{
+class Achievement {
   final String id;
 
   final String name;
@@ -17,14 +16,14 @@ class Achievement
 
   final String type;
 
-  Achievement({
-    @required this.id,
-    @required this.name,
-    this.achievedDate,
-    this.kind,
-    this.type
-  });
+  Achievement(
+      {@required this.id,
+      @required this.name,
+      this.achievedDate,
+      this.kind,
+      this.type});
 
-  factory Achievement.fromJson(Map<String, dynamic> json) => _$AchievementFromJson(json);
+  static Achievement fromJson(Map<String, dynamic> json) =>
+      _$AchievementFromJson(json);
   Map<String, dynamic> toJson() => _$AchievementToJson(this);
 }

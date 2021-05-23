@@ -13,7 +13,8 @@ class PersonProfilePicture extends StatefulWidget {
   final Person displayed;
   final double size;
 
-  PersonProfilePicture({Key key, @required this.displayed, @required this.size}): super(key: key);
+  PersonProfilePicture({Key key, @required this.displayed, @required this.size})
+      : super(key: key);
 
   _PersonProfilePictureState createState() => _PersonProfilePictureState();
 }
@@ -44,9 +45,8 @@ class _PersonProfilePictureState extends State<PersonProfilePicture> {
 
   @override
   Widget build(BuildContext context) {
-    this._bloc.eventController.sink.add(
-        StartConsumeEvent<LoadProfilePicture>(
-            request: LoadProfilePicture(this._person, this._size)));
+    this._bloc.eventController.sink.add(StartConsumeEvent<LoadProfilePicture>(
+        request: LoadProfilePicture(this._person, this._size)));
 
     return StreamBuilder(
       stream: this._bloc.consumingStateStream,
@@ -55,17 +55,23 @@ class _PersonProfilePictureState extends State<PersonProfilePicture> {
             snapshot.data is ConsumingReadyState<ProfilePicture>) {
           var _state = snapshot.data as ConsumingReadyState<ProfilePicture>;
           ProfilePicture pic = _state.content;
-          return SizedBox(
-              width: _size,
-              height: _size,
-              child: Container (
-              decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  image: DecorationImage(
-                      fit: BoxFit.fill, image: MemoryImage(pic.toBinary())))));
+          return Container(
+            decoration:
+                BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: CircleAvatar(
+                radius: _size,
+                backgroundColor: Colors.white,
+                backgroundImage: MemoryImage(pic.toBinary())),
+          );
         }
 
-        return Center(child: CircularProgressIndicator());
+        return Container(
+            decoration:
+                BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+            child: CircleAvatar(
+              radius: _size,
+              backgroundColor: Colors.grey.shade300,
+            ));
       },
     );
   }

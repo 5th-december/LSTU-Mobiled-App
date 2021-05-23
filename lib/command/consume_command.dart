@@ -23,7 +23,6 @@ class LoadProfilePicture {
   LoadProfilePicture(this.person, this.size);
 }
 
-
 class LoadDisciplineTeacherList {
   final Discipline discipline;
   final Education education;
@@ -88,7 +87,8 @@ class LoadPrivateChatMessagesListCommand {
   final Dialog dialog;
   final int count;
   final int offset;
-  LoadPrivateChatMessagesListCommand({@required this.dialog, @required this.count, @required this.offset});
+  LoadPrivateChatMessagesListCommand(
+      {@required this.dialog, @required this.count, @required this.offset});
 }
 
 class LoadDialogListCommand {
@@ -103,9 +103,12 @@ class LoadDisciplineDiscussionListCommand {
   final Semester semester;
   final int count;
   final int offset;
-  LoadDisciplineDiscussionListCommand({
-    this.discipline, this.count, this.offset, this.education, this.semester
-  });
+  LoadDisciplineDiscussionListCommand(
+      {this.discipline,
+      this.count,
+      this.offset,
+      this.education,
+      this.semester});
 }
 
 abstract class MultipartRequestCommand {}
@@ -129,29 +132,48 @@ class LoadPersonListByTextQuery {
   final String textQuery;
   final int count;
   final int offset;
-  LoadPersonListByTextQuery({
-    @required this.count,
-    @required this.offset,
-    this.textQuery
-  });
+  LoadPersonListByTextQuery(
+      {@required this.count, @required this.offset, this.textQuery});
 }
 
 class LoadTimetableCommand {
   final TimetableWeek weekType;
   final Education education;
   final Semester semester;
-  LoadTimetableCommand({
-    @required this.weekType,
-    @required this.semester,
-    @required this.education
-  });
+  LoadTimetableCommand(
+      {@required this.weekType,
+      @required this.semester,
+      @required this.education});
 }
 
 class LoadExamsTimetableCommand {
   final Education education;
   final Semester semester;
-  LoadExamsTimetableCommand({
-    @required this.education,
-    @required this.semester
-  });
+  LoadExamsTimetableCommand(
+      {@required this.education, @required this.semester});
+}
+
+class LoadPublicationsListCommand {
+  final Person person;
+  LoadPublicationsListCommand({@required this.person});
+}
+
+class LoadAchievementsListCommand {
+  final Person person;
+  LoadAchievementsListCommand({@required this.person});
+}
+
+class LoadAchievementsSummaryCommand {
+  final Person person;
+  LoadAchievementsSummaryCommand({@required this.person});
+}
+
+class LoadTasksListCommand {
+  final Education education;
+  final Semester semester;
+  final Discipline discipline;
+  LoadTasksListCommand(
+      {@required this.discipline,
+      @required this.education,
+      @required this.semester});
 }

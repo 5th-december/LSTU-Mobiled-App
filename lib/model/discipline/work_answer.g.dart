@@ -9,10 +9,11 @@ part of 'work_answer.dart';
 WorkAnswer _$WorkAnswerFromJson(Map<String, dynamic> json) {
   return WorkAnswer(
     score: json['score'] as num,
-    answerAttachments: json['answer_attachments'] == null
-        ? null
-        : WorkAnswerAttachment.fromJson(
-            json['answer_attachments'] as Map<String, dynamic>),
+    answerAttachments: (json['answer_attachments'] as List)
+        ?.map((e) => e == null
+            ? null
+            : WorkAnswerAttachment.fromJson(e as Map<String, dynamic>))
+        ?.toList(),
   );
 }
 

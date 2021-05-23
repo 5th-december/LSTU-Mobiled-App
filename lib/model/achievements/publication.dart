@@ -4,8 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'publication.g.dart';
 
 @JsonSerializable()
-class Publication
-{
+class Publication {
   final String id;
 
   final String title;
@@ -23,16 +22,16 @@ class Publication
   @JsonKey(name: 'pub_form_value')
   final String pubFormValue;
 
-  Publication({
-    @required this.id,
-    this.title,
-    this.description,
-    this.published,
-    this.pubType,
-    this.pubForm,
-    this.pubFormValue
-  });
+  Publication(
+      {@required this.id,
+      this.title,
+      this.description,
+      this.published,
+      this.pubType,
+      this.pubForm,
+      this.pubFormValue});
 
-  factory Publication.fromJson(Map<String, dynamic> json) => _$PublicationFromJson(json);
+  static Publication fromJson(Map<String, dynamic> json) =>
+      _$PublicationFromJson(json);
   Map<String, dynamic> toJson() => _$PublicationToJson(this);
 }
