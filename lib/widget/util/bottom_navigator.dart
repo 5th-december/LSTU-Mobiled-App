@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
+import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
@@ -24,12 +25,19 @@ class _BottomNavigatorState extends State<BottomNavigator> {
       this._navigator =
           AppStateContainer.of(context).blocProvider.navigationBloc;
     }
+
+    if (widget.startIndex != null) {
+      this
+          ._navigator
+          .eventController
+          .add(NavigateToPageEvent(widget.startIndex));
+    } else {
+      this._navigator.serviceController.add(GetCurrentStateEvent());
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    this._navigator.eventController.add(NavigateToPageEvent(widget.startIndex));
-
     return StreamBuilder(
         stream: this._navigator.navigationStateStream,
         builder:
@@ -43,16 +51,15 @@ class _BottomNavigatorState extends State<BottomNavigator> {
               },
               items: const <BottomNavigationBarItem>[
                 BottomNavigationBarItem(
-                    icon: Icon(IconData(62694, fontFamily: 'MaterialIcons')),
+                    icon: Icon(Icons.calendar_today_rounded),
                     label: 'Расписание'),
                 BottomNavigationBarItem(
-                    icon: Icon(IconData(62489, fontFamily: 'MaterialIcons')),
-                    label: 'Образование'),
+                    icon: Icon(Icons.school_rounded), label: 'Образование'),
                 BottomNavigationBarItem(
-                    icon: Icon(IconData(61704, fontFamily: 'MaterialIcons')),
+                    icon: Icon(Icons.chat_bubble_outline_rounded),
                     label: 'Сообщения'),
                 BottomNavigationBarItem(
-                    icon: Icon(IconData(58080, fontFamily: 'MaterialIcons')),
+                    icon: Icon(Icons.account_circle_rounded),
                     label: 'Мой профиль')
               ]);
         });

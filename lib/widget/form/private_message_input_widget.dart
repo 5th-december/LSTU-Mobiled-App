@@ -11,15 +11,16 @@ import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/producing_state.dart';
 import 'package:lk_client/store/local/private_dialog_page_provider.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
-import 'package:lk_client/widget/form/attached_form.dart';
+import 'package:lk_client/widget/form/attached_messaging_form.dart';
 
 class PrivateMessageInputWidget extends StatefulWidget {
   final DialogModel.Dialog dialog;
 
-  PrivateMessageInputWidget({Key key, this.dialog}): super(key: key);
+  PrivateMessageInputWidget({Key key, this.dialog}) : super(key: key);
 
   @override
-  _PrivateMessageInputWidgetState createState() => _PrivateMessageInputWidgetState();
+  _PrivateMessageInputWidgetState createState() =>
+      _PrivateMessageInputWidgetState();
 }
 
 class _PrivateMessageInputWidgetState extends State<PrivateMessageInputWidget> {
@@ -28,47 +29,61 @@ class _PrivateMessageInputWidgetState extends State<PrivateMessageInputWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._bloc == null) {
-      this._bloc = PrivateDialogPageProvider.of(context).attachedPrivateMessageFormBloc;
+    if (this._bloc == null) {
+      this._bloc =
+          PrivateDialogPageProvider.of(context).attachedPrivateMessageFormBloc;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    this._bloc.eventController.sink.add(ProducerInitEvent<AttachedFileContent<PrivateMessage>>());
+    this
+        ._bloc
+        .eventController
+        .sink
+        .add(ProducerInitEvent<AttachedFileContent<PrivateMessage>>());
 
     return StreamBuilder(
-      stream: this._bloc.attachedFormStateStream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if(snapshot.hasData) {
-          final state = snapshot.data as ProducingState<PrivateMessage>;
+        stream: this._bloc.attachedFormStateStream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            final state = snapshot.data as ProducingState<PrivateMessage>;
 
-          return AttachedForm(
-            hasInvalidations: state is ProducingInvalidState, 
-            hasErrors: state is ProducingErrorState,
-            onSendAction: ({@required String messageText, LocalFilesystemObject attachment, ExternalLink link}) {
+            return AttachedMessagingForm(
+              hasInvalidations: state is ProducingInvalidState,
+              hasErrors: state is ProducingErrorState,
+              isWaiting: state is ProducingLoadingState,
+              errorBox: state is ProducingInvalidState
+                  ? (state as ProducingInvalidState).errorBox
+                  : null,
+              errorText: state is ProducingErrorState
+                  ? (state as ProducingErrorState).error.toString()
+                  : null,
+              onSendAction: (
+                  {@required String messageText,
+                  LocalFilesystemObject attachment,
+                  ExternalLink link}) {
+                PrivateMessage msg = PrivateMessage(
+                    messageText: messageText,
+                    links: link != null ? <ExternalLink>[link] : null);
 
-              PrivateMessage msg = PrivateMessage(
-                messageText: messageText, 
-                links: <ExternalLink>[link]
-              );
+                AttachedFileContent<PrivateMessage> privateMessage =
+                    AttachedFileContent<PrivateMessage>(
+                        content: msg, file: attachment);
 
-              AttachedFileContent<PrivateMessage> privateMessage = AttachedFileContent<PrivateMessage>(
-                content: msg, 
-                file: attachment
-              );
+                /**
+                 * Ивент об отправке контента
+                 */
+                this._bloc.eventController.sink.add(ProduceResourceEvent<
+                        AttachedFileContent<PrivateMessage>,
+                        SendNewPrivateMessage>(
+                    command: SendNewPrivateMessage(dialog: widget.dialog),
+                    resource: privateMessage));
+              },
+            );
+          }
 
-              this._bloc.eventController.sink.add(
-                ProduceResourceEvent<AttachedFileContent<PrivateMessage>, SendNewPrivateMessage>(
-                  command: SendNewPrivateMessage(dialog: widget.dialog), resource: privateMessage
-                )
-              );
-            },
-          );
-        }
-
-        return ListLoadingBottomIndicator();
-      }
-    );
+          return ListLoadingBottomIndicator();
+        });
   }
 }

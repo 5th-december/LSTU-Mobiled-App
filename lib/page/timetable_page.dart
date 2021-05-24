@@ -10,13 +10,13 @@ import 'package:lk_client/widget/list/timetable_list.dart';
 class TimetablePage extends StatefulWidget {
   final Education education;
   final Semester semester;
-  final Widget timetableSelector;
+  final List<Widget> timetableSelectorList;
 
   TimetablePage(
       {Key key,
       @required this.education,
       @required this.semester,
-      this.timetableSelector})
+      this.timetableSelectorList})
       : super(key: key);
 
   @override
@@ -36,21 +36,19 @@ class _TimetablePageState extends State<TimetablePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Расписание'),
-        actions: [widget.timetableSelector],
-        bottom: TabBar(
-          controller: this._tabController,
-          tabs: [
-            Tab(icon: Text('Белая')),
-            Tab(icon: Text('Зеленая')),
-            Tab(icon: Text('Экзамены')),
-          ],
+        appBar: AppBar(
+          title: Text('Расписание'),
+          actions: widget.timetableSelectorList,
+          bottom: TabBar(
+            controller: this._tabController,
+            tabs: [
+              Tab(icon: Text('Белая')),
+              Tab(icon: Text('Зеленая')),
+              Tab(icon: Text('Экзамены')),
+            ],
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: this._tabController,
-        children: [
+        body: TabBarView(controller: this._tabController, children: [
           TimetableList(
             education: widget.education,
             semester: widget.semester,
@@ -61,12 +59,7 @@ class _TimetablePageState extends State<TimetablePage>
             semester: widget.semester,
             week: TimetableWeek(type: 'green'),
           ),
-          ExamsList(
-            education: widget.education, 
-            semester: widget.semester
-          )
-        ]
-      )
-    );
+          ExamsList(education: widget.education, semester: widget.semester)
+        ]));
   }
 }

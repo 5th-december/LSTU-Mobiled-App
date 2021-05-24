@@ -5,6 +5,7 @@ import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/widget/list/publications_list.dart';
+import 'package:lk_client/widget/util/bottom_navigator.dart';
 
 class PublicationsPage extends StatefulWidget {
   final Person person;
@@ -30,6 +31,7 @@ class _PublicationsPageState extends State<PublicationsPage> {
         body: PublicationsList(
           person: widget.person,
           publicationsListLoaderBloc: publicationsListLoaderBloc,
-        ));
+        ),
+        bottomNavigationBar: BottomNavigator());
   }
 }

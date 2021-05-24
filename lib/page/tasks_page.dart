@@ -7,6 +7,7 @@ import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/list/tasks_list.dart';
+import 'package:lk_client/widget/util/bottom_navigator.dart';
 
 class TasksPage extends StatefulWidget {
   final Education education;
@@ -38,12 +39,12 @@ class _TasksPageState extends State<TasksPage> {
 
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Задания')),
-      body: TasksList(
-          discipline: widget.discipline,
-          education: widget.education,
-          semester: widget.semester,
-          tasksListLoaderBloc: this.tasksListLoaderBloc),
-    );
+        appBar: AppBar(title: Text('Задания')),
+        body: TasksList(
+            discipline: widget.discipline,
+            education: widget.education,
+            semester: widget.semester,
+            tasksListLoaderBloc: this.tasksListLoaderBloc),
+        bottomNavigationBar: BottomNavigator());
   }
 }

@@ -13,24 +13,22 @@ abstract class AbstractBloc<TS, TE> {
 
   StreamController<TE> eventController = StreamController<TE>.broadcast();
 
-  @protected
-  StreamController<TS> statusController = StreamController<TS>();
-  Stream<TS> get currentStateStream => statusController.stream;
+  StreamController serviceController = StreamController.broadcast();
 
   AbstractBloc() {
-    Stream<TE> currentStateEventStream = this
-        .eventController
+    Stream currentStateEventStream = this
+        .serviceController
         .stream
         .where((event) => event is GetCurrentStateEvent);
     currentStateEventStream.listen((event) {
-      this.statusController.sink.add(_currentState);
+      this.stateContoller.sink.add(_currentState);
     });
   }
 
   dispose() async {
     await this.stateContoller.close();
     await this.eventController.close();
-    await this.statusController.close();
+    await this.serviceController.close();
   }
 
   @protected

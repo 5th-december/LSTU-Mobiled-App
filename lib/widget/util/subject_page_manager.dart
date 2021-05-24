@@ -8,6 +8,7 @@ import 'package:lk_client/page/discipline_page.dart';
 import 'package:lk_client/widget/list/discipline_list.dart';
 import 'package:lk_client/widget/list/education_list.dart';
 import 'package:lk_client/widget/list/semester_list.dart';
+import 'package:lk_client/widget/util/bottom_navigator.dart';
 
 class SubjectPageManager extends StatefulWidget {
   final Person currentPerson;
@@ -49,10 +50,12 @@ class _SubjectPageManagerState extends State<SubjectPageManager> {
 
   Widget getEducationListPage(Function onItemTap) {
     return Scaffold(
-        appBar: AppBar(
-          title: Text('Периоды обучения'),
-        ),
-        body: EducationList(widget.currentPerson, onItemTap));
+      appBar: AppBar(
+        title: Text('Периоды обучения'),
+      ),
+      body: EducationList(widget.currentPerson, onItemTap),
+      bottomNavigationBar: BottomNavigator(),
+    );
   }
 
   Widget getSemestersListPage(Education education, Function onItemTap) {
@@ -60,7 +63,8 @@ class _SubjectPageManagerState extends State<SubjectPageManager> {
         appBar: AppBar(
           title: Text('Семестры'),
         ),
-        body: SemesterList(education, onItemTap));
+        body: SemesterList(education, onItemTap),
+        bottomNavigationBar: BottomNavigator());
   }
 
   Widget getSubjectsListPage(
@@ -70,6 +74,7 @@ class _SubjectPageManagerState extends State<SubjectPageManager> {
           title: Text('Дисциплины'),
         ),
         body: DisciplineList(
-            education: education, semester: semester, onItemTap: onItemTap));
+            education: education, semester: semester, onItemTap: onItemTap),
+        bottomNavigationBar: BottomNavigator());
   }
 }

@@ -11,16 +11,15 @@ import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/state/producing_state.dart';
 
-class AttachedDiscussionFormBloc extends AbstractAttachedFormBloc
-  <DiscussionMessage, DiscussionMessage, SendNewDiscussionMessage> {
-
+class AttachedDiscussionFormBloc extends AbstractAttachedFormBloc<
+    DiscussionMessage, DiscussionMessage, SendNewDiscussionMessage> {
   final DiscussionMessageFormBloc discussionMessageFormBloc;
-  final DiscussionMessageSendDocumentTransferBloc discussionMessageSendDocumentTransferBloc;
+  final DiscussionMessageSendDocumentTransferBloc
+      discussionMessageSendDocumentTransferBloc;
 
-  AttachedDiscussionFormBloc({
-    @required this.discussionMessageFormBloc,
-    @required this.discussionMessageSendDocumentTransferBloc
-  });
+  AttachedDiscussionFormBloc(
+      {@required this.discussionMessageFormBloc,
+      @required this.discussionMessageSendDocumentTransferBloc});
 
   @override
   dispose() {
@@ -30,28 +29,37 @@ class AttachedDiscussionFormBloc extends AbstractAttachedFormBloc
   }
 
   @override
-  Stream<ProducingState<DiscussionMessage>> sendFormData(DiscussionMessage request, SendNewDiscussionMessage command) {
+  Stream<ProducingState<DiscussionMessage>> sendFormData(
+      DiscussionMessage request, SendNewDiscussionMessage command) {
     this.discussionMessageFormBloc.eventController.sink.add(
-      ProduceResourceEvent<DiscussionMessage, SendNewDiscussionMessage>(command: command, resource: request));
+        ProduceResourceEvent<DiscussionMessage, SendNewDiscussionMessage>(
+            command: command, resource: request));
     return this.discussionMessageFormBloc.resourseStateStream;
   }
 
   @override
-  Stream<FileManagementState> sendMultipartData(LocalFilesystemObject loadingFile, DiscussionMessage argument) {
-    this.discussionMessageSendDocumentTransferBloc.eventController.sink.add(
-      FileFindLocallyEvent(file: loadingFile));
+  Stream<FileManagementState> sendMultipartData(
+      LocalFilesystemObject loadingFile, DiscussionMessage argument) {
+    this
+        .discussionMessageSendDocumentTransferBloc
+        .eventController
+        .sink
+        .add(FileFindLocallyEvent(file: loadingFile));
 
-    this.discussionMessageSendDocumentTransferBloc.binaryTransferStateStream.listen((event) {
-      if(event is FileLocatedState) {
+    this
+        .discussionMessageSendDocumentTransferBloc
+        .binaryTransferStateStream
+        .listen((event) {
+      if (event is FileLocatedState) {
         this.discussionMessageSendDocumentTransferBloc.eventController.sink.add(
-          FileStartUploadEvent<UploadDiscussionMessageAttachment>(
-            command: UploadDiscussionMessageAttachment(message: argument),
-            file: loadingFile
-          )
-        );
+            FileStartUploadEvent<UploadDiscussionMessageAttachment>(
+                command: UploadDiscussionMessageAttachment(message: argument),
+                file: loadingFile));
       }
     });
 
-    return this.discussionMessageSendDocumentTransferBloc.binaryTransferStateStream;
+    return this
+        .discussionMessageSendDocumentTransferBloc
+        .binaryTransferStateStream;
   }
 }

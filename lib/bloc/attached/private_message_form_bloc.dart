@@ -5,9 +5,8 @@ import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/model/validatable.dart';
 import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 
-class PrivateMessageFormBloc extends 
-  AbstractFormBloc<PrivateMessage, SendNewPrivateMessage, PrivateMessage>
-{
+class PrivateMessageFormBloc extends AbstractFormBloc<PrivateMessage,
+    SendNewPrivateMessage, PrivateMessage> {
   final MessengerQueryService messengerQueryService;
 
   PrivateMessageFormBloc({@required this.messengerQueryService});
@@ -18,8 +17,11 @@ class PrivateMessageFormBloc extends
   }
 
   @override
-  Future<PrivateMessage> getResponse(PrivateMessage request, SendNewPrivateMessage command) async {
-    return await this.messengerQueryService.sendNewPrivateMessage(request, command.dialog.id);
+  Future<PrivateMessage> getResponse(
+      PrivateMessage request, SendNewPrivateMessage command) async {
+    return await this
+        .messengerQueryService
+        .sendNewPrivateMessage(request, command.dialog.id);
   }
 
   @override

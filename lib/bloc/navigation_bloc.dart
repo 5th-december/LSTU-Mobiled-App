@@ -8,19 +8,27 @@ class NavigationBloc extends AbstractBloc<NavigationState, NavigationEvent> {
   Stream<NavigationState> get navigationStateStream =>
       this.stateContoller.stream;
 
-  Stream<NavigationEvent> get _navigationEventStream => this
-      .eventController
-      .stream
-      .where((event) => event is NavigateToPageEvent);
+  /*
+   * Переход на указанную вкладку
+   * Событие игнорируется если требуемая вкладка уже открыта
+   */
+  Stream<NavigationEvent> get _navigationEventStream =>
+      this.eventController.stream.where((event) =>
+          event is NavigateToPageEvent &&
+          event.pageNumber != currentState?.selectedIndex);
 
-  Stream<NavigationEvent> get _navigateToCustomPageEventStream => this
-      .eventController
-      .stream
-      .where((event) => event is NavigateToCustomPageEvent);
+  /*
+   * Открытие страницы в указанной вкладке
+   */
+  Stream<NavigationEvent> get _navigateToCustomPageEventStream =>
+      this.eventController.stream.where((event) =>
+          event is NavigateToCustomPageEvent &&
+          event.pageNumber != currentState.selectedIndex);
 
   NavigationBloc() {
     this._navigationEventStream.listen((NavigationEvent event) {
       final _event = event as NavigateToPageEvent;
+
       switch (_event.pageNumber) {
         case 0:
           this.updateState(NavigatedToTimetablePage(_event.pageNumber));
@@ -39,6 +47,11 @@ class NavigationBloc extends AbstractBloc<NavigationState, NavigationEvent> {
       }
     });
 
-    this._navigateToCustomPageEventStream.listen((event) {});
+    this._navigateToCustomPageEventStream.listen((event) {
+      /**
+       * Для открытия произвольной страницы в указанной вкладке
+       * В page managere нужно обрабатывать такие события, push на навигаторах с указанными индексами
+       */
+    });
   }
 }

@@ -41,20 +41,27 @@ abstract class AbstractFileTransferBloc
 
       /* Для eventов поиска в директориях */
       if (event is FileFindLocallyEvent ||
-        event is FileFindInDirectoryEvent ||
-        event is FileFindInDefaultDocumentLocationEvent
-      ){
+          event is FileFindInDirectoryEvent ||
+          event is FileFindInDefaultDocumentLocationEvent) {
         this.updateState(FileLocationProgressState());
 
-        bool isExists = await fileLocalManager.isFileExists(filePath: event.file.filePath);
+        bool isExists =
+            await fileLocalManager.isFileExists(filePath: event.file.filePath);
 
         if (isExists) {
-          final Map<String, bool> permissions = await fileLocalManager.getPremissions(event.file.filePath);
-          this.updateState(FileLocatedState(filePath: event.file.filePath, w: permissions['w'], r: permissions['r']));
+          final Map<String, bool> permissions =
+              await fileLocalManager.getPremissions(event.file.filePath);
+          this.updateState(FileLocatedState(
+              filePath: event.file.filePath,
+              w: permissions['w'],
+              r: permissions['r']));
         } else {
-          final String basePath = fileLocalManager.getFileBase(event.file.filePath);
-          final Map<String, bool> permissions = await fileLocalManager.getPremissions(basePath);
-          this.updateState(FileUnlocatedState(filePath: event.file.filePath, w: permissions['w']));
+          final String basePath =
+              fileLocalManager.getFileBase(event.file.filePath);
+          final Map<String, bool> permissions =
+              await fileLocalManager.getPremissions(basePath);
+          this.updateState(FileUnlocatedState(
+              filePath: event.file.filePath, w: permissions['w']));
         }
       }
 
@@ -64,11 +71,11 @@ abstract class AbstractFileTransferBloc
        * либо если файл найден и может быть заменен
        */
       if (event is FileStartDownloadEvent<MultipartRequestCommand> &&
-          ((currentState is FileUnlocatedState && (currentState as FileUnlocatedState).w) ||
-          (currentState is FileLocatedState && (currentState as FileLocatedState).w))
-          ) {
-
-        if(currentState is FileLocatedState) {
+          ((currentState is FileUnlocatedState &&
+                  (currentState as FileUnlocatedState).w) ||
+              (currentState is FileLocatedState &&
+                  (currentState as FileLocatedState).w))) {
+        if (currentState is FileLocatedState) {
           fileLocalManager.deleteFile(event.file.filePath);
         }
 
@@ -80,8 +87,8 @@ abstract class AbstractFileTransferBloc
           } else if (iOEvent is FileOperationError) {
             this.updateState(FileOperationErrorState());
           } else if (iOEvent is FileOperationDone) {
-            bool isExists =
-                await fileLocalManager.isFileExists(filePath: event.file.filePath);
+            bool isExists = await fileLocalManager.isFileExists(
+                filePath: event.file.filePath);
 
             if (!isExists) {
               this.updateState(FileOperationErrorState());
@@ -100,7 +107,8 @@ abstract class AbstractFileTransferBloc
        * Выгрузка доступна только если файл найден по указанному пути
        */
       if (event is FileStartUploadEvent<MultipartRequestCommand> &&
-          ((currentState is FileLocatedState && (currentState as FileLocatedState).r) || 
+          ((currentState is FileLocatedState &&
+                  (currentState as FileLocatedState).r) ||
               currentState is FileDownloadReadyState)) {
         this
             .startUploadingOperation(event.command, event.file.filePath)

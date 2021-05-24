@@ -11,14 +11,15 @@ import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/state/producing_state.dart';
 
-class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMessage, PrivateMessage, SendNewPrivateMessage> {
+class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<
+    PrivateMessage, PrivateMessage, SendNewPrivateMessage> {
   final PrivateMessageFormBloc privateMessageFormBloc;
-  final PrivateMessageSendDocumentTransferBloc privateMessageDocumentTransferBloc;
+  final PrivateMessageSendDocumentTransferBloc
+      privateMessageDocumentTransferBloc;
 
-  AttachedPrivateMessageFormBloc({
-    @required this.privateMessageDocumentTransferBloc,
-    @required this.privateMessageFormBloc
-  });
+  AttachedPrivateMessageFormBloc(
+      {@required this.privateMessageDocumentTransferBloc,
+      @required this.privateMessageFormBloc});
 
   @override
   dispose() {
@@ -28,26 +29,34 @@ class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<PrivateMes
   }
 
   @override
-  Stream<ProducingState<PrivateMessage>> sendFormData(PrivateMessage request, SendNewPrivateMessage command) {
+  Stream<ProducingState<PrivateMessage>> sendFormData(
+      PrivateMessage request, SendNewPrivateMessage command) {
     this.privateMessageFormBloc.eventController.sink.add(
-      ProduceResourceEvent<PrivateMessage, SendNewPrivateMessage>(resource: request, command: command));
+        ProduceResourceEvent<PrivateMessage, SendNewPrivateMessage>(
+            resource: request, command: command));
     return this.privateMessageFormBloc.resourseStateStream;
   }
 
   @override
-  Stream<FileManagementState> sendMultipartData(LocalFilesystemObject loadingFile, PrivateMessage argument) {
-    this.privateMessageDocumentTransferBloc.eventController.sink.add(
-      FileFindLocallyEvent(file: loadingFile)
-    );
-    this.privateMessageDocumentTransferBloc.binaryTransferStateStream.listen((event) {
-      if(event is FileLocatedState) {
+  Stream<FileManagementState> sendMultipartData(
+      LocalFilesystemObject loadingFile, PrivateMessage argument) {
+    this
+        .privateMessageDocumentTransferBloc
+        .eventController
+        .sink
+        .add(FileFindLocallyEvent(file: loadingFile));
+    this
+        .privateMessageDocumentTransferBloc
+        .binaryTransferStateStream
+        .listen((event) {
+      if (event is FileLocatedState) {
         this.privateMessageDocumentTransferBloc.eventController.sink.add(
-          FileStartUploadEvent<UploadPrivateMessageAttachment>(
-            file: loadingFile, command: UploadPrivateMessageAttachment(message: argument)
-        ));
+            FileStartUploadEvent<UploadPrivateMessageAttachment>(
+                file: loadingFile,
+                command: UploadPrivateMessageAttachment(message: argument)));
       }
     });
-    
+
     return this.privateMessageDocumentTransferBloc.binaryTransferStateStream;
   }
 }

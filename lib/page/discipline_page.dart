@@ -10,6 +10,7 @@ import 'package:lk_client/widget/layout/discipline_details.dart';
 import 'package:lk_client/widget/list/discipline_teachers_list.dart';
 import 'package:lk_client/widget/list/teach_materials_list.dart';
 import 'package:lk_client/widget/list/timetable_horizontal_list.dart';
+import 'package:lk_client/widget/util/bottom_navigator.dart';
 
 class DisciplinePage extends StatefulWidget {
   final Discipline discipline;
@@ -61,6 +62,7 @@ class _DisciplinePageState extends State<DisciplinePage> {
                             semester: widget.semester,
                             discipline: widget.discipline,
                           ),
+                          bottomNavigationBar: BottomNavigator(),
                         );
                       }))
                     },
@@ -87,6 +89,7 @@ class _DisciplinePageState extends State<DisciplinePage> {
               })),
             )
           ],
-        ));
+        ),
+        bottomNavigationBar: BottomNavigator());
   }
 }

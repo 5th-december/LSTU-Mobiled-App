@@ -4,8 +4,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'external_link.g.dart';
 
 @JsonSerializable()
-class ExternalLink
-{
+class ExternalLink {
   @JsonKey(name: 'link_text')
   final String linkText;
 
@@ -14,6 +13,10 @@ class ExternalLink
 
   ExternalLink({this.linkText, this.linkContent});
 
-  factory ExternalLink.fromJson(Map<String, dynamic> json) => _$ExternalLinkFromJson(json);
+  // TODO: Вытаскивать базу урла
+  String get linkBaseUrl => '';
+
+  factory ExternalLink.fromJson(Map<String, dynamic> json) =>
+      _$ExternalLinkFromJson(json);
   Map<String, dynamic> toJson() => _$ExternalLinkToJson(this);
 }

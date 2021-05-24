@@ -11,6 +11,7 @@ import 'package:lk_client/page/publications_page.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
+import 'package:lk_client/widget/util/bottom_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class PersonalPage extends StatefulWidget {
@@ -170,7 +171,7 @@ class _PersonalPageState extends State<PersonalPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         PersonProfilePicture(
-                            displayed: this._person, size: 100),
+                            displayed: this._person, size: 50.0),
                         Expanded(
                             flex: 1,
                             child: Container(
@@ -270,6 +271,7 @@ class _PersonalPageState extends State<PersonalPage> {
               return Center(child: CircularProgressIndicator());
             }
           },
-        ));
+        ),
+        bottomNavigationBar: BottomNavigator());
   }
 }

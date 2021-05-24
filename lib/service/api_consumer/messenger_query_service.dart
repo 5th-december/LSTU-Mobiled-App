@@ -16,42 +16,55 @@ class MessengerQueryService {
 
   ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
 
-  MessengerQueryService({
-    @required this.apiEndpointConsumer,
-    @required this.apiErrorHandler,
-    @required this.authenticationExtractor
-  });
+  MessengerQueryService(
+      {@required this.apiEndpointConsumer,
+      @required this.apiErrorHandler,
+      @required this.authenticationExtractor});
 
-  Stream<ConsumingState<ListedResponse<PrivateMessage>>> getPrivateChatMessagesList
-      (String dialogId, String count, String offset) async* {
-    HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/messenger/list', 
-      {'dialog': dialogId, 'of': offset, 'c': count}, this.accessKey.token);
+  Stream<ConsumingState<ListedResponse<PrivateMessage>>>
+      getPrivateChatMessagesList(
+          String dialogId, String count, String offset) async* {
+    HttpResponse response = await this.apiEndpointConsumer.get(
+        '/api/v1/messenger/list',
+        {'dialog': dialogId, 'of': offset, 'c': count},
+        this.accessKey.token);
 
-    if(response.status == 200) {
-      ListedResponse<PrivateMessage> responseData = ListedResponse.fromJson(response.body, PrivateMessage.fromJson);
+    if (response.status == 200) {
+      ListedResponse<PrivateMessage> responseData =
+          ListedResponse.fromJson(response.body, PrivateMessage.fromJson);
       yield ConsumingReadyState<ListedResponse<PrivateMessage>>(responseData);
     } else {
-      yield ConsumingErrorState<ListedResponse<PrivateMessage>>(error: this.apiErrorHandler.apply(response.body));
+      yield ConsumingErrorState<ListedResponse<PrivateMessage>>(
+          error: this.apiErrorHandler.apply(response.body));
     }
   }
 
-  Stream<ConsumingState<ListedResponse<Dialog>>> getDialogList(String count, String offset) async* {
-    HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/messenger/dialog/list', 
-      {'of': offset, 'c': count}, this.accessKey.token);
+  Stream<ConsumingState<ListedResponse<Dialog>>> getDialogList(
+      String count, String offset) async* {
+    HttpResponse response = await this.apiEndpointConsumer.get(
+        '/api/v1/messenger/dialog/list',
+        {'of': offset, 'c': count},
+        this.accessKey.token);
 
-    if(response.status == 200) {
-      ListedResponse<Dialog> dialogListData = ListedResponse.fromJson(response.body, Dialog.fromJson);
+    if (response.status == 200) {
+      ListedResponse<Dialog> dialogListData =
+          ListedResponse.fromJson(response.body, Dialog.fromJson);
       yield ConsumingReadyState<ListedResponse<Dialog>>(dialogListData);
     } else {
-      yield ConsumingErrorState<ListedResponse<Dialog>>(error: this.apiErrorHandler.apply(response.body));
+      yield ConsumingErrorState<ListedResponse<Dialog>>(
+          error: this.apiErrorHandler.apply(response.body));
     }
   }
 
-  Future<PrivateMessage> sendNewPrivateMessage(PrivateMessage message, String dialogId) async {
-    HttpResponse response = await this.apiEndpointConsumer.post('/api/v1/messenger', 
-        {'dialog': dialogId}, message.toJson(), this.accessKey.token);
+  Future<PrivateMessage> sendNewPrivateMessage(
+      PrivateMessage message, String dialogId) async {
+    HttpResponse response = await this.apiEndpointConsumer.post(
+        '/api/v1/messenger',
+        {'dialog': dialogId},
+        message.toJson(),
+        this.accessKey.token);
 
-    if(response.status == 201) {
+    if (response.status == 201) {
       PrivateMessage createdMessage = PrivateMessage.fromJson(response.body);
       return createdMessage;
     }
@@ -59,26 +72,45 @@ class MessengerQueryService {
     throw this.apiErrorHandler.apply(response.body);
   }
 
-  Stream<ConsumingState<ListedResponse<DiscussionMessage>>> getDiscussionMessagesList
-    (String disciplineId, String educationId, String semesterId, String count, String offset) async* {
-    HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/discussion/list',
-      {'dis': disciplineId, 'edu': educationId, 'sem': semesterId, 'c': count, 'of': offset}, this.accessKey.token);
+  Stream<ConsumingState<ListedResponse<DiscussionMessage>>>
+      getDiscussionMessagesList(String disciplineId, String educationId,
+          String semesterId, String count, String offset) async* {
+    HttpResponse response = await this.apiEndpointConsumer.get(
+        '/api/v1/discussion/list',
+        {
+          'dis': disciplineId,
+          'edu': educationId,
+          'sem': semesterId,
+          'c': count,
+          'of': offset
+        },
+        this.accessKey.token);
 
-    if(response.status == 200){
-      ListedResponse<DiscussionMessage> discussionMessagedata = ListedResponse.fromJson(response.body, DiscussionMessage.fromJson);
-      yield ConsumingReadyState<ListedResponse<DiscussionMessage>>(discussionMessagedata);
+    if (response.status == 200) {
+      ListedResponse<DiscussionMessage> discussionMessagedata =
+          ListedResponse.fromJson(response.body, DiscussionMessage.fromJson);
+      yield ConsumingReadyState<ListedResponse<DiscussionMessage>>(
+          discussionMessagedata);
     } else {
-      yield ConsumingErrorState<ListedResponse<DiscussionMessage>>(error: this.apiErrorHandler.apply(response.body));
+      yield ConsumingErrorState<ListedResponse<DiscussionMessage>>(
+          error: this.apiErrorHandler.apply(response.body));
     }
   }
 
-  Future<DiscussionMessage> sendNewDiscussionMessage
-    (DiscussionMessage discussionMessage, String educationId, String disciplineId, String semesterId) async {
-    HttpResponse response = await this.apiEndpointConsumer.post('/api/v1/discussion', 
-      {'edu': educationId, 'dis': disciplineId, 'sem': semesterId}, discussionMessage.toJson(), this.accessKey.token);
+  Future<DiscussionMessage> sendNewDiscussionMessage(
+      DiscussionMessage discussionMessage,
+      String educationId,
+      String disciplineId,
+      String semesterId) async {
+    HttpResponse response = await this.apiEndpointConsumer.post(
+        '/api/v1/discussion',
+        {'edu': educationId, 'dis': disciplineId, 'sem': semesterId},
+        discussionMessage.toJson(),
+        this.accessKey.token);
 
-    if(response.status == 201) {
-      DiscussionMessage createdMessage = DiscussionMessage.fromJson(response.body);
+    if (response.status == 201) {
+      DiscussionMessage createdMessage =
+          DiscussionMessage.fromJson(response.body);
       return createdMessage;
     }
 
@@ -86,15 +118,17 @@ class MessengerQueryService {
   }
 
   Future<Dialog> createNewDialog(String companionId) async {
-    HttpResponse response = await this.apiEndpointConsumer.post('/api/v1/messenger/dialog', 
-      {'p': companionId}, const {}, this.accessKey.token);
+    HttpResponse response = await this.apiEndpointConsumer.post(
+        '/api/v1/messenger/dialog',
+        {'p': companionId},
+        const {},
+        this.accessKey.token);
 
-    if(response.status == 201) {
+    if (response.status == 201) {
       Dialog dialog = Dialog.fromJson(response.body);
       return dialog;
     }
 
     throw this.apiErrorHandler.apply(response.body);
   }
-
 }
