@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
@@ -81,12 +82,33 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
                 teachingMaterialInfo = 'Внешний ресурс';
               }
               return Container(
-                child: ListTile(
+                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                child: Row(
+                  children: [
+                    Text(teachingMaterials[index].materialName),
+                    FileDownloadWidget(
+                      manager:
+                          TeachingMaterialDownloadManagerCreator.initialize(
+                              teachingMaterials[index],
+                              TeachingMaterialDocumentTransferBloc(
+                                  fileLocalManager:
+                                      AppStateContainer.of(context)
+                                          .serviceProvider
+                                          .fileLocalManager,
+                                  appNotifier: null,
+                                  fileTransferService:
+                                      AppStateContainer.of(context)
+                                          .serviceProvider
+                                          .fileTransferService)),
+                    )
+                  ],
+                ),
+                /*child: ListTile(
                   title: Text(teachingMaterials[index].materialName),
                   subtitle: Text(teachingMaterialInfo),
                   //trailing:
                   //    FileDownloadWidget(material: teachingMaterials[index]),
-                ),
+                ),*/
               );
             },
             separatorBuilder: (BuildContext context, int index) => Divider(),

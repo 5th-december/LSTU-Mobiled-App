@@ -7,6 +7,8 @@ abstract class FileManagementState {
 
 class FileManagementInitState extends FileManagementState {}
 
+class FileManagementRightsErrorState extends FileManagementState {}
+/*
 class FileLocationProgressState extends FileManagementState {
   FileLocationProgressState({String filePath}) : super(filePath: filePath);
 }
@@ -19,9 +21,8 @@ class FileUnlocatedState extends FileManagementState {
 class FileLocatedState extends FileManagementState {
   final bool r;
   final bool w;
-  FileLocatedState({String filePath, this.r, this.w})
-      : super(filePath: filePath);
-}
+  FileLocatedState({String filePath, this.r, this.w}) : super(filePath: filePath);
+}*/
 
 class FileOperationProgressState extends FileManagementState {
   final double rate;

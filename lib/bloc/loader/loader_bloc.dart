@@ -183,10 +183,11 @@ class TeachingMaterialListLoadingBloc extends AbstractPrimitiveLoaderBloc<
   }
 
   @override
-  Stream<ConsumingState<TeachingMaterial>> commandArgumentTranslator(
-          loaderFunc, LoadTeachingMaterialsList command) =>
-      loaderFunc(
-          command.discipline.id, command.education.id, command.semester.id);
+  Stream<ConsumingState<ListedResponse<TeachingMaterial>>>
+      commandArgumentTranslator(
+              loaderFunc, LoadTeachingMaterialsList command) =>
+          loaderFunc(
+              command.discipline.id, command.education.id, command.semester.id);
 
   @override
   List<TeachingMaterial> valueTranslator(

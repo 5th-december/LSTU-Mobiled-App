@@ -8,15 +8,13 @@ abstract class FileManagementEvent {
 
 class FileManagementInitEvent extends FileManagementEvent {}
 
-class FileFindLocallyEvent extends FileManagementEvent {
-  FileFindLocallyEvent({@required LocalFilesystemObject file})
-      : super(file: file);
+/*class FileFindLocallyEvent extends FileManagementEvent {
+  FileFindLocallyEvent({@required LocalFilesystemObject file}): super(file: file);
 }
 
 class FileFindInDirectoryEvent extends FileManagementEvent {
   LocalFilesystemObject file;
-  FileFindInDirectoryEvent(
-      {@required String basePath, @required String fileName}) {
+  FileFindInDirectoryEvent({@required String basePath, @required String fileName}) {
     this.file = LocalFilesystemObject.fromNameAndBase(basePath, fileName);
   }
 }
@@ -24,7 +22,7 @@ class FileFindInDirectoryEvent extends FileManagementEvent {
 class FileFindInDefaultDocumentLocationEvent extends FileManagementEvent {
   LocalFilesystemObject file; // TODO: Initial method
   FileFindInDefaultDocumentLocationEvent();
-}
+}*/
 
 class FileStartDownloadEvent<T> extends FileManagementEvent {
   final T command;

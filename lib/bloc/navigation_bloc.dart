@@ -12,10 +12,10 @@ class NavigationBloc extends AbstractBloc<NavigationState, NavigationEvent> {
    * Переход на указанную вкладку
    * Событие игнорируется если требуемая вкладка уже открыта
    */
-  Stream<NavigationEvent> get _navigationEventStream =>
-      this.eventController.stream.where((event) =>
-          event is NavigateToPageEvent &&
-          event.pageNumber != currentState?.selectedIndex);
+  Stream<NavigationEvent> get _navigationEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is NavigateToPageEvent);
 
   /*
    * Открытие страницы в указанной вкладке

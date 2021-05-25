@@ -40,24 +40,10 @@ class AttachedDiscussionFormBloc extends AbstractAttachedFormBloc<
   @override
   Stream<FileManagementState> sendMultipartData(
       LocalFilesystemObject loadingFile, DiscussionMessage argument) {
-    this
-        .discussionMessageSendDocumentTransferBloc
-        .eventController
-        .sink
-        .add(FileFindLocallyEvent(file: loadingFile));
-
-    this
-        .discussionMessageSendDocumentTransferBloc
-        .binaryTransferStateStream
-        .listen((event) {
-      if (event is FileLocatedState) {
-        this.discussionMessageSendDocumentTransferBloc.eventController.sink.add(
-            FileStartUploadEvent<UploadDiscussionMessageAttachment>(
-                command: UploadDiscussionMessageAttachment(message: argument),
-                file: loadingFile));
-      }
-    });
-
+    this.discussionMessageSendDocumentTransferBloc.eventController.sink.add(
+        FileStartUploadEvent<UploadDiscussionMessageAttachment>(
+            command: UploadDiscussionMessageAttachment(message: argument),
+            file: loadingFile));
     return this
         .discussionMessageSendDocumentTransferBloc
         .binaryTransferStateStream;

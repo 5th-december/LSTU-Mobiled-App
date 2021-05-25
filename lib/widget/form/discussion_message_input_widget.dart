@@ -61,7 +61,7 @@ class _DiscussionMessageInputWidget
       DiscussionMessageSendDocumentTransferBloc
           discussionMessageSendDocumentTransferBloc =
           DiscussionMessageSendDocumentTransferBloc(
-              appConfig, fileLocalManager, fileTransferService);
+              fileTransferService: fileTransferService);
       this._bloc = AttachedDiscussionFormBloc(
           discussionMessageFormBloc: discussionMessageFormBloc,
           discussionMessageSendDocumentTransferBloc:

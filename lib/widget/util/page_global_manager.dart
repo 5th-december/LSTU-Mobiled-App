@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
-import 'package:lk_client/model/education/education.dart';
-import 'package:lk_client/model/education/semester.dart';
+import 'package:lk_client/event/navigation_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/basic/navigator_wrapped_page.dart';
 import 'package:lk_client/page/messenger_page.dart';
@@ -10,6 +9,7 @@ import 'package:lk_client/page/personal_page.dart';
 import 'package:lk_client/state/navigation_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/local/messenger_page_provider.dart';
+import 'package:lk_client/store/local/page_index_provider.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/store/local/subject_page_provider.dart';
 import 'package:lk_client/store/local/timetable_page_provider.dart';
@@ -34,6 +34,7 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
     if (this._navigator == null) {
       this._navigator =
           AppStateContainer.of(context).blocProvider.navigationBloc;
+      this._navigator.eventController.sink.add(NavigateToPageEvent(3));
     }
   }
 
@@ -56,18 +57,26 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
             return IndexedStack(
               index: event.selectedIndex,
               children: [
-                TimetablePageProvider(
-                    child: NavigatorWrappedPage(
-                        TimetablePageManager(widget.loggedPerson))),
-                SubjectPageProvider(
-                    child: NavigatorWrappedPage(SubjectPageManager(
-                        currentPerson: widget.loggedPerson))),
-                MessengerPageProvider(
-                    child: NavigatorWrappedPage(
-                        MessengerPage(widget.loggedPerson))),
-                ProfilePageProvider(
-                    child:
-                        NavigatorWrappedPage(PersonalPage(widget.loggedPerson)))
+                PageIndexProvider(
+                    pageIndex: 0,
+                    child: TimetablePageProvider(
+                        child: NavigatorWrappedPage(
+                            TimetablePageManager(widget.loggedPerson)))),
+                PageIndexProvider(
+                    pageIndex: 1,
+                    child: SubjectPageProvider(
+                        child: NavigatorWrappedPage(SubjectPageManager(
+                            currentPerson: widget.loggedPerson)))),
+                PageIndexProvider(
+                    pageIndex: 2,
+                    child: MessengerPageProvider(
+                        child: NavigatorWrappedPage(
+                            MessengerPage(widget.loggedPerson)))),
+                PageIndexProvider(
+                    pageIndex: 3,
+                    child: ProfilePageProvider(
+                        child: NavigatorWrappedPage(
+                            PersonalPage(widget.loggedPerson))))
               ],
             );
           }
