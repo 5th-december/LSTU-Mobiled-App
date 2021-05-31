@@ -16,8 +16,6 @@ class EducationQueryService {
   final AuthenticationExtractor authenticationExtractor;
   final ApiEndpointConsumer apiEndpointConsumer;
 
-  ApiKey get accessKey => authenticationExtractor.getAuthenticationData();
-
   EducationQueryService(this.apiEndpointConsumer, this.authenticationExtractor,
       this.apiErrorHandler);
 
@@ -27,7 +25,7 @@ class EducationQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/list',
           <String, String>{'p': person},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<Education> personEducationsList =
@@ -48,7 +46,7 @@ class EducationQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/semesters/list',
           <String, String>{'edu': educationId},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<Semester> personSemesterList =
@@ -68,7 +66,7 @@ class EducationQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/discipline/list',
           <String, String>{'edu': educationId, 'sem': semesterId},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<Discipline> requiredDisciplineList =
@@ -89,7 +87,7 @@ class EducationQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/semesters/current',
           <String, String>{'edu': educationId},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         Semester currentSemester = Semester.fromJson(response.body);
@@ -103,44 +101,47 @@ class EducationQueryService {
   }
 
   Stream<ConsumingState<Timetable>> getCurrentTimetable(
-    String educationId, String semesterId, String weekType) async* {
+      String educationId, String semesterId, String weekType) async* {
     try {
       HttpResponse response = await this.apiEndpointConsumer.get(
-        '/api/v1/student/timetable',
-        <String,String>{'edu': educationId, 'sem': semesterId, 'week': weekType},
-        this.accessKey.token
-      );
+          '/api/v1/student/timetable',
+          <String, String>{
+            'edu': educationId,
+            'sem': semesterId,
+            'week': weekType
+          },
+          await this.authenticationExtractor.getAuthenticationData);
 
-      if(response.status == 200) {
+      if (response.status == 200) {
         Timetable loadedTimetable = Timetable.fromJson(response.body);
         yield ConsumingReadyState<Timetable>(loadedTimetable);
       } else {
-        yield ConsumingErrorState<Timetable>(error: this.apiErrorHandler.apply(response.body));
+        yield ConsumingErrorState<Timetable>(
+            error: this.apiErrorHandler.apply(response.body));
       }
     } on Exception catch (e) {
       yield ConsumingErrorState<Timetable>(error: e);
     }
   }
 
-  Stream<ConsumingState<ListedResponse<Exam>>> getExamsTimetable
-    (String educationId, String semesterId) async* {
+  Stream<ConsumingState<ListedResponse<Exam>>> getExamsTimetable(
+      String educationId, String semesterId) async* {
     try {
       HttpResponse response = await this.apiEndpointConsumer.get(
-        '/api/v1/student/timetable/exams/list',
-        <String, String>{'edu': educationId, 'sem': semesterId},
-        this.accessKey.token
-      );
+          '/api/v1/student/timetable/exams/list',
+          <String, String>{'edu': educationId, 'sem': semesterId},
+          await this.authenticationExtractor.getAuthenticationData);
 
-      if(response.status == 200) {
-        ListedResponse<Exam> loadedExamsList = ListedResponse.fromJson(response.body, Exam.fromJson);
+      if (response.status == 200) {
+        ListedResponse<Exam> loadedExamsList =
+            ListedResponse.fromJson(response.body, Exam.fromJson);
         yield ConsumingReadyState<ListedResponse<Exam>>(loadedExamsList);
       } else {
-        yield ConsumingErrorState<ListedResponse<Exam>>(error: this.apiErrorHandler.apply(response.body));
+        yield ConsumingErrorState<ListedResponse<Exam>>(
+            error: this.apiErrorHandler.apply(response.body));
       }
-
-    } on Exception catch(e) {
+    } on Exception catch (e) {
       yield ConsumingErrorState<ListedResponse<Exam>>(error: e);
     }
   }
 }
-

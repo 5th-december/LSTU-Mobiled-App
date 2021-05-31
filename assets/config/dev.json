@@ -1,5 +1,10 @@
 {
     "apiBase": "185.204.0.225",
     "apiVersion": "v1",
-    "useHttps": 0
+    "useHttps": 0,
+    "rmqHost": "185.204.0.225",
+    "rmqPort": "5672",
+    "rmqUsername": "client",
+    "rmqVHost": "lkapp",
+    "rmqPassword": "client"
 }

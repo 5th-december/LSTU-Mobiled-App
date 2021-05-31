@@ -11,19 +11,28 @@ class StartNewDialog {
   StartNewDialog({@required this.companion});
 }
 
-class DialogCreatorBloc extends AbstractBloc<ProducingState<void>, ProducingEvent<void>>
-{
-  Stream<ProducingState> get dialogCreatorStateStream => this.stateContoller.stream.where((event) => event is ProducingState<void>);
+class DialogCreatorBloc
+    extends AbstractBloc<ProducingState<void>, ProducingEvent<void>> {
+  Stream<ProducingState> get dialogCreatorStateStream => this
+      .stateContoller
+      .stream
+      .where((event) => event is ProducingState<void>);
 
-  Stream<ProducingEvent> get _dialogCreatorProduceEventStream => this.eventController.stream.where((event) => event is ProduceResourceEvent<void, StartNewDialog>);
+  Stream<ProducingEvent> get _dialogCreatorProduceEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is ProduceResourceEvent<void, StartNewDialog>);
 
-  Stream<ProducingEvent> get _dialogCreatorInitStream => this.eventController.stream.where((event) => event is ProducerInitEvent<void>);
+  Stream<ProducingEvent> get _dialogCreatorInitStream => this
+      .eventController
+      .stream
+      .where((event) => event is ProducerInitEvent<void>);
 
   DialogCreatorBloc({@required MessengerQueryService messengerQueryService}) {
     this.updateState(ProducingInitState<void>());
 
     this._dialogCreatorInitStream.listen((event) {
-      if(!(currentState is ProducingLoadingState<void>)) {
+      if (!(currentState is ProducingLoadingState<void>)) {
         this.updateState(ProducingInitState<void>());
       }
     });
@@ -32,9 +41,11 @@ class DialogCreatorBloc extends AbstractBloc<ProducingState<void>, ProducingEven
       final _event = event as ProduceResourceEvent<void, StartNewDialog>;
       this.updateState(ProducingLoadingState<void>());
       try {
-        DialogModel.Dialog createdDialog = await messengerQueryService.createNewDialog(_event.command.companion.id);
-        this.updateState(ProducingReadyState<void, DialogModel.Dialog>(response: createdDialog));
-      } on Exception catch(e) {
+        DialogModel.Dialog createdDialog = await messengerQueryService
+            .createNewDialog(_event.command.companion.id);
+        this.updateState(ProducingReadyState<void, DialogModel.Dialog>(
+            response: createdDialog));
+      } on Exception catch (e) {
         this.updateState(ProducingErrorState<DialogModel.Dialog>(e));
       }
     });

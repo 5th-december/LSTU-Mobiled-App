@@ -8,7 +8,8 @@ import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<PrivateMessage, LoadPrivateChatMessagesListCommand> {
+class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<
+    PrivateMessage, LoadPrivateChatMessagesListCommand> {
   final PrivateChatMessagesListLoadingBloc _bloc;
 
   PrivateMessageListBloc(this._bloc);
@@ -19,27 +20,34 @@ class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<PrivateMessage
   }
 
   @override
-  LoadPrivateChatMessagesListCommand getNextChunkCommand(LoadPrivateChatMessagesListCommand previousCommand, ListedResponse<PrivateMessage> fresh) {
-    LoadPrivateChatMessagesListCommand(
-      dialog: previousCommand.dialog,
-      count: min(previousCommand.count, fresh.remains),
-      offset: previousCommand.offset + fresh.count
-    );
+  LoadPrivateChatMessagesListCommand getNextChunkCommand(
+      LoadPrivateChatMessagesListCommand previousCommand,
+      int count,
+      int remains) {
+    return LoadPrivateChatMessagesListCommand(
+        dialog: previousCommand.dialog,
+        count: min(previousCommand.count, remains),
+        offset: previousCommand.offset + count);
   }
 
   @override
-  List<PrivateMessage> copyPreviousToNew(List<PrivateMessage> previuos, List<PrivateMessage> fresh) {
+  List<PrivateMessage> copyPreviousToNew(
+      List<PrivateMessage> previuos, List<PrivateMessage> fresh) {
     List<PrivateMessage> refresh = List<PrivateMessage>.from(previuos);
     refresh.addAll(fresh);
     return refresh;
   }
 
-    @override
-  Future<ListedResponse<PrivateMessage>> loadListElementChunk(LoadPrivateChatMessagesListCommand command) async {
-    this._bloc.eventController.sink.add(StartConsumeEvent<LoadPrivateChatMessagesListCommand>(request: command));
+  @override
+  Future<ListedResponse<PrivateMessage>> loadListElementChunk(
+      LoadPrivateChatMessagesListCommand command) async {
+    this._bloc.eventController.sink.add(
+        StartConsumeEvent<LoadPrivateChatMessagesListCommand>(
+            request: command));
 
-    await for (ConsumingState<ListedResponse<PrivateMessage>> event in this._bloc.consumingStateStream) {
-      if(event is ConsumingErrorState<ListedResponse<PrivateMessage>>) {
+    await for (ConsumingState<ListedResponse<PrivateMessage>> event
+        in this._bloc.consumingStateStream) {
+      if (event is ConsumingErrorState<ListedResponse<PrivateMessage>>) {
         throw Exception('Data not loaded');
       } else if (event is ConsumingReadyState<ListedResponse<PrivateMessage>>) {
         return event.content;

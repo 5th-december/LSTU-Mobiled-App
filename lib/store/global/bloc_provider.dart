@@ -1,11 +1,10 @@
-
-
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/authentication/identification_bloc.dart';
 import 'package:lk_client/bloc/authentication/login_bloc.dart';
 import 'package:lk_client/bloc/authentication/registration_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
+import 'package:lk_client/bloc/notification_prefs_bloc.dart';
 
 class BlocProvider {
   final AuthenticationBloc authenticationBloc;
@@ -13,11 +12,13 @@ class BlocProvider {
   final RegistrationBloc registrationBloc;
   final IdentificationBloc identificationBloc;
   final NavigationBloc navigationBloc;
+  final NotificationPrefsBloc notificationPrefsBloc;
 
   BlocProvider(
       {@required this.authenticationBloc,
       @required this.loginBloc,
       @required this.registrationBloc,
       @required this.identificationBloc,
+      @required this.notificationPrefsBloc,
       @required this.navigationBloc});
 }

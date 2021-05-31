@@ -14,9 +14,13 @@ class TokenValidateEvent extends AuthenticationEvent {
   TokenValidateEvent(this.validToken);
 }
 
-class TokenInvalidateEvent extends AuthenticationEvent {
-  ApiKey invalidToken;
-  TokenInvalidateEvent(this.invalidToken);
+class TokenUpdateEvent extends AuthenticationEvent {
+  ApiKey updatedToken;
+  TokenUpdateEvent(this.updatedToken);
 }
+
+class TokenInvalidateEvent extends AuthenticationEvent {}
+
+class TokenForcedUpdateEvent extends AuthenticationEvent {}
 
 class LoggedOutEvent extends AuthenticationEvent {}

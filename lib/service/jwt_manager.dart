@@ -15,8 +15,9 @@ class JwtManager {
   }
 
   Future<bool> hasSavedKeyPair() async {
-    return await _storage.containsKey(key: _jwtKeyName)
-      && await _storage.containsKey(key: _refreshKeyName);
+    bool isHas = (await _storage.containsKey(key: _jwtKeyName) &&
+        await _storage.containsKey(key: _refreshKeyName));
+    return isHas;
   }
 
   Future<String> getSavedJwt() async {
@@ -44,17 +45,4 @@ class JwtManager {
   Future<void> removeSavedRefresh() async {
     await _storage.delete(key: _refreshKeyName);
   }
-
-  static bool checkJwtValid(String jwtToken) {
-    List<String> splittedJwt = jwtToken.split('.');
-    if (splittedJwt.length != 3) {
-      throw new FormatException();
-    }
-    String payload = splittedJwt[1];
-    var encodedJwt =
-        json.decode(ascii.decode(base64.decode(base64.normalize(payload))));
-    var exp = (encodedJwt['exp'] ?? 0) * 1000;
-    return DateTime.fromMillisecondsSinceEpoch(exp).isAfter(DateTime.now());
-  }
-
 }

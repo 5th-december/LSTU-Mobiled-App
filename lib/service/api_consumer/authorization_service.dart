@@ -10,10 +10,12 @@ class AuthorizationService {
   final JwtManager appJwtManager;
   final ApiEndpointConsumer apiEndpointConsumer;
 
-  AuthorizationService(this.apiEndpointConsumer, this.apiErrorHandler, this.appJwtManager);
+  AuthorizationService(
+      this.apiEndpointConsumer, this.apiErrorHandler, this.appJwtManager);
 
   Future<ApiKey> authenticate(LoginCredentials user) async {
-    HttpResponse response = await this.apiEndpointConsumer.post('api/v1/auth', {}, user.toJson());
+    HttpResponse response =
+        await this.apiEndpointConsumer.post('api/v1/auth', {}, user.toJson());
 
     if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body);
@@ -24,8 +26,9 @@ class AuthorizationService {
   }
 
   Future<ApiKey> identifyStudent(IdentifyCredentials credentials) async {
-    HttpResponse response =
-        await this.apiEndpointConsumer.post('api/v1/identify', {}, credentials.toJson());
+    HttpResponse response = await this
+        .apiEndpointConsumer
+        .post('api/v1/identify', {}, credentials.toJson());
 
     if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body);
@@ -37,8 +40,9 @@ class AuthorizationService {
 
   Future<ApiKey> register(LoginCredentials user) async {
     String jwtToken = await this.appJwtManager.getSavedJwt();
-    HttpResponse response =
-        await this.apiEndpointConsumer.post('api/v1/reg', {}, user.toJson(), jwtToken);
+    HttpResponse response = await this
+        .apiEndpointConsumer
+        .post('api/v1/reg', {}, user.toJson(), jwtToken);
 
     if (response.status == 200) {
       ApiKey token = ApiKey.fromJson(response.body);
@@ -49,12 +53,14 @@ class AuthorizationService {
   }
 
   Future<ApiKey> updateJwt(ApiKey token) async {
-    HttpResponse response =
-        await this.apiEndpointConsumer.post('/api/v1/token/refresh', {}, token.toJson());
+    HttpResponse response = await this.apiEndpointConsumer.post(
+        '/api/v1/token/refresh',
+        {},
+        {'refresh_token': token.refreshToken},
+        token.token);
 
     if (response.status == 200) {
-      ApiKey updatedToken =
-          ApiKey.fromJson(response.body);
+      ApiKey updatedToken = ApiKey.fromJson(response.body);
       return updatedToken;
     }
 

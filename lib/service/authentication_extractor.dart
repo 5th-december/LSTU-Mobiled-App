@@ -1,22 +1,78 @@
+import 'dart:convert';
+
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
+import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
+import 'package:lk_client/service/api_consumer/authorization_service.dart';
 import 'package:lk_client/state/authentication_state.dart';
 
 class AuthenticationExtractor {
-  final AuthenticationBloc appAuthenticator;
+  final AuthorizationService _authorizationService;
+  final AuthenticationBloc _bloc;
 
-  AuthenticationExtractor(this.appAuthenticator);
+  AuthenticationExtractor(this._authorizationService, this._bloc);
 
-  ApiKey getAuthenticationData() {
-    AuthenticationState currentAuthenticationState =
-        appAuthenticator.currentState;
+  bool _checkJwtValid(String jwtToken) {
+    List<String> splittedJwt = jwtToken.split('.');
+    if (splittedJwt.length != 3) {
+      throw new FormatException();
+    }
+    String payload = splittedJwt[1];
+    var encodedJwt =
+        json.decode(ascii.decode(base64.decode(base64.normalize(payload))));
+    var exp = (encodedJwt['exp'] ?? 0) * 1000;
+    return DateTime.fromMillisecondsSinceEpoch(exp).isAfter(DateTime.now());
+  }
 
-    if (currentAuthenticationState is AuthenticationValidState) {
-      return currentAuthenticationState.validToken;
+  Future<ApiKey> applyKey([bool forced = false]) async {
+    if (this._bloc.currentState is Tokenized) {
+      final key = (this._bloc.currentState as Tokenized).token;
+
+      try {
+        final isValid = !forced && this._checkJwtValid(key.token);
+
+        if (!isValid) {
+          if (this._bloc.currentState is AuthenticationIdentifiedState) {
+            this._bloc.eventController.sink.add(TokenInvalidateEvent());
+          } else {
+            final updatedKey = await this._authorizationService.updateJwt(key);
+
+            if (this._bloc.currentState is AuthenticationValidState) {
+              this._bloc.eventController.sink.add(TokenUpdateEvent(updatedKey));
+            } else {
+              this
+                  ._bloc
+                  .eventController
+                  .sink
+                  .add(TokenValidateEvent(updatedKey));
+            }
+
+            return updatedKey;
+          }
+        } else {
+          if (!(this._bloc.currentState is AuthenticationValidState ||
+              this._bloc.currentState is AuthenticationIdentifiedState)) {
+            this._bloc.eventController.sink.add(TokenValidateEvent(key));
+          }
+
+          return key;
+        }
+      } on Exception {
+        this._bloc.eventController.sink.add(TokenInvalidateEvent());
+      }
     }
 
-    // необходимо добавить обработку случая, когда состояние отличается от
-    // залогинного и проверять валидность токена
-    throw Exception('Not implemented');
+    if (this._bloc.currentState is AuthenticationUndefinedState) {
+      this._bloc.eventController.sink.add(TokenInvalidateEvent());
+    }
+
+    await for (AuthenticationState state in this._bloc.state) {
+      if (state is Tokenized) {
+        return (this._bloc.currentState as Tokenized).token;
+      }
+    }
   }
+
+  Future<String> get getAuthenticationData async =>
+      (await this.applyKey(false)).token;
 }

@@ -6,5 +6,3 @@ class StartConsumeEvent<T> extends ConsumingEvent<T> {
   final T request;
   StartConsumeEvent({@required this.request});
 }
-
-class GetCurrentStateEvent extends ConsumingEvent {}

@@ -26,7 +26,9 @@ class _MessengerPageState extends State<MessengerPage> {
                   builder: (BuildContext context) => PersonFinderPage())))
         ],
       ),
-      body: DialogList(),
+      body: DialogList(
+        person: widget.currentUser,
+      ),
       bottomNavigationBar: BottomNavigator(),
     );
   }

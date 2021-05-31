@@ -8,22 +8,30 @@ class FileTransferService {
 
   FileTransferService(this.fileTransferManager, this.authenticationExtractor);
 
-  ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
-
   Stream<FileOperationStatus> downloadTeachingMaterialsAttachment(
       String teachingMaterialId, String filePath) async* {
     yield* this.fileTransferManager.progressedDownload(
-        '/api/v1/materials/doc', <String, String>{'material': teachingMaterialId}, this.accessKey.token, filePath);
+        '/api/v1/materials/doc',
+        <String, String>{'material': teachingMaterialId},
+        await this.authenticationExtractor.getAuthenticationData,
+        filePath);
   }
 
   Stream<FileOperationStatus> uploadPrivateMessageAttachment(
-    String privateMessageId, String filePath) async* {
-    yield* this.fileTransferManager.progressedUpload
-      ('/api/v1/messenger/doc', <String, String>{'pmsg': privateMessageId}, this.accessKey.token, filePath);
+      String privateMessageId, String filePath) async* {
+    yield* this.fileTransferManager.progressedUpload(
+        '/api/v1/messenger/doc',
+        <String, String>{'pmsg': privateMessageId},
+        await this.authenticationExtractor.getAuthenticationData,
+        filePath);
   }
 
-  Stream<FileOperationStatus> uploadDiscussionMessageAttachment(String discussionMessageId, String filePath) async* {
-    yield* this.fileTransferManager.progressedUpload
-      ('/api/v1/discussion/doc', {'msg': discussionMessageId}, this.accessKey.toString(), filePath);
+  Stream<FileOperationStatus> uploadDiscussionMessageAttachment(
+      String discussionMessageId, String filePath) async* {
+    yield* this.fileTransferManager.progressedUpload(
+        '/api/v1/discussion/doc',
+        {'msg': discussionMessageId},
+        await this.authenticationExtractor.getAuthenticationData,
+        filePath);
   }
 }

@@ -13,8 +13,6 @@ class PersonQueryService {
   final AuthenticationExtractor authenticationExtractor;
   final ApiEndpointConsumer apiEndpointConsumer;
 
-  ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
-
   PersonQueryService(this.apiEndpointConsumer, this.authenticationExtractor,
       this.apiErrorHandler);
 
@@ -23,7 +21,7 @@ class PersonQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/person',
           <String, String>{'p': person},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         Person person = Person.fromJson(response.body);
@@ -38,9 +36,10 @@ class PersonQueryService {
 
   Stream<ConsumingState<Person>> getCurrentPersonIdentifier() async* {
     try {
-      HttpResponse response = await this
-          .apiEndpointConsumer
-          .get('/api/v1/whoami', {}, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/whoami',
+          {},
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         Person person = Person.fromJson(response.body);
@@ -59,7 +58,7 @@ class PersonQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/person/pic',
           <String, String>{'p': person, 'size': size},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ProfilePicture pictureData = ProfilePicture.fromJson(response.body);
@@ -72,28 +71,32 @@ class PersonQueryService {
     }
   }
 
-  Stream<ConsumingState<ListedResponse<Person>>> getPersonList
-    (String query, String count, String offset) async* {
+  Stream<ConsumingState<ListedResponse<Person>>> getPersonList(
+      String query, String count, String offset) async* {
     Map<String, dynamic> queryParams = <String, dynamic>{};
 
-    if(query != null) {
+    if (query != null) {
       queryParams['q'] = query;
     }
 
-    if(count != null && offset != null) {
+    if (count != null && offset != null) {
       queryParams['c'] = count;
       queryParams['of'] = offset;
     }
 
     try {
-      HttpResponse response = await this.apiEndpointConsumer.get('/api/v1/person/list', 
-        queryParams, this.accessKey.token);
+      HttpResponse response = await this.apiEndpointConsumer.get(
+          '/api/v1/person/list',
+          queryParams,
+          await this.authenticationExtractor.getAuthenticationData);
 
-      if(response.status == 200) {
-        ListedResponse<Person> personList = ListedResponse.fromJson(response.body, Person.fromJson);
+      if (response.status == 200) {
+        ListedResponse<Person> personList =
+            ListedResponse.fromJson(response.body, Person.fromJson);
         yield ConsumingReadyState<ListedResponse<Person>>(personList);
       } else {
-        yield ConsumingErrorState<ListedResponse<Person>>(error: this.apiErrorHandler.apply(response.body));
+        yield ConsumingErrorState<ListedResponse<Person>>(
+            error: this.apiErrorHandler.apply(response.body));
       }
     } on Exception catch (e) {
       yield ConsumingErrorState<ListedResponse<Person>>(error: e);
@@ -104,7 +107,10 @@ class PersonQueryService {
     Map<String, dynamic> updateProfileSerialized = updatedProfileData.toJson();
 
     HttpResponse response = await this.apiEndpointConsumer.post(
-        '/api/v1/person/props', {}, updateProfileSerialized, this.accessKey.token);
+        '/api/v1/person/props',
+        {},
+        updateProfileSerialized,
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 200) {
       return true;

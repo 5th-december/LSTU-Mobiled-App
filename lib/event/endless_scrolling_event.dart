@@ -1,13 +1,13 @@
 import 'package:flutter/foundation.dart';
 
-abstract class EndlessScrollingEvent<C> {}
+abstract class EndlessScrollingEvent {}
 
-class EndlessScrollingLoadEvent<C> extends EndlessScrollingEvent<C> {
+class EndlessScrollingLoadEvent<C> extends EndlessScrollingEvent {
   C command;
   EndlessScrollingLoadEvent({@required this.command});
 }
 
-class EndlessScrollingLoadNextChunkEvent<C> extends EndlessScrollingEvent<C> {
-  C command;
-  EndlessScrollingLoadNextChunkEvent({@required this.command});
+class ExternalDataAddEvent<T> extends EndlessScrollingEvent {
+  final List<T> externalAddedData;
+  ExternalDataAddEvent({@required this.externalAddedData});
 }

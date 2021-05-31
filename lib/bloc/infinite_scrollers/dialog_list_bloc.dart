@@ -8,7 +8,8 @@ import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class DialogListBloc extends AbstractEndlessScrollingBloc<Dialog, LoadDialogListCommand> {
+class DialogListBloc
+    extends AbstractEndlessScrollingBloc<Dialog, LoadDialogListCommand> {
   DialogListLoadingBloc _bloc;
 
   DialogListBloc(this._bloc);
@@ -26,20 +27,27 @@ class DialogListBloc extends AbstractEndlessScrollingBloc<Dialog, LoadDialogList
   }
 
   @override
-  LoadDialogListCommand getNextChunkCommand(LoadDialogListCommand previousCommand, ListedResponse<Dialog> fresh) {
+  LoadDialogListCommand getNextChunkCommand(
+      LoadDialogListCommand previousCommand, int count, int remains) {
     return LoadDialogListCommand(
-      count: min(previousCommand.count, fresh.remains),
-      offset: previousCommand.offset + fresh.count
-    );
+        person: previousCommand.person,
+        count: min(previousCommand.count, remains),
+        offset: previousCommand.offset + count);
   }
 
   @override
-  Future<ListedResponse<Dialog>> loadListElementChunk(LoadDialogListCommand command) async {
-    this._bloc.eventController.sink.add(StartConsumeEvent<LoadDialogListCommand>(request: command));
-    await for (ConsumingState<ListedResponse<Dialog>> event in this._bloc.consumingStateStream) {
-      if(event is ConsumingErrorState<ListedResponse<Dialog>>) {
+  Future<ListedResponse<Dialog>> loadListElementChunk(
+      LoadDialogListCommand command) async {
+    this
+        ._bloc
+        .eventController
+        .sink
+        .add(StartConsumeEvent<LoadDialogListCommand>(request: command));
+    await for (ConsumingState<ListedResponse<Dialog>> event
+        in this._bloc.consumingStateStream) {
+      if (event is ConsumingErrorState<ListedResponse<Dialog>>) {
         throw event.error;
-      } else if(event is ConsumingReadyState<ListedResponse<Dialog>>) {
+      } else if (event is ConsumingReadyState<ListedResponse<Dialog>>) {
         return event.content;
       }
     }

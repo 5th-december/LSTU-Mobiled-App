@@ -92,9 +92,10 @@ class LoadPrivateChatMessagesListCommand {
 }
 
 class LoadDialogListCommand {
+  final Person person;
   final int count;
   final int offset;
-  LoadDialogListCommand({this.count, this.offset});
+  LoadDialogListCommand({this.count, this.offset, @required this.person});
 }
 
 class LoadDisciplineDiscussionListCommand {

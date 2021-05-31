@@ -19,8 +19,6 @@ class DisciplineQueryService {
   final AuthenticationExtractor authenticationExtractor;
   final ApiEndpointConsumer apiEndpointConsumer;
 
-  ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
-
   DisciplineQueryService(this.apiEndpointConsumer, this.apiErrorHandler,
       this.authenticationExtractor);
 
@@ -30,7 +28,7 @@ class DisciplineQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/discipline',
           <String, String>{'dis': discipline},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         Discipline discipline = Discipline.fromJson(response.body);
@@ -53,7 +51,7 @@ class DisciplineQueryService {
             'edu': education,
             'sem': semester
           },
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<TimetableItem> disciplineTeachersList =
@@ -78,7 +76,7 @@ class DisciplineQueryService {
             'edu': education,
             'sem': semester
           },
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         Timetable timetable = Timetable.fromJson(response.body);
@@ -102,7 +100,7 @@ class DisciplineQueryService {
             'edu': education,
             'sem': semester
           },
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<TeachingMaterial> teachingMaterialsList =
@@ -122,7 +120,7 @@ class DisciplineQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/tasks/list',
           {'dis': discipline, 'edu': education, 'sem': semester},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<StudentWork> loadedStudentWorks =

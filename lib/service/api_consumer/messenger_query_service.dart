@@ -14,8 +14,6 @@ class MessengerQueryService {
   final ComponentErrorHandler apiErrorHandler;
   final AuthenticationExtractor authenticationExtractor;
 
-  ApiKey get accessKey => this.authenticationExtractor.getAuthenticationData();
-
   MessengerQueryService(
       {@required this.apiEndpointConsumer,
       @required this.apiErrorHandler,
@@ -27,7 +25,7 @@ class MessengerQueryService {
     HttpResponse response = await this.apiEndpointConsumer.get(
         '/api/v1/messenger/list',
         {'dialog': dialogId, 'of': offset, 'c': count},
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 200) {
       ListedResponse<PrivateMessage> responseData =
@@ -44,7 +42,7 @@ class MessengerQueryService {
     HttpResponse response = await this.apiEndpointConsumer.get(
         '/api/v1/messenger/dialog/list',
         {'of': offset, 'c': count},
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 200) {
       ListedResponse<Dialog> dialogListData =
@@ -62,7 +60,7 @@ class MessengerQueryService {
         '/api/v1/messenger',
         {'dialog': dialogId},
         message.toJson(),
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 201) {
       PrivateMessage createdMessage = PrivateMessage.fromJson(response.body);
@@ -84,7 +82,7 @@ class MessengerQueryService {
           'c': count,
           'of': offset
         },
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 200) {
       ListedResponse<DiscussionMessage> discussionMessagedata =
@@ -106,7 +104,7 @@ class MessengerQueryService {
         '/api/v1/discussion',
         {'edu': educationId, 'dis': disciplineId, 'sem': semesterId},
         discussionMessage.toJson(),
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 201) {
       DiscussionMessage createdMessage =
@@ -122,7 +120,7 @@ class MessengerQueryService {
         '/api/v1/messenger/dialog',
         {'p': companionId},
         const {},
-        this.accessKey.token);
+        await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 201) {
       Dialog dialog = Dialog.fromJson(response.body);

@@ -1,4 +1,10 @@
 {
     "apiBase": "http://localhost:81/api",
-    "apiVersion": "v1"
+    "apiVersion": "v1",
+    "useHttps": 0,
+    "rmqHost": "rmqHost",
+    "rmqPort": "rmqPort",
+    "rmqUsername": "rmqUsername",
+    "rmqVHost": "rmqVHost",
+    "rmqPassword": "rmqPassword"
 }

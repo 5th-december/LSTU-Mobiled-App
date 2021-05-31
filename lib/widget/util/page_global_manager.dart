@@ -48,6 +48,8 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
 
   @override
   Widget build(BuildContext context) {
+    // TODO: Обработка NavigatedToCustomPage
+
     return StreamBuilder(
         stream: this._navigator.navigationStateStream,
         builder: (context, snapshot) {

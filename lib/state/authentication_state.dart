@@ -2,23 +2,29 @@ import 'package:lk_client/model/authentication/api_key.dart';
 
 abstract class AuthenticationState {}
 
-class AuthenticationUndefinedState extends AuthenticationState {}
-
-class AuthenticationValidState extends AuthenticationState {
-  ApiKey validToken;
-  AuthenticationValidState(this.validToken);
+abstract class Tokenized {
+  ApiKey token;
+  Tokenized(this.token);
 }
 
-class AuthenticationInvalidState extends AuthenticationState {
-  ApiKey invalidToken;
-  AuthenticationInvalidState(this.invalidToken);
+class AuthenticationUndefinedState implements AuthenticationState {}
+
+class AuthenticationValidState extends Tokenized
+    implements AuthenticationState {
+  AuthenticationValidState(ApiKey validToken) : super(validToken);
 }
 
-class AuthenticationUnauthorizedState extends AuthenticationState {}
+class AuthenticationInvalidState extends Tokenized
+    implements AuthenticationState {
+  AuthenticationInvalidState(ApiKey invalidToken) : super(invalidToken);
+}
 
-class AuthenticationProcessingState extends AuthenticationState {}
+class AuthenticationUnauthorizedState implements AuthenticationState {}
 
-class AuthenticationIdentifiedState extends AuthenticationState {
-  ApiKey identifyToken;
-  AuthenticationIdentifiedState(this.identifyToken);
+class AuthenticationProcessingState implements AuthenticationState {}
+
+class AuthenticationIdentifiedState extends Tokenized
+    implements AuthenticationState {
+  AuthenticationIdentifiedState(ApiKey identifiedToken)
+      : super(identifiedToken);
 }

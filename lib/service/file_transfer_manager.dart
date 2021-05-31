@@ -5,7 +5,6 @@ import 'package:http/http.dart';
 import 'package:lk_client/service/app_config.dart';
 import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/service/http_service.dart';
-import 'package:path_provider/path_provider.dart';
 
 abstract class FileOperationStatus {
   final String filePath;
@@ -33,16 +32,17 @@ class FileTransferManager {
   FileTransferManager(
       this._config, this._endpointConsumer, this._fileLocalManager);
 
-  Stream<FileOperationStatus> progressedDownload(
-      String url, Map<String, String> params, String apiToken, String filePath) async* {
+  Stream<FileOperationStatus> progressedDownload(String url,
+      Map<String, String> params, String apiToken, String filePath) async* {
     StreamController<FileOperationStatus> notifier =
         StreamController<FileOperationStatus>();
 
     File downloadedFile = File(filePath);
     IOSink fileWriteSink = downloadedFile.openWrite();
 
-    ByteStream downloaderStream =
-        await this._endpointConsumer.consumeResourseAsStream(url, params, apiJwtToken: apiToken);
+    ByteStream downloaderStream = await this
+        ._endpointConsumer
+        .consumeResourseAsStream(url, params, apiJwtToken: apiToken);
 
     double totalDownloadedSize = 0;
 
@@ -63,8 +63,8 @@ class FileTransferManager {
     yield* notifier.stream;
   }
 
-  Stream<FileOperationStatus> progressedUpload(
-      String url, Map<String, String> params, String apiToken, String filePath) async* {
+  Stream<FileOperationStatus> progressedUpload(String url,
+      Map<String, String> params, String apiToken, String filePath) async* {
     StreamController<FileOperationStatus> notifier =
         StreamController<FileOperationStatus>();
 
@@ -91,7 +91,9 @@ class FileTransferManager {
       notifier.close();
     });
 
-    this._endpointConsumer.produceResourseAsStream(url, params, 1, ['attachment'], [fileName], [producer], [fileSize], apiJwtToken: apiToken);
+    this._endpointConsumer.produceResourseAsStream(
+        url, params, 1, ['attachment'], [fileName], [producer], [fileSize],
+        apiJwtToken: apiToken);
 
     yield* notifier.stream;
   }

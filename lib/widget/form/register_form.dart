@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/authentication/registration_bloc.dart';
 import 'package:lk_client/event/register_event.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';
@@ -31,10 +30,14 @@ class _RegisterFormState extends State<RegisterForm> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (this._registrationBloc == null) {
-      AuthenticationBloc authenticationBloc =
+      final authenticationBloc =
           AppStateContainer.of(context).blocProvider.authenticationBloc;
-      this._registrationBloc =
-          RegistrationBloc(authorizationService, authenticationBloc);
+      final serviceProvider = AppStateContainer.of(context).serviceProvider;
+      this._registrationBloc = RegistrationBloc(
+          authorizationService: authorizationService,
+          fcmService: serviceProvider.firebaseMessaging,
+          utilQueryService: serviceProvider.utilQueryService,
+          authenticationBloc: authenticationBloc);
     }
   }
 

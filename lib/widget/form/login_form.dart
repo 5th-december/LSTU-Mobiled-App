@@ -33,9 +33,14 @@ class _LoginFormState extends State<LoginForm> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (this._loginBloc == null) {
+      final serviceProvider = AppStateContainer.of(context).serviceProvider;
       AuthenticationBloc authenticationBloc =
           AppStateContainer.of(context).blocProvider.authenticationBloc;
-      this._loginBloc = LoginBloc(authorizationService, authenticationBloc);
+      this._loginBloc = LoginBloc(
+          authorizationService: authorizationService,
+          authenticationBloc: authenticationBloc,
+          fcmService: serviceProvider.firebaseMessaging,
+          utilQueryService: serviceProvider.utilQueryService);
     }
   }
 

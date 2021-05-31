@@ -3,7 +3,6 @@ import 'package:lk_client/model/achievements/achievement.dart';
 import 'package:lk_client/model/achievements/achievements_summary.dart';
 import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/achievements/publication.dart';
-import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/model/listed_response.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/http_service.dart';
@@ -13,8 +12,6 @@ class AchievementQueryService {
   final ComponentErrorHandler apiErrorHandler;
   final AuthenticationExtractor authenticationExtractor;
   final ApiEndpointConsumer apiEndpointConsumer;
-
-  ApiKey get accessKey => authenticationExtractor.getAuthenticationData();
 
   AchievementQueryService(
       {@required this.apiEndpointConsumer,
@@ -34,7 +31,9 @@ class AchievementQueryService {
         arguments['c'] = count.toString();
       }
       HttpResponse response = await this.apiEndpointConsumer.get(
-          '/api/v1/person/achievements/list', arguments, this.accessKey.token);
+          '/api/v1/person/achievements/list',
+          arguments,
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<Achievement> personAchievements =
@@ -63,7 +62,9 @@ class AchievementQueryService {
         arguments['c'] = count.toString();
       }
       HttpResponse response = await this.apiEndpointConsumer.get(
-          '/api/v1/person/publications/list', arguments, this.accessKey.token);
+          '/api/v1/person/publications/list',
+          arguments,
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         ListedResponse<Publication> personPublications =
@@ -85,7 +86,7 @@ class AchievementQueryService {
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/person/achievements/summary',
           <String, String>{'p': person},
-          this.accessKey.token);
+          await this.authenticationExtractor.getAuthenticationData);
 
       if (response.status == 200) {
         AchievementsSummary personAchievementsSummary =

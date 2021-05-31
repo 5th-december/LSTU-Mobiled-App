@@ -15,7 +15,8 @@ import 'package:lk_client/widget/layout/profile_picture.dart';
 import 'package:lk_client/widget/list/endless_scrolling_widget.dart';
 
 class DialogList extends StatefulWidget {
-  DialogList({Key key}) : super(key: key);
+  final Person person;
+  DialogList({Key key, @required this.person}) : super(key: key);
 
   @override
   _DialogListState createState() => _DialogListState();
@@ -35,24 +36,22 @@ class _DialogListState extends State<DialogList> {
   @override
   Widget build(BuildContext context) {
     // Инициализация заполнения списка
-    this._bloc.eventController.sink.add(
-        EndlessScrollingLoadEvent<LoadDialogListCommand>(
-            command: LoadDialogListCommand(count: 50, offset: 0)));
+    final loadingCommand = EndlessScrollingLoadEvent<LoadDialogListCommand>(
+        command:
+            LoadDialogListCommand(count: 50, offset: 0, person: widget.person));
+
+    this._bloc.eventController.sink.add(loadingCommand);
 
     final ScrollController scrollController = ScrollController();
     final int scrollDistance = 200;
 
-    EndlessScrollingLoadNextChunkEvent<LoadDialogListCommand>
-        nextChunkQueryEvent;
     bool needsAutoloading = false;
 
     scrollController.addListener(() {
       final maxScroll = scrollController.position.maxScrollExtent;
       final currentScroll = scrollController.position.pixels;
-      if (needsAutoloading &&
-          nextChunkQueryEvent != null &&
-          maxScroll - currentScroll <= scrollDistance) {
-        this._bloc.eventController.sink.add(nextChunkQueryEvent);
+      if (needsAutoloading && maxScroll - currentScroll <= scrollDistance) {
+        this._bloc.eventController.sink.add(loadingCommand);
       }
     });
 
@@ -60,11 +59,8 @@ class _DialogListState extends State<DialogList> {
       bloc: this._bloc,
       buildList: (EndlessScrollingState<DialogModel.Dialog> state) {
         if (state is EndlessScrollingChunkReadyState) {
-          needsAutoloading = true;
-          nextChunkQueryEvent =
-              EndlessScrollingLoadNextChunkEvent<LoadDialogListCommand>(
-                  command: (state as EndlessScrollingChunkReadyState)
-                      .nextChunkCommand);
+          needsAutoloading =
+              (state as EndlessScrollingChunkReadyState).hasMoreData;
         } else {
           needsAutoloading = false;
         }
@@ -84,7 +80,9 @@ class _DialogListState extends State<DialogList> {
         List<DialogModel.Dialog> loadedDialogs = state.entityList;
 
         return ListView.builder(
-            itemCount: (state is EndlessScrollingChunkReadyState ||
+            itemCount: ((state is EndlessScrollingChunkReadyState &&
+                        (state as EndlessScrollingChunkReadyState)
+                            .hasMoreData) ||
                     state is EndlessScrollingLoadingState)
                 ? loadedDialogs.length + 1
                 : loadedDialogs.length,

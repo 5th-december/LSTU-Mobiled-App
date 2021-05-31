@@ -8,13 +8,14 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 
-class PersonListBloc extends AbstractEndlessScrollingBloc<Person, LoadPersonListByTextQuery> {
+class PersonListBloc
+    extends AbstractEndlessScrollingBloc<Person, LoadPersonListByTextQuery> {
   final PersonQueryService personQueryService;
 
   PersonListBloc({@required this.personQueryService});
   @override
   List<Person> copyPreviousToNew(List<Person> previuos, List<Person> fresh) {
-    List<Person> payload = List<Person>.from(previuos); 
+    List<Person> payload = List<Person>.from(previuos);
     payload.addAll(fresh);
     return payload;
   }
@@ -25,20 +26,24 @@ class PersonListBloc extends AbstractEndlessScrollingBloc<Person, LoadPersonList
   }
 
   @override
-  LoadPersonListByTextQuery getNextChunkCommand(LoadPersonListByTextQuery previousCommand, ListedResponse<Person> fresh) {
+  LoadPersonListByTextQuery getNextChunkCommand(
+      LoadPersonListByTextQuery previousCommand, int count, int remains) {
     return LoadPersonListByTextQuery(
-      count: min(previousCommand.count, fresh.remains),
-      offset: previousCommand.offset + fresh.count,
-      textQuery: previousCommand.textQuery
-    );
+        count: min(previousCommand.count, remains),
+        offset: previousCommand.offset + count,
+        textQuery: previousCommand.textQuery);
   }
 
   @override
-  Future<ListedResponse<Person>> loadListElementChunk(LoadPersonListByTextQuery command) async {
-    Stream<ConsumingState<ListedResponse<Person>>> personsListStream = 
-      this.personQueryService.getPersonList(command.textQuery, command.count.toString(), command.offset.toString());
-    await for (ConsumingState<ListedResponse<Person>> state in personsListStream) {
-      if(state is ConsumingErrorState<ListedResponse<Person>>) {
+  Future<ListedResponse<Person>> loadListElementChunk(
+      LoadPersonListByTextQuery command) async {
+    Stream<ConsumingState<ListedResponse<Person>>> personsListStream = this
+        .personQueryService
+        .getPersonList(command.textQuery, command.count.toString(),
+            command.offset.toString());
+    await for (ConsumingState<ListedResponse<Person>> state
+        in personsListStream) {
+      if (state is ConsumingErrorState<ListedResponse<Person>>) {
         throw state.error;
       } else if (state is ConsumingReadyState<ListedResponse<Person>>) {
         return state.content;

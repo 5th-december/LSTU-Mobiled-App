@@ -73,6 +73,60 @@ class ApiEndpointConsumer {
     return new HttpResponse(status: response.statusCode, body: responseBody);
   }
 
+  Future<HttpResponse> delete(
+      String url, Map<String, dynamic> params, Map<String, dynamic> body,
+      [String apiJwtToken]) async {
+    Uri uri;
+    if (_configuration.useHttps == true) {
+      uri = Uri.https(_configuration.apiBase, url, params);
+    } else {
+      uri = Uri.http(_configuration.apiBase, url, params);
+    }
+
+    Map<String, String> headers = defaultHeaders;
+    if (apiJwtToken != null) {
+      headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
+    }
+
+    final response =
+        await http.delete(uri, headers: headers, body: jsonEncode(body));
+
+    if (response.headers[HttpHeaders.contentTypeHeader] !=
+        ContentType.json.value) {
+      throw new Exception('Undefined response type');
+    }
+
+    final responseBody = jsonDecode(response.body);
+    return new HttpResponse(status: response.statusCode, body: responseBody);
+  }
+
+  Future<HttpResponse> patch(
+      String url, Map<String, dynamic> params, Map<String, dynamic> body,
+      [String apiJwtToken]) async {
+    Uri uri;
+    if (_configuration.useHttps == true) {
+      uri = Uri.https(_configuration.apiBase, url, params);
+    } else {
+      uri = Uri.http(_configuration.apiBase, url, params);
+    }
+
+    Map<String, String> headers = defaultHeaders;
+    if (apiJwtToken != null) {
+      headers[HttpHeaders.authorizationHeader] = "Bearer $apiJwtToken";
+    }
+
+    final response =
+        await http.patch(uri, headers: headers, body: jsonEncode(body));
+
+    if (response.headers[HttpHeaders.contentTypeHeader] !=
+        ContentType.json.value) {
+      throw new Exception('Undefined response type');
+    }
+
+    final responseBody = jsonDecode(response.body);
+    return new HttpResponse(status: response.statusCode, body: responseBody);
+  }
+
   Future<void> produceResourseAsStream(
       String url,
       Map<String, String> params,

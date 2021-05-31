@@ -1,39 +1,24 @@
-import 'dart:async';
-
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/event/consuming_event.dart';
+import 'package:rxdart/rxdart.dart';
 
 abstract class AbstractBloc<TS, TE> {
-  TS _currentState;
-
-  TS get currentState => _currentState;
+  TS get currentState =>
+      this.stateContoller.hasValue ? this.stateContoller.value : null;
+  TE get currentCommand =>
+      this.eventController.hasValue ? this.eventController.value : null;
 
   @protected
-  StreamController<TS> stateContoller = StreamController<TS>.broadcast();
+  BehaviorSubject<TS> stateContoller = BehaviorSubject<TS>();
 
-  StreamController<TE> eventController = StreamController<TE>.broadcast();
-
-  //StreamController serviceController = StreamController.broadcast();
-
-  /*AbstractBloc() {
-    Stream currentStateEventStream = this
-        .serviceController
-        .stream
-        .where((event) => event is GetCurrentStateEvent);
-    currentStateEventStream.listen((event) {
-      this.stateContoller.sink.add(_currentState);
-    });
-  }*/
+  BehaviorSubject<TE> eventController = BehaviorSubject<TE>();
 
   dispose() async {
     await this.stateContoller.close();
     await this.eventController.close();
-    //await this.serviceController.close();
   }
 
   @protected
   void updateState(TS newState) {
-    this._currentState = newState;
     this.stateContoller.sink.add(newState);
   }
 }

@@ -16,9 +16,8 @@ import 'package:lk_client/widget/chunk/centered_loader.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
 import 'package:lk_client/widget/list/endless_scrolling_widget.dart';
 
-class PersonList extends StatefulWidget
-{
-  PersonList({Key key}): super(key: key);
+class PersonList extends StatefulWidget {
+  PersonList({Key key}) : super(key: key);
 
   @override
   _PersonListState createState() => _PersonListState();
@@ -31,104 +30,115 @@ class _PersonListState extends State<StatefulWidget> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if(this._personListBloc == null) {
-      this._personListBloc = PersonFinderPageProvider.of(context).personListBloc;
-      this._dialogCreatorBloc = PersonFinderPageProvider.of(context).dialogCreatorBloc;
+    if (this._personListBloc == null) {
+      this._personListBloc =
+          PersonFinderPageProvider.of(context).personListBloc;
+      this._dialogCreatorBloc =
+          PersonFinderPageProvider.of(context).dialogCreatorBloc;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final loadingEvent = EndlessScrollingLoadEvent(
+        command: LoadPersonListByTextQuery(count: 20, offset: 0));
     // Инициализация заполнения списка
-    this._personListBloc.eventController.add(
-      EndlessScrollingLoadEvent(
-        command: LoadPersonListByTextQuery(
-          count: 20, 
-          offset: 0
-        )
-      )
-    );
+    this._personListBloc.eventController.add(loadingEvent);
 
     ScrollController scrollController = ScrollController();
     final int scrollDistance = 200;
 
-    EndlessScrollingLoadNextChunkEvent<LoadPersonListByTextQuery> nextChunkQueryEvent;
     bool needsAutoloading = false;
 
     scrollController.addListener(() {
       final maxScroll = scrollController.position.maxScrollExtent;
       final currentScroll = scrollController.position.pixels;
-      if(needsAutoloading && nextChunkQueryEvent != null && maxScroll - currentScroll <= scrollDistance) {
-        this._personListBloc.eventController.sink.add(nextChunkQueryEvent);
+      if (needsAutoloading && maxScroll - currentScroll <= scrollDistance) {
+        this._personListBloc.eventController.sink.add(loadingEvent);
       }
     });
 
     return EndlessScrollingWidget<Person, LoadPersonListByTextQuery>(
-      bloc: this._personListBloc,
-      buildList: (EndlessScrollingState<Person> state) {
-        if(state is EndlessScrollingChunkReadyState) {
-          needsAutoloading = true;
-          nextChunkQueryEvent = EndlessScrollingLoadNextChunkEvent<LoadPersonListByTextQuery>(
-            command: (state as EndlessScrollingChunkReadyState).nextChunkCommand);
-        } else {
-          needsAutoloading = false;
-        }
-
-        if(state.entityList.length == 0) {
-          if(state is EndlessScrollingErrorState){
-            return Center(child: Text('Ошибка загрузки списка пользователей'));
+        bloc: this._personListBloc,
+        buildList: (EndlessScrollingState<Person> state) {
+          if (state is EndlessScrollingChunkReadyState) {
+            needsAutoloading =
+                (state as EndlessScrollingChunkReadyState).hasMoreData;
+          } else {
+            needsAutoloading = false;
           }
 
-          if(state is EndlessScrollingLoadingState) {
-            return CenteredLoader();
-          }
-
-          return Center(child: Text('Ничего не найдено'));
-        }
-
-        final dataList = state.entityList;
-        return ListView.builder(
-          itemCount: (state is EndlessScrollingChunkReadyState || state is EndlessScrollingLoadingState) ? dataList.length + 1 : dataList.length,
-          controller: scrollController,
-          itemBuilder: (BuildContext context, int index) {
-            if(index >= dataList.length) {
-              return ListLoadingBottomIndicator();
+          if (state.entityList.length == 0) {
+            if (state is EndlessScrollingErrorState) {
+              return Center(
+                  child: Text('Ошибка загрузки списка пользователей'));
             }
 
-            return Container(
-              child: ListTile(
-                //leading: PersonProfilePicture(displayed: dataList[index], size: 30.0),
-                title: Text("${dataList[index].name} ${dataList[index].surname}"),
-                onTap: () async {
-                  this._dialogCreatorBloc.eventController.add(ProduceResourceEvent<void, StartNewDialog>(command: StartNewDialog(companion: dataList[index])));
+            if (state is EndlessScrollingLoadingState) {
+              return CenteredLoader();
+            }
 
-                  await for (ProducingState<void> response in this._dialogCreatorBloc.dialogCreatorStateStream) {
-                    if(response is ProducingErrorState<void>) {
-                      throw response;
-                    }
-                    if(response is ProducingReadyState<void, DialogModel.Dialog>) {
-                      DialogModel.Dialog createdDialog = response.response;
-                      this._dialogCreatorBloc.eventController.add(ProducerInitEvent<void>());
-                      MessengerPageProvider.of(context).dialogListBloc.eventController.add(
-                        EndlessScrollingLoadEvent<LoadDialogListCommand>(command: LoadDialogListCommand(count: 50, offset: 0)));
-                      Navigator.of(context).pop();
-                      Navigator.of(context).push(
-                        MaterialPageRoute(builder: (BuildContext context) {
-                          return PrivateDialogPage(
-                            companion: dataList[index],
-                            dialog: createdDialog,
-                          );
-                        })
-                      );
-                    }
-                  }
-                },
-              ),
-            );
-
+            return Center(child: Text('Ничего не найдено'));
           }
-        );
-      }
-    );
+
+          final dataList = state.entityList;
+          return ListView.builder(
+              itemCount: (state is EndlessScrollingChunkReadyState ||
+                      state is EndlessScrollingLoadingState)
+                  ? dataList.length + 1
+                  : dataList.length,
+              controller: scrollController,
+              itemBuilder: (BuildContext context, int index) {
+                if (index >= dataList.length) {
+                  return ListLoadingBottomIndicator();
+                }
+
+                return Container(
+                  child: ListTile(
+                    //leading: PersonProfilePicture(displayed: dataList[index], size: 30.0),
+                    title: Text(
+                        "${dataList[index].name} ${dataList[index].surname}"),
+                    onTap: () async {
+                      this._dialogCreatorBloc.eventController.add(
+                          ProduceResourceEvent<void, StartNewDialog>(
+                              command:
+                                  StartNewDialog(companion: dataList[index])));
+
+                      await for (ProducingState<void> response
+                          in this._dialogCreatorBloc.dialogCreatorStateStream) {
+                        if (response is ProducingErrorState<void>) {
+                          throw response;
+                        }
+                        if (response
+                            is ProducingReadyState<void, DialogModel.Dialog>) {
+                          DialogModel.Dialog createdDialog = response.response;
+                          this
+                              ._dialogCreatorBloc
+                              .eventController
+                              .add(ProducerInitEvent<void>());
+                          MessengerPageProvider.of(context)
+                              .dialogListBloc
+                              .eventController
+                              .add(EndlessScrollingLoadEvent<
+                                      LoadDialogListCommand>(
+                                  command: LoadDialogListCommand(
+                                      person: dataList[index],
+                                      count: 50,
+                                      offset: 0)));
+                          Navigator.of(context).pop();
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (BuildContext context) {
+                            return PrivateDialogPage(
+                              companion: dataList[index],
+                              dialog: createdDialog,
+                            );
+                          }));
+                        }
+                      }
+                    },
+                  ),
+                );
+              });
+        });
   }
 }

@@ -20,10 +20,10 @@ class NavigationBloc extends AbstractBloc<NavigationState, NavigationEvent> {
   /*
    * Открытие страницы в указанной вкладке
    */
-  Stream<NavigationEvent> get _navigateToCustomPageEventStream =>
-      this.eventController.stream.where((event) =>
-          event is NavigateToCustomPageEvent &&
-          event.pageNumber != currentState.selectedIndex);
+  Stream<NavigationEvent> get _navigateToCustomPageEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is NavigateToCustomPageEvent);
 
   NavigationBloc() {
     this._navigationEventStream.listen((NavigationEvent event) {
@@ -52,6 +52,10 @@ class NavigationBloc extends AbstractBloc<NavigationState, NavigationEvent> {
        * Для открытия произвольной страницы в указанной вкладке
        * В page managere нужно обрабатывать такие события, push на навигаторах с указанными индексами
        */
+      final _event = event as NavigateToCustomPageEvent;
+      this.updateState(
+          NavigatedToCustomPage(_event.pageNumber, _event.customPage));
+      // TODO: Обработка на стороне менеджера страниц
     });
   }
 }
