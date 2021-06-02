@@ -3,7 +3,7 @@ import 'dart:io';
 import 'dart:async';
 import 'package:http/http.dart' as http;
 
-import 'package:lk_client/service/app_config.dart';
+import 'package:lk_client/service/config/app_config.dart';
 
 class HttpResponse {
   final int status;

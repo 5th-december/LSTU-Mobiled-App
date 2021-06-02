@@ -60,10 +60,11 @@ class UtilQueryService {
   }
 
   Future<NotificationPreferences> getCurrentNotificationPreferences() async {
-    HttpResponse response = await this.apiEndpointConsumer.get(
-        '/api/v1/notifications/prefs',
-        {},
-        await this.authenticationExtractor.getAuthenticationData);
+    String apiToken = await this.authenticationExtractor.getAuthenticationData;
+
+    HttpResponse response = await this
+        .apiEndpointConsumer
+        .get('/api/v1/notifications/prefs', {}, apiToken);
 
     if (response.status == 200) {
       return NotificationPreferences.fromJson(response.body);

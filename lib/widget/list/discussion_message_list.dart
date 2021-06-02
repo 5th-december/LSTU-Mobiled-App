@@ -55,7 +55,6 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
         EndlessScrollingLoadEvent<LoadDisciplineDiscussionListCommand>(
             command: LoadDisciplineDiscussionListCommand(
                 count: 50,
-                offset: 0,
                 discipline: widget.discipline,
                 education: widget.education,
                 semester: widget.semester));

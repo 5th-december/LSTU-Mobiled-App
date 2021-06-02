@@ -2,14 +2,13 @@ import 'dart:async';
 
 import 'package:dart_amqp/dart_amqp.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/mb_objects/mb_dialog.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/amqp_service.dart';
-import 'package:lk_client/state/amqp_connection_storage.dart';
+import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
 class AmqpStartConsumeDialogListUpdates {
@@ -19,30 +18,48 @@ class AmqpStartConsumeDialogListUpdates {
 
 class AmqpDialogListConsumerBloc extends AbstractBloc<
     NotificationConsumeState<List<Dialog>>, NotificationConsumeEvent> {
+  final _exchangeType = ExchangeType.DIRECT;
+
+  String _exchangeName;
+
+  StreamController _dialogListController = StreamController();
+
+  Consumer _amqpConsumer;
+
+  @override
+  dispose() {
+    super.dispose();
+    this._dialogListController.close();
+    this._amqpConsumer.cancel();
+  }
+
+  /*
+   * Стрим состояний
+   */
   Stream<NotificationConsumeState> get dialogListConsumingStateStream => this
       .stateContoller
       .stream
       .where((event) => event is NotificationConsumeState<List<Dialog>>);
 
+  /*
+   * Стрим событий потребления
+   */
   Stream<NotificationConsumeEvent> get _dialogListStartConsumingEvent =>
       this.eventController.stream.where((event) => event
           is StartNotificationConsumeEvent<AmqpStartConsumeDialogListUpdates>);
 
-  Stream<NotificationConsumeEvent> get _ackDialogListNotificationEventStream =>
-      this
+  /*
+   * Стрим событий подтверждения 
+   */
+  Stream<NotificationConsumeEvent>
+      get _ackAllDialogListNotificationEventStream => this
           .eventController
           .stream
-          .where((event) => event is AckNotificationReceived<List<Dialog>>);
+          .where((event) => event is AckAllNotificationReceived);
 
-  AmqpConnectionStorage amqpConnectionStorage;
-
-  final exchangeType = ExchangeType.DIRECT;
-
-  final exchangeName = 'dialog';
-
-  StreamController dialogListController = StreamController();
-
-  AmqpDialogListConsumerBloc({@required amqpConnectionStorage}) {
+  AmqpDialogListConsumerBloc(
+      {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
+    this._exchangeName = amqpConfig.dialogListExchangeName;
     /**
      * Событие старта подписки на обновление списка диалогов
      */
@@ -55,35 +72,47 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
       final String routingKey = command.receiver.id;
 
       final amqpBindingData = AmqpBindingData(
-          exchangeName: this.exchangeName,
-          exchangeType: this.exchangeType,
+          exchangeName: this._exchangeName,
+          exchangeType: this._exchangeType,
           routingKeys: [routingKey]);
 
       try {
-        Stream<Map<dynamic, dynamic>> valuesStream =
-            await this.amqpConnectionStorage.getConsumeStream(amqpBindingData);
+        this._amqpConsumer =
+            await amqpService.startListenBindedQueue(amqpBindingData);
 
         final transformer = StreamTransformer.fromHandlers(
             handleData: (data, EventSink sink) async {
           final createdDialogData = MbDialog.fromJson(data);
           final dialog = createdDialogData.getDialog();
 
-          final box = await Hive.openBox('dialog_list_notifications');
-          await box.put(dialog.id, dialog);
-          final List<Dialog> notifiedDialogList = box.values.toList();
-
-          sink.add(notifiedDialogList);
-        });
-
-        this.dialogListController.stream.transform(transformer).listen((event) {
-          if (event is List<Dialog>) {
-            this.updateState(
-                NotificationReadyState<List<Dialog>>(notifications: event));
+          if (this.currentState is NotificationReadyState<List<Dialog>> &&
+              (this.currentState as NotificationReadyState<List<Dialog>>)
+                      .notifications
+                      .length !=
+                  0) {
+            List<Dialog> existing = List<Dialog>.from(
+                (this.currentState as NotificationReadyState<List<Dialog>>)
+                    .notifications);
+            existing.add(dialog);
+            sink.add(existing);
+          } else {
+            sink.add(<Dialog>[dialog]);
           }
         });
 
-        valuesStream.listen((event) {
-          this.dialogListController.sink.add(event);
+        this
+            ._dialogListController
+            .stream
+            .transform(transformer)
+            .listen((event) {
+          if (event is List) {
+            this.updateState(NotificationReadyState<List<Dialog>>(
+                notifications: event.cast<Dialog>()));
+          }
+        });
+
+        this._amqpConsumer.listen((event) {
+          this._dialogListController.sink.add(event.payloadAsJson);
         },
             onError: (e) => this
                 .updateState(NotificationErrorState<List<Dialog>>(error: e)));
@@ -93,23 +122,12 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
     });
 
     /**
-     * Событие подтверждение получения от виджета
+     * Событие подтверждения получения от виджета
      */
-    this._ackDialogListNotificationEventStream.listen((event) async {
-      final _event = event as AckNotificationReceived<List<Dialog>>;
-      List<Dialog> notifiedDialogs = _event.receivedNotification;
-
-      try {
-        final box = await Hive.openBox('dialog_list_notifications');
-        for (Dialog notifiedDialog in notifiedDialogs) {
-          box.delete(notifiedDialog.id);
-        }
-
-        final List<Dialog> notificationList = box.values.toList();
+    this._ackAllDialogListNotificationEventStream.listen((event) async {
+      if (this.currentState is NotificationReadyState<List<Dialog>>) {
         this.updateState(NotificationReadyState<List<Dialog>>(
-            notifications: notificationList));
-      } on Exception catch (e) {
-        this.updateState(NotificationErrorState<List<Dialog>>(error: e));
+            notifications: const <Dialog>[]));
       }
     });
   }

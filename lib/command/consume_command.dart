@@ -86,16 +86,15 @@ class LoadCurrentEducationsCommand {
 class LoadPrivateChatMessagesListCommand {
   final Dialog dialog;
   final int count;
-  final int offset;
+  final String bound;
   LoadPrivateChatMessagesListCommand(
-      {@required this.dialog, @required this.count, @required this.offset});
+      {@required this.dialog, this.count, this.bound});
 }
 
 class LoadDialogListCommand {
-  final Person person;
   final int count;
-  final int offset;
-  LoadDialogListCommand({this.count, this.offset, @required this.person});
+  final String bound;
+  LoadDialogListCommand({this.count, this.bound});
 }
 
 class LoadDisciplineDiscussionListCommand {
@@ -103,13 +102,9 @@ class LoadDisciplineDiscussionListCommand {
   final Education education;
   final Semester semester;
   final int count;
-  final int offset;
+  final String bound;
   LoadDisciplineDiscussionListCommand(
-      {this.discipline,
-      this.count,
-      this.offset,
-      this.education,
-      this.semester});
+      {this.discipline, this.count, this.bound, this.education, this.semester});
 }
 
 abstract class MultipartRequestCommand {}

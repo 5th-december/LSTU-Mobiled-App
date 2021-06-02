@@ -20,12 +20,23 @@ class MessengerQueryService {
       @required this.authenticationExtractor});
 
   Stream<ConsumingState<ListedResponse<PrivateMessage>>>
-      getPrivateChatMessagesList(
-          String dialogId, String count, String offset) async* {
-    HttpResponse response = await this.apiEndpointConsumer.get(
-        '/api/v1/messenger/list',
-        {'dialog': dialogId, 'of': offset, 'c': count},
-        await this.authenticationExtractor.getAuthenticationData);
+      getPrivateChatMessagesList(String dialogId,
+          [String bound, String count]) async* {
+    Map<String, String> request = <String, String>{'dialog': dialogId};
+
+    if (bound != null) {
+      request['iof'] = bound;
+    }
+
+    if (count != null) {
+      request['ic'] = count;
+    }
+
+    String apiToken = await this.authenticationExtractor.getAuthenticationData;
+
+    HttpResponse response = await this
+        .apiEndpointConsumer
+        .get('/api/v1/messenger/list', request, apiToken);
 
     if (response.status == 200) {
       ListedResponse<PrivateMessage> responseData =
@@ -38,10 +49,17 @@ class MessengerQueryService {
   }
 
   Stream<ConsumingState<ListedResponse<Dialog>>> getDialogList(
-      String count, String offset) async* {
+      [String bound, String count]) async* {
+    final requestData = <String, String>{};
+    if (bound != null) {
+      requestData['iof'] = bound;
+    }
+    if (count != null) {
+      requestData['ic'] = count;
+    }
     HttpResponse response = await this.apiEndpointConsumer.get(
         '/api/v1/messenger/dialog/list',
-        {'of': offset, 'c': count},
+        requestData,
         await this.authenticationExtractor.getAuthenticationData);
 
     if (response.status == 200) {
@@ -71,18 +89,28 @@ class MessengerQueryService {
   }
 
   Stream<ConsumingState<ListedResponse<DiscussionMessage>>>
-      getDiscussionMessagesList(String disciplineId, String educationId,
-          String semesterId, String count, String offset) async* {
-    HttpResponse response = await this.apiEndpointConsumer.get(
-        '/api/v1/discussion/list',
-        {
-          'dis': disciplineId,
-          'edu': educationId,
-          'sem': semesterId,
-          'c': count,
-          'of': offset
-        },
-        await this.authenticationExtractor.getAuthenticationData);
+      getDiscussionMessagesList(
+          String disciplineId, String educationId, String semesterId,
+          [String bound, String count]) async* {
+    Map<String, String> arguments = <String, String>{
+      'dis': disciplineId,
+      'edu': educationId,
+      'sem': semesterId,
+    };
+
+    if (bound != null) {
+      arguments['iof'] = bound;
+    }
+
+    if (count != null) {
+      arguments['ic'] = count;
+    }
+
+    String apiToken = await this.authenticationExtractor.getAuthenticationData;
+
+    HttpResponse response = await this
+        .apiEndpointConsumer
+        .get('/api/v1/discussion/list', arguments, apiToken);
 
     if (response.status == 200) {
       ListedResponse<DiscussionMessage> discussionMessagedata =

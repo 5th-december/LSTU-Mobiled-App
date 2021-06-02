@@ -10,51 +10,90 @@ abstract class AbstractEndlessScrollingBloc<T, C>
       .stream
       .where((event) => event is EndlessScrollingState<T>);
 
+  /*
+   * Стрим событий начальной инициализации списка, 
+   * может содержать изначально добавленные элементы
+   */
+  Stream<EndlessScrollingEvent> get _dialogListInitEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is EndlessScrollingInitEvent<T>);
+
+  /*
+   *  Стрим событий загрузки следующей страницы списка 
+   *  при этом учитываются ранее добавленные элементы
+   */
   Stream<EndlessScrollingEvent> get _nextChunkLoadEventStream => this
       .eventController
       .stream
       .where((event) => event is EndlessScrollingLoadEvent<C>);
 
+  /*
+   * Стрим событий добавления списка извне блока
+   */
   Stream<EndlessScrollingEvent> get _externalDataAddedEventStream => this
       .eventController
       .stream
       .where((event) => event is ExternalDataAddEvent<T>);
 
-  /* Загружает очередой лист результата  */
+  /*
+   * Стрим событий обновления списка извне блока 
+   */
+  Stream<EndlessScrollingEvent> get _externalDataUpdateEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is ExternalDataUpdateEvent<T>);
+
+  /*
+   * Загружает очередой лист результата
+   */
   Future<ListedResponse<T>> loadListElementChunk(C command);
 
-  /* Вернуть true при наличии следующих страниц */
+  /*
+   * Вернуть true при наличии следующих страниц
+   */
   bool hasMoreChunks(ListedResponse<T> fresh);
 
-  /* Возвращает составной список из предыдущих и загруженных результатов */
+  /*
+   * Возвращает составной список из предыдущих и загруженных результатов
+   */
   List<T> copyPreviousToNew(List<T> previuos, List<T> fresh);
 
-  /* Инициализация нового объекта команды для загрузки следующей страницы */
-  C getNextChunkCommand(C baseCommand, int loaded, int remains);
+  /*
+   * Инициализация нового объекта команды для загрузки следующей страницы
+   */
+  C getNextChunkCommand(C baseCommand, List<T> loaded, [int remains]);
+
+  /*
+   * Обновляет элементы имеющегося списка из добавленного
+   * По умолчанию игнорирует обновление
+   * В подклассах поведение необходимо изменять, 
+   * если есть необходимость в динамическом обновлении 
+   * контента в списке, например, из события external update
+   */
+  List<T> updateItemsInList(List<T> actual, List<T> update) {
+    return actual;
+  }
+
+  /*
+   * Добавление в список новых элементов
+   * По умолчанию элементы добавляются в конец
+   * В подклассах поведение может быть изменено
+   * 
+   * В таких списках, как чаты новые элементы всегда
+   * добавляются в начало списка, поэтому в таких
+   * подклассах их изменение обязательно
+   */
+  List<T> addNewItemsToList(List<T> actual, List<T> additional) {
+    final addedList = List<T>.from(actual);
+    addedList.addAll(additional);
+    return addedList;
+  }
 
   AbstractEndlessScrollingBloc() {
-    this.updateState(EndlessScrollingInitState());
-
-    /* this._nextChunkLoadEventStream.listen((event) async {
-      final _event = event as EndlessScrollingLoadEvent<C>;
-      this.updateState(EndlessScrollingLoadingState());
-      try {
-        ListedResponse<T> freshData =
-            await this.loadListElementChunk(_event.command);
-        C nextChunkCommand =
-            this.getNextChunkCommand(_event.command, freshData);
-        if (this.hasMoreChunks(freshData)) {
-          this.updateState(EndlessScrollingChunkReadyState<T, C>(
-              entityList: freshData.payload,
-              nextChunkCommand: nextChunkCommand));
-        } else {
-          this.updateState(EndlessScrollingNoMoreDataState<T>(
-              entityList: freshData.payload));
-        }
-      } on Exception catch (e) {
-        this.updateState(EndlessScrollingErrorState<T>(error: e));
-      }
-    });*/
+    this._dialogListInitEventStream.listen((event) {
+      this.updateState(EndlessScrollingInitState<T>());
+    });
 
     this._nextChunkLoadEventStream.listen((event) async {
       final _event = event as EndlessScrollingLoadEvent<C>;
@@ -69,7 +108,7 @@ abstract class AbstractEndlessScrollingBloc<T, C>
         if (currentState is EndlessScrollingChunkReadyState) {
           command = this.getNextChunkCommand(
               _event.command,
-              currentState.entityList.length,
+              currentState.entityList,
               (currentState as EndlessScrollingChunkReadyState).remains);
         }
 
@@ -102,13 +141,28 @@ abstract class AbstractEndlessScrollingBloc<T, C>
     this._externalDataAddedEventStream.listen((event) {
       final _event = event as ExternalDataAddEvent<T>;
 
-      if (currentState is EndlessScrollingChunkReadyState) {
-        this.updateState(EndlessScrollingChunkReadyState(
-            entityList: _event.externalAddedData + currentState.entityList,
-            hasMoreData:
-                (currentState as EndlessScrollingChunkReadyState).hasMoreData,
+      if (currentState is EndlessScrollingChunkReadyState<T>) {
+        this.updateState(EndlessScrollingChunkReadyState<T>(
+            entityList: this.addNewItemsToList(
+                currentState.entityList, _event.externalAddedData),
+            hasMoreData: (currentState as EndlessScrollingChunkReadyState<T>)
+                .hasMoreData,
             remains:
-                (currentState as EndlessScrollingChunkReadyState).remains));
+                (currentState as EndlessScrollingChunkReadyState<T>).remains));
+      }
+    });
+
+    this._externalDataUpdateEventStream.listen((event) {
+      final _event = event as ExternalDataUpdateEvent<T>;
+
+      if (currentState is EndlessScrollingChunkReadyState) {
+        this.updateState(EndlessScrollingChunkReadyState<T>(
+            entityList: this.updateItemsInList(
+                this.currentState.entityList, _event.externalUpdatedData),
+            hasMoreData: (currentState as EndlessScrollingChunkReadyState<T>)
+                .hasMoreData,
+            remains:
+                (currentState as EndlessScrollingChunkReadyState<T>).remains));
       }
     });
   }

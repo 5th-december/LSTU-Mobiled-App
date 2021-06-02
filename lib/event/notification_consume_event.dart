@@ -7,7 +7,11 @@ class StartNotificationConsumeEvent<T> extends NotificationConsumeEvent {
   StartNotificationConsumeEvent({@required this.command});
 }
 
-class AckNotificationReceived<T> extends NotificationConsumeEvent {
-  T receivedNotification;
-  AckNotificationReceived({@required this.receivedNotification});
+class AckNotificationReceived extends NotificationConsumeEvent {}
+
+class AckAllNotificationReceived extends AckNotificationReceived {}
+
+class AckPartiallyNotificationReceived<T> extends AckNotificationReceived {
+  List<T> deliveredNotifications;
+  AckPartiallyNotificationReceived({@required this.deliveredNotifications});
 }

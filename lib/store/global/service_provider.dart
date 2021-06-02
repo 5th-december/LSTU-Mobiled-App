@@ -1,5 +1,6 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
+import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/api_consumer/achievement_query_service.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
@@ -7,7 +8,8 @@ import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
 import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/api_consumer/util_query_service.dart';
-import 'package:lk_client/service/app_config.dart';
+import 'package:lk_client/service/config/amqp_config.dart';
+import 'package:lk_client/service/config/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';
 import 'package:lk_client/service/file_local_manager.dart';
@@ -29,6 +31,8 @@ class ServiceProvider {
   final AchievementQueryService achievementQueryService;
   final UtilQueryService utilQueryService;
   final FirebaseMessaging firebaseMessaging;
+  final AmqpService amqpService;
+  final AmqpConfig amqpConfig;
 
   ServiceProvider(
       {@required this.jwtManager,
@@ -44,5 +48,7 @@ class ServiceProvider {
       @required this.fileTransferService,
       @required this.achievementQueryService,
       @required this.utilQueryService,
-      @required this.messengerQueryService});
+      @required this.messengerQueryService,
+      @required this.amqpConfig,
+      @required this.amqpService});
 }

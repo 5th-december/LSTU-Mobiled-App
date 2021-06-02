@@ -30,14 +30,22 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
   @override
   LoadDisciplineDiscussionListCommand getNextChunkCommand(
       LoadDisciplineDiscussionListCommand previousCommand,
-      int count,
-      int remains) {
+      List<DiscussionMessage> loaded,
+      [int remains]) {
     return LoadDisciplineDiscussionListCommand(
         discipline: previousCommand.discipline,
         education: previousCommand.education,
         semester: previousCommand.semester,
         count: min(previousCommand.count, remains),
-        offset: previousCommand.offset + count);
+        bound: loaded.last.id);
+  }
+
+  @override
+  List<DiscussionMessage> addNewItemsToList(
+      List<DiscussionMessage> actual, List<DiscussionMessage> additional) {
+    final addedList = List<DiscussionMessage>.from(additional);
+    addedList.addAll(actual);
+    return addedList;
   }
 
   @override

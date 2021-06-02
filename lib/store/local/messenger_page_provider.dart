@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
+import 'package:lk_client/bloc/amqp_consumers/amqp_dialog_start_consumer_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/dialog_list_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
+import 'package:lk_client/bloc/proxy/dialog_list_proxy_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/store/global/service_provider.dart';
 
 class MessengerPageProvider extends StatefulWidget {
   final Widget child;
@@ -30,17 +31,26 @@ class MessengerPageInherited extends InheritedWidget {
 }
 
 class MessengerPageProviderState extends State<MessengerPageProvider> {
-  DialogListBloc dialogListBloc;
+  DialogListProxyBloc dialogListBloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     if (this.dialogListBloc == null) {
-      ServiceProvider appServiceProvider =
-          AppStateContainer.of(context).serviceProvider;
-      DialogListLoadingBloc dialogListLoadingBloc =
+      final appServiceProvider = AppStateContainer.of(context).serviceProvider;
+
+      final dialogListLoadingBloc =
           DialogListLoadingBloc(appServiceProvider.messengerQueryService);
-      this.dialogListBloc = DialogListBloc(dialogListLoadingBloc);
+
+      final dialogInfiniteListBloc = DialogListBloc(dialogListLoadingBloc);
+
+      final amqpDialogListConsumerBloc = AmqpDialogListConsumerBloc(
+          amqpService: appServiceProvider.amqpService,
+          amqpConfig: appServiceProvider.amqpConfig);
+
+      this.dialogListBloc = DialogListProxyBloc(
+          loadingBloc: dialogInfiniteListBloc,
+          amqpListConsumerBloc: amqpDialogListConsumerBloc);
     }
   }
 

@@ -15,7 +15,7 @@ import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/page/basic/fullscreen_error_page.dart';
 import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
 import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
-import 'package:lk_client/service/app_config.dart';
+import 'package:lk_client/service/config/app_config.dart';
 import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/state/producing_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';

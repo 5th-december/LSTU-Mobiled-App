@@ -208,8 +208,8 @@ class PrivateChatMessagesListLoadingBloc extends AbstractPrimitiveLoaderBloc<
   Stream<ConsumingState<ListedResponse<PrivateMessage>>>
       commandArgumentTranslator(
               loaderFunc, LoadPrivateChatMessagesListCommand command) =>
-          loaderFunc(command.dialog.id, command.count.toString(),
-              command.offset.toString());
+          loaderFunc(
+              command.dialog.id, command.bound, command.count.toString());
 
   @override
   ListedResponse<PrivateMessage> valueTranslator(ListedResponse argument) =>
@@ -225,7 +225,7 @@ class DialogListLoadingBloc extends AbstractPrimitiveLoaderBloc<
   @override
   Stream<ConsumingState<ListedResponse<Dialog>>> commandArgumentTranslator(
           loaderFunc, LoadDialogListCommand command) =>
-      loaderFunc(command.count.toString(), command.offset.toString());
+      loaderFunc(command.bound, command.count.toString());
 
   @override
   ListedResponse<Dialog> valueTranslator(ListedResponse<Dialog> argument) =>
@@ -244,12 +244,8 @@ class DiscussionLoadingBloc extends AbstractPrimitiveLoaderBloc<
   Stream<ConsumingState<ListedResponse<DiscussionMessage>>>
       commandArgumentTranslator(
               loaderFunc, LoadDisciplineDiscussionListCommand command) =>
-          loaderFunc(
-              command.discipline.id,
-              command.education.id,
-              command.semester.id,
-              command.count.toString(),
-              command.offset.toString());
+          loaderFunc(command.discipline.id, command.education.id,
+              command.semester.id, command.bound, command.count);
 
   @override
   ListedResponse<DiscussionMessage> valueTranslator(

@@ -9,7 +9,7 @@ import 'package:lk_client/model/mb_objects/mb_private_message.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
-import 'package:lk_client/state/amqp_connection_storage.dart';
+import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
 class AmqpStartConsumeDialogMessages {
@@ -19,32 +19,52 @@ class AmqpStartConsumeDialogMessages {
 
 class AmqpPrivateMessageConsumerBloc
     extends AbstractBloc<NotificationConsumeState, NotificationConsumeEvent> {
-  // Состояние наличия уведомлений
+  /*
+   * Тип exchange
+   */
+  final _exchangeType = ExchangeType.DIRECT;
+
+  /*
+   *  Наименование exchange
+   */
+  String _exchangeName;
+
+  final StreamController _messageController = StreamController();
+
+  Consumer _amqpConsumer;
+
+  @override
+  dispose() {
+    super.dispose();
+    this._messageController.close();
+    this._amqpConsumer.cancel();
+  }
+
+  /*
+   * Состояние наличия уведомлений
+   */
   Stream<NotificationConsumeState> get privateMessageConsumingStateStream =>
       this.stateContoller.stream.where(
           (event) => event is NotificationConsumeState<List<PrivateMessage>>);
 
-  // Стрим событий подписки на уведомления
+  /*
+   * Стрим событий подписки на уведомления
+   */
   Stream<NotificationConsumeEvent>
       get _privateMessageStartConsumingEventStream =>
           this.eventController.stream.where((event) => event
               is StartNotificationConsumeEvent<AmqpStartConsumeDialogMessages>);
 
-  // Стрим событий подтверждения получения уведомлений
+  /*
+   * Стрим событий подтверждения получения уведомлений
+   *
   Stream<NotificationConsumeEvent> get _ackNotificationReceivedEventStream =>
       this.eventController.stream.where(
-          (event) => event is AckNotificationReceived<List<PrivateMessage>>);
+          (event) => event is AckNotificationReceived<List<PrivateMessage>>);*/
 
-  // Тип exchange
-  final exchangeType = ExchangeType.DIRECT;
-  // Наименование exchange
-  final exchangeName = 'private_msg';
-
-  final StreamController messageController = StreamController();
-
-  AmqpConnectionStorage amqpConnectionStorage;
-
-  AmqpPrivateMessageConsumerBloc({@required this.amqpConnectionStorage}) {
+  AmqpPrivateMessageConsumerBloc(
+      {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
+    this._exchangeName = amqpConfig.messageExchangeName;
     /**
      * Событие старта подписки на обновления
      */
@@ -53,17 +73,22 @@ class AmqpPrivateMessageConsumerBloc
           as StartNotificationConsumeEvent<AmqpStartConsumeDialogMessages>;
       final command = _event.command;
 
-      // amqp ключ для сообщений - id диалога
+      /*
+       * AMQP ключ для сообщений - id диалога
+       */
       final String routingKey = command.dialog.id;
 
       final bindingData = AmqpBindingData(
-          exchangeName: this.exchangeName,
-          exchangeType: this.exchangeType,
+          exchangeName: this._exchangeName,
+          exchangeType: this._exchangeType,
           routingKeys: [routingKey]);
 
+      this.updateState(NotificationReadyState<List<PrivateMessage>>(
+          notifications: <PrivateMessage>[]));
+
       try {
-        Stream<Map<dynamic, dynamic>> valuesStream =
-            await this.amqpConnectionStorage.getConsumeStream(bindingData);
+        this._amqpConsumer =
+            await amqpService.startListenBindedQueue(bindingData);
 
         // При обработке потока сообщений подтягиваются также необработанные
         // уведолмения из бд, в состояние кладется результирующий список
@@ -73,33 +98,37 @@ class AmqpPrivateMessageConsumerBloc
           final messageData = MbPrivateMessage.fromJson(data);
           final privateMessage = messageData.getPrivateMessage();
 
-          final box = await Hive.openBox('private_msg_notifications');
-          await box.put(privateMessage.id, privateMessage);
-          final List<PrivateMessage> notificationsList = box.values.toList();
-
-          sink.add(notificationsList);
-        });
-
-        this
-            .messageController
-            .stream
-            .transform(privateMessageTransformer)
-            .listen((event) {
-          if (event is List<PrivateMessage>) {
-            this.updateState(NotificationReadyState<List<PrivateMessage>>(
-                notifications: event));
+          if (this.currentState
+              is NotificationReadyState<List<PrivateMessage>>) {
+            final List<PrivateMessage> existing = List<PrivateMessage>.from(
+                (this.currentState
+                        as NotificationReadyState<List<PrivateMessage>>)
+                    .notifications);
+            existing.add(privateMessage);
+            sink.add(NotificationReadyState<List<PrivateMessage>>(
+                notifications: existing));
+          } else {
+            sink.add(NotificationReadyState<List<PrivateMessage>>(
+                notifications: <PrivateMessage>[privateMessage]));
           }
         });
 
-        valuesStream.listen((event) {
-          this.messageController.sink.add(event);
+        this
+            ._messageController
+            .stream
+            .transform(privateMessageTransformer)
+            .listen((event) {
+          if (event is List) {
+            this.updateState(NotificationReadyState<List<PrivateMessage>>(
+                notifications: event.cast<PrivateMessage>()));
+          }
+        });
+
+        this._amqpConsumer.listen((event) {
+          this._messageController.sink.add(event.payloadAsJson);
         },
             onError: (e) => this
                 .updateState(NotificationErrorState<List<Dialog>>(error: e)));
-
-        final box = await Hive.openBox('private_msg_notifications');
-        this.updateState(NotificationReadyState<List<PrivateMessage>>(
-            notifications: box.values.toList()));
       } on Exception catch (e) {
         this.updateState(
             NotificationErrorState<List<PrivateMessage>>(error: e));
@@ -108,7 +137,7 @@ class AmqpPrivateMessageConsumerBloc
 
     /**
      * Обработка события подтверждения получения уведомления
-     */
+     *
     this._ackNotificationReceivedEventStream.listen((event) async {
       final _event = event as AckNotificationReceived<List<PrivateMessage>>;
 
@@ -126,6 +155,6 @@ class AmqpPrivateMessageConsumerBloc
         this.updateState(
             NotificationErrorState<List<PrivateMessage>>(error: e));
       }
-    });
+    });*/
   }
 }

@@ -22,12 +22,12 @@ class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<
   @override
   LoadPrivateChatMessagesListCommand getNextChunkCommand(
       LoadPrivateChatMessagesListCommand previousCommand,
-      int count,
-      int remains) {
+      List<PrivateMessage> loaded,
+      [int remains]) {
     return LoadPrivateChatMessagesListCommand(
         dialog: previousCommand.dialog,
         count: min(previousCommand.count, remains),
-        offset: previousCommand.offset + count);
+        bound: loaded.last.id);
   }
 
   @override
@@ -36,6 +36,28 @@ class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<
     List<PrivateMessage> refresh = List<PrivateMessage>.from(previuos);
     refresh.addAll(fresh);
     return refresh;
+  }
+
+  @override
+  List<PrivateMessage> addNewItemsToList(
+      List<PrivateMessage> actual, List<PrivateMessage> additional) {
+    final addedList = List<PrivateMessage>.from(additional);
+    addedList.addAll(actual);
+    return addedList;
+  }
+
+  @override
+  List<PrivateMessage> updateItemsInList(
+      List<PrivateMessage> actual, List<PrivateMessage> update) {
+    for (int i = 0; i != actual.length; ++i) {
+      final replacer = update.firstWhere(
+          (element) => element.id == actual[i].id,
+          orElse: () => null);
+      if (replacer != null) {
+        actual[i] = replacer;
+      }
+    }
+    return actual;
   }
 
   @override

@@ -3,6 +3,71 @@
 part of 'person.dart';
 
 // **************************************************************************
+// TypeAdapterGenerator
+// **************************************************************************
+
+class PersonAdapter extends TypeAdapter<Person> {
+  @override
+  final int typeId = 2;
+
+  @override
+  Person read(BinaryReader reader) {
+    final numOfFields = reader.readByte();
+    final fields = <int, dynamic>{
+      for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
+    };
+    return Person(
+      id: fields[0] as String,
+      surname: fields[1] as String,
+      name: fields[2] as String,
+      patronymic: fields[3] as String,
+      birthday: fields[4] as DateTime,
+      sex: fields[5] as String,
+      phone: fields[6] as String,
+      email: fields[7] as String,
+      messenger: fields[8] as String,
+      post: fields[9] as String,
+    );
+  }
+
+  @override
+  void write(BinaryWriter writer, Person obj) {
+    writer
+      ..writeByte(10)
+      ..writeByte(0)
+      ..write(obj.id)
+      ..writeByte(1)
+      ..write(obj.surname)
+      ..writeByte(2)
+      ..write(obj.name)
+      ..writeByte(3)
+      ..write(obj.patronymic)
+      ..writeByte(4)
+      ..write(obj.birthday)
+      ..writeByte(5)
+      ..write(obj.sex)
+      ..writeByte(6)
+      ..write(obj.phone)
+      ..writeByte(7)
+      ..write(obj.email)
+      ..writeByte(8)
+      ..write(obj.messenger)
+      ..writeByte(9)
+      ..write(obj.post);
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PersonAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+// **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 

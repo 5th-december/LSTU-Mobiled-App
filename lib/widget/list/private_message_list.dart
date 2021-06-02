@@ -39,7 +39,7 @@ class _PrivateMessageHistoryListState extends State<PrivateMessageHistoryList> {
     final loadingEvent =
         EndlessScrollingLoadEvent<LoadPrivateChatMessagesListCommand>(
             command: LoadPrivateChatMessagesListCommand(
-                count: 50, offset: 0, dialog: widget.dialog));
+                count: 50, dialog: widget.dialog));
     this._bloc.eventController.sink.add(loadingEvent);
 
     final listViewScrollController = ScrollController();

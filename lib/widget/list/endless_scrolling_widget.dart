@@ -8,24 +8,26 @@ class EndlessScrollingWidget<T, C> extends StatefulWidget {
 
   final Function buildList;
 
-  EndlessScrollingWidget({Key key, this.buildList, this.bloc}): super(key: key);
+  EndlessScrollingWidget({Key key, this.buildList, this.bloc})
+      : super(key: key);
 
   @override
   _EndlessScrollingWidgetState createState() => _EndlessScrollingWidgetState();
 }
 
-class _EndlessScrollingWidgetState<T, C> extends State<EndlessScrollingWidget<T,C>> {
-
+class _EndlessScrollingWidgetState<T, C>
+    extends State<EndlessScrollingWidget<T, C>> {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder(
-      stream: widget.bloc.endlessListScrollingStateStream,
-      builder: (BuildContext context, AsyncSnapshot snapshot) {
-        if(snapshot.hasData) {
-          return this.widget.buildList(snapshot.data as EndlessScrollingState<T>);
-        }
-        return Center(child: CircularProgressIndicator());
-      }
-    );
+        stream: widget.bloc.endlessListScrollingStateStream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            return this
+                .widget
+                .buildList(snapshot.data as EndlessScrollingState<T>);
+          }
+          return Center(child: CircularProgressIndicator());
+        });
   }
 }

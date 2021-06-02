@@ -4,10 +4,10 @@ import 'package:json_annotation/json_annotation.dart';
 class ListedResponse<T> {
   final int count;
 
-  final int offset;
+  final dynamic offset;
 
   @JsonKey(name: 'next_offset')
-  final int nextOffset;
+  final dynamic nextOffset;
 
   final int remains;
 

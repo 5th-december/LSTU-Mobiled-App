@@ -28,11 +28,17 @@ class DialogListBloc
 
   @override
   LoadDialogListCommand getNextChunkCommand(
-      LoadDialogListCommand previousCommand, int count, int remains) {
+      LoadDialogListCommand previousCommand, List<Dialog> loaded,
+      [int remains]) {
     return LoadDialogListCommand(
-        person: previousCommand.person,
-        count: min(previousCommand.count, remains),
-        offset: previousCommand.offset + count);
+        count: min(previousCommand.count, remains), bound: loaded.last.id);
+  }
+
+  @override
+  List<Dialog> addNewItemsToList(List<Dialog> actual, List<Dialog> additional) {
+    final addedList = List<Dialog>.from(additional);
+    addedList.addAll(actual);
+    return addedList;
   }
 
   @override

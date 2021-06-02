@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/infinite_scrollers/dialog_list_bloc.dart';
+import 'package:lk_client/bloc/proxy/dialog_list_proxy_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as DialogModel;
@@ -23,7 +24,7 @@ class DialogList extends StatefulWidget {
 }
 
 class _DialogListState extends State<DialogList> {
-  DialogListBloc _bloc;
+  DialogListProxyBloc _bloc;
 
   @override
   void didChangeDependencies() {
@@ -35,85 +36,97 @@ class _DialogListState extends State<DialogList> {
 
   @override
   Widget build(BuildContext context) {
-    // Инициализация заполнения списка
-    final loadingCommand = EndlessScrollingLoadEvent<LoadDialogListCommand>(
-        command:
-            LoadDialogListCommand(count: 50, offset: 0, person: widget.person));
-
-    this._bloc.eventController.sink.add(loadingCommand);
+    this._bloc.eventController.sink.add(
+        EndlessScrollingLoadEvent<StartNotifyOnPerson>(
+            command: StartNotifyOnPerson(trackedPerson: widget.person)));
 
     final ScrollController scrollController = ScrollController();
-    final int scrollDistance = 200;
 
     bool needsAutoloading = false;
 
-    scrollController.addListener(() {
-      final maxScroll = scrollController.position.maxScrollExtent;
-      final currentScroll = scrollController.position.pixels;
-      if (needsAutoloading && maxScroll - currentScroll <= scrollDistance) {
-        this._bloc.eventController.sink.add(loadingCommand);
-      }
-    });
+    return StreamBuilder(
+      stream: this._bloc.dialogListStateStream,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          final state = snapshot.data;
 
-    return EndlessScrollingWidget<DialogModel.Dialog, LoadDialogListCommand>(
-      bloc: this._bloc,
-      buildList: (EndlessScrollingState<DialogModel.Dialog> state) {
-        if (state is EndlessScrollingChunkReadyState) {
-          needsAutoloading =
-              (state as EndlessScrollingChunkReadyState).hasMoreData;
-        } else {
-          needsAutoloading = false;
-        }
-
-        if (state.entityList.length == 0) {
-          if (state is EndlessScrollingLoadingState) {
-            return CenteredLoader();
-          }
-
-          if (state is EndlessScrollingErrorState) {
-            return Center(child: Text('Ошибка загрузки диалогов'));
-          }
-
-          return Center(child: Text('Ничего не найдено'));
-        }
-
-        List<DialogModel.Dialog> loadedDialogs = state.entityList;
-
-        return ListView.builder(
-            itemCount: ((state is EndlessScrollingChunkReadyState &&
-                        (state as EndlessScrollingChunkReadyState)
-                            .hasMoreData) ||
-                    state is EndlessScrollingLoadingState)
-                ? loadedDialogs.length + 1
-                : loadedDialogs.length,
-            controller: scrollController,
-            itemBuilder: (BuildContext context, int index) {
-              if (index >= loadedDialogs.length) {
-                return ListLoadingBottomIndicator();
+          if (state is EndlessScrollingInitState) {
+            /**
+             * Когда виджет инициализирован, на контроллер скролла вешается листенер
+             * отправляющий новые команды для добавления строк
+             * и отправляется команда
+             */
+            scrollController.addListener(() {
+              final maxScroll = scrollController.position.maxScrollExtent;
+              final currentScroll = scrollController.position.pixels;
+              if (needsAutoloading && maxScroll - currentScroll <= 200) {
+                this._bloc.eventController.sink.add(
+                    EndlessScrollingLoadEvent<LoadDialogListCommand>(
+                        command: LoadDialogListCommand(count: 50)));
               }
-
-              Person companion = loadedDialogs[index].companion;
-              PrivateMessage lastDialogMessage =
-                  loadedDialogs[index].lastMessage;
-              String displayedMessageText =
-                  lastDialogMessage?.messageText ?? '';
-
-              return Container(
-                child: ListTile(
-                  leading:
-                      PersonProfilePicture(displayed: companion, size: 27.0),
-                  title: Text("${companion.name} ${companion.surname}"),
-                  subtitle: Text("$displayedMessageText"),
-                  onTap: () {
-                    Navigator.of(context).push(
-                        MaterialPageRoute(builder: (BuildContext context) {
-                      return PrivateDialogPage(
-                          companion: companion, dialog: loadedDialogs[index]);
-                    }));
-                  },
-                ),
-              );
             });
+            this._bloc.eventController.sink.add(
+                EndlessScrollingLoadEvent<LoadDialogListCommand>(
+                    command: LoadDialogListCommand(count: 50)));
+          }
+
+          if (state is EndlessScrollingChunkReadyState) {
+            needsAutoloading = state.hasMoreData;
+          } else {
+            needsAutoloading = false;
+          }
+
+          if (state.entityList.length == 0) {
+            if (state is EndlessScrollingLoadingState) {
+              return CenteredLoader();
+            }
+
+            if (state is EndlessScrollingErrorState) {
+              return Center(child: Text('Ошибка загрузки диалогов'));
+            }
+
+            return Center(child: Text('Ничего не найдено'));
+          }
+
+          List<DialogModel.Dialog> loadedDialogs = state.entityList;
+
+          return ListView.builder(
+              itemCount: ((state is EndlessScrollingChunkReadyState &&
+                          state.hasMoreData) ||
+                      state is EndlessScrollingLoadingState)
+                  ? loadedDialogs.length + 1
+                  : loadedDialogs.length,
+              controller: scrollController,
+              itemBuilder: (BuildContext context, int index) {
+                if (index >= loadedDialogs.length) {
+                  return ListLoadingBottomIndicator();
+                }
+
+                Person companion = loadedDialogs[index].companion;
+                PrivateMessage lastDialogMessage =
+                    loadedDialogs[index].lastMessage;
+                String displayedMessageText =
+                    lastDialogMessage?.messageText ?? '';
+
+                return Container(
+                  child: ListTile(
+                    leading:
+                        PersonProfilePicture(displayed: companion, size: 27.0),
+                    title: Text("${companion.name} ${companion.surname}"),
+                    subtitle: Text("$displayedMessageText"),
+                    onTap: () {
+                      Navigator.of(context).push(
+                          MaterialPageRoute(builder: (BuildContext context) {
+                        return PrivateDialogPage(
+                            companion: companion, dialog: loadedDialogs[index]);
+                      }));
+                    },
+                  ),
+                );
+              });
+        }
+
+        return CenteredLoader();
       },
     );
   }

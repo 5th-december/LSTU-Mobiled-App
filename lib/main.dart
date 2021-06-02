@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
@@ -22,7 +23,8 @@ import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
 import 'package:lk_client/service/api_consumer/messenger_query_service.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/service/api_consumer/util_query_service.dart';
-import 'package:lk_client/service/app_config.dart';
+import 'package:lk_client/service/config/amqp_config.dart';
+import 'package:lk_client/service/config/app_config.dart';
 import 'package:lk_client/service/authentication_extractor.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';
 import 'package:lk_client/service/file_local_manager.dart';
@@ -38,8 +40,9 @@ import 'store/global/app_state_container.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final appEnv = 'dev';
+  final appEnv = kReleaseMode ? 'prod' : 'dev';
   final appConfig = await AppConfig.configure(env: appEnv);
+  final amqpConfig = await AmqpConfig.configure();
 
   await Firebase.initializeApp();
   final firebaseMessaging = FirebaseMessaging.instance;
@@ -54,13 +57,16 @@ Future<void> main() async {
   );
 
   final hiveService = HiveService();
+  hiveService.initializeTypeGenerators();
+
   final authData = AmqpAuthenticationData(
-      rmqHost: appConfig.rmqHost,
-      rmqPort: appConfig.rmqPort,
-      rmqUsername: appConfig.rmqUsername,
-      rmqVHost: appConfig.rmqVHost,
-      rmqPassword: appConfig.rmqPassword);
-  final amqpService = AmqpService(rmqAuthenticationData: authData);
+      rmqHost: amqpConfig.rmqHost,
+      rmqPort: amqpConfig.rmqPort,
+      rmqUsername: amqpConfig.rmqUsername,
+      rmqVHost: amqpConfig.rmqVHost,
+      rmqPassword: amqpConfig.rmqPassword);
+
+  final appAmqpService = AmqpService(rmqAuthenticationData: authData);
 
   final stubErrorHandler = StubErrorHandler();
   final validationErrorHandler = ValidationErrorHandler(stubErrorHandler);
@@ -131,7 +137,9 @@ Future<void> main() async {
       personQueryService: appPersonQueryService,
       achievementQueryService: appAchievementQueryService,
       utilQueryService: appUtilQueryService,
-      educationQueryService: appEducationQueryService);
+      educationQueryService: appEducationQueryService,
+      amqpConfig: amqpConfig,
+      amqpService: appAmqpService);
 
   appAuthenticationBloc.eventController.sink.add(AppStartedEvent());
 

@@ -46,16 +46,12 @@ class AuthenticationExtractor {
                   .sink
                   .add(TokenValidateEvent(updatedKey));
             }
-
-            return updatedKey;
           }
         } else {
           if (!(this._bloc.currentState is AuthenticationValidState ||
               this._bloc.currentState is AuthenticationIdentifiedState)) {
             this._bloc.eventController.sink.add(TokenValidateEvent(key));
           }
-
-          return key;
         }
       } on Exception {
         this._bloc.eventController.sink.add(TokenInvalidateEvent());
@@ -67,12 +63,15 @@ class AuthenticationExtractor {
     }
 
     await for (AuthenticationState state in this._bloc.state) {
-      if (state is Tokenized) {
+      if (state is AuthenticationValidState ||
+          state is AuthenticationIdentifiedState) {
         return (this._bloc.currentState as Tokenized).token;
       }
     }
   }
 
-  Future<String> get getAuthenticationData async =>
-      (await this.applyKey(false)).token;
+  Future<String> get getAuthenticationData async {
+    ApiKey actualKey = await this.applyKey(false);
+    return actualKey.token;
+  }
 }

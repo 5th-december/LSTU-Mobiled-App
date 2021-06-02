@@ -116,7 +116,7 @@ class _PersonListState extends State<StatefulWidget> {
                               ._dialogCreatorBloc
                               .eventController
                               .add(ProducerInitEvent<void>());
-                          MessengerPageProvider.of(context)
+                          /*MessengerPageProvider.of(context)
                               .dialogListBloc
                               .eventController
                               .add(EndlessScrollingLoadEvent<
@@ -124,7 +124,7 @@ class _PersonListState extends State<StatefulWidget> {
                                   command: LoadDialogListCommand(
                                       person: dataList[index],
                                       count: 50,
-                                      offset: 0)));
+                                      offset: 0)));*/
                           Navigator.of(context).pop();
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (BuildContext context) {

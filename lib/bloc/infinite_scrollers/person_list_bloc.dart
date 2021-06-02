@@ -27,10 +27,11 @@ class PersonListBloc
 
   @override
   LoadPersonListByTextQuery getNextChunkCommand(
-      LoadPersonListByTextQuery previousCommand, int count, int remains) {
+      LoadPersonListByTextQuery previousCommand, List<Person> loaded,
+      [int remains]) {
     return LoadPersonListByTextQuery(
         count: min(previousCommand.count, remains),
-        offset: previousCommand.offset + count,
+        offset: previousCommand.offset + loaded.length,
         textQuery: previousCommand.textQuery);
   }
 

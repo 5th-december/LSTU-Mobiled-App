@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:http/http.dart';
-import 'package:lk_client/service/app_config.dart';
+import 'package:lk_client/service/config/app_config.dart';
 import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/service/http_service.dart';
 
