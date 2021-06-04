@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:lk_client/model/data_transfer/attachment.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
@@ -5,6 +6,25 @@ import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/person/person.dart';
 
 part 'mb_discussion_message.g.dart';
+
+/*
+ * Обертка для сообщений в обсуждениях
+ * Поскольку для каждого из обсуждений нет отдельной очереди в брокере
+ * нужно принадлежность каждого сообщения к определенному 
+ * диалогу дополнительно идентифицировать
+ * путем оборачивания в объект этого класса
+ */
+class DiscussionUpdate {
+  final String semester;
+  final String discipline;
+  final String group;
+  final DiscussionMessage message;
+  DiscussionUpdate(
+      {@required this.discipline,
+      @required this.group,
+      @required this.semester,
+      @required this.message});
+}
 
 @JsonSerializable()
 class MbDiscussionMessage {
@@ -66,7 +86,7 @@ class MbDiscussionMessage {
       _$MbDiscussionMessageFromJson(json);
   Map<String, dynamic> toJson() => _$MbDiscussionMessageToJson(this);
 
-  DiscussionMessage getDiscussionMessage() {
+  DiscussionUpdate getDiscussionMessage() {
     Attachment attachment;
     if (this.docName != null || this.docSize != null) {
       attachment = Attachment(
@@ -85,12 +105,18 @@ class MbDiscussionMessage {
         surname: this.authorSurname,
         patronymic: this.authorPatronymic);
 
-    return DiscussionMessage(
+    final message = DiscussionMessage(
         id: this.id,
         sender: sender,
         created: this.createdAt,
         msg: this.textContent,
         attachments: attachment != null ? [attachment] : null,
         externalLinks: externalLink != null ? [externalLink] : null);
+
+    return DiscussionUpdate(
+        discipline: this.discipline,
+        group: this.group,
+        semester: this.semester,
+        message: message);
   }
 }

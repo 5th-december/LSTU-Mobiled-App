@@ -8,6 +8,11 @@ abstract class FileManagementEvent {
 
 class FileManagementInitEvent extends FileManagementEvent {}
 
+class FileDownloadInitEvent extends FileManagementInitEvent {
+  String fileMaterialIdentifier;
+  FileDownloadInitEvent({@required this.fileMaterialIdentifier});
+}
+
 /*class FileFindLocallyEvent extends FileManagementEvent {
   FileFindLocallyEvent({@required LocalFilesystemObject file}): super(file: file);
 }

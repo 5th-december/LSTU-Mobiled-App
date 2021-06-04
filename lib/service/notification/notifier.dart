@@ -5,7 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:lk_client/service/notification/notification_select_handler.dart';
 
 class Notifier {
-  final NotificationSelectHandler handler;
+  //final NotificationSelectHandler handler;
   FlutterLocalNotificationsPlugin _localNotificationsPlugin;
 
   NotificationDetails get _highPriorityNotification => NotificationDetails(
@@ -14,7 +14,7 @@ class Notifier {
           priority: Priority.high, importance: Importance.high),
       iOS: IOSNotificationDetails());
 
-  Notifier({@required this.handler}) {
+  Notifier(/*{@required this.handler}*/) {
     this._localNotificationsPlugin = FlutterLocalNotificationsPlugin();
     final android = AndroidInitializationSettings('@mipmap/ic_launcher');
     final iOs = IOSInitializationSettings();
@@ -37,6 +37,7 @@ class Notifier {
 
   Future<void> _onNotificationTap(String payload) async {
     Map<String, dynamic> notificationDataJson = jsonDecode(payload);
-    this.handler.handleApply(notificationDataJson);
+    //this.handler.handleApply(notificationDataJson);
+    //TODO: Добавить обработчик
   }
 }

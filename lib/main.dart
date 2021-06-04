@@ -32,7 +32,9 @@ import 'package:lk_client/service/file_transfer_manager.dart';
 import 'package:lk_client/service/hive_service.dart';
 import 'package:lk_client/service/http_service.dart';
 import 'package:lk_client/service/jwt_manager.dart';
+import 'package:lk_client/service/notification/notifier.dart';
 import 'package:lk_client/store/global/bloc_provider.dart';
+import 'package:lk_client/store/global/mbc_bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 import 'app.dart';
 import 'store/global/app_state_container.dart';
@@ -124,6 +126,8 @@ Future<void> main() async {
       apiErrorHandler: apiErrorHandlersChain,
       authenticationExtractor: appAuthenticationExtractor);
 
+  final appNotifier = Notifier();
+
   final applicationServiceProvider = ServiceProvider(
       disciplineQueryService: appDisciplineQueryService,
       appConfig: appConfig,
@@ -139,7 +143,9 @@ Future<void> main() async {
       utilQueryService: appUtilQueryService,
       educationQueryService: appEducationQueryService,
       amqpConfig: amqpConfig,
-      amqpService: appAmqpService);
+      notifier: appNotifier,
+      amqpService: appAmqpService,
+      authenticationExtractor: appAuthenticationExtractor);
 
   appAuthenticationBloc.eventController.sink.add(AppStartedEvent());
 

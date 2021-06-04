@@ -8,6 +8,8 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/person_query_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/store/global/loader_provider.dart';
+import 'package:lk_client/store/global/mbc_bloc_provider.dart';
 import 'package:lk_client/widget/util/page_global_manager.dart';
 
 class HomePage extends StatefulWidget {
@@ -61,7 +63,11 @@ class _HomePageState extends State<HomePage> {
                 .sink
                 .add(NavigateToPageEvent(3));
 
-            return Scaffold(body: PageGlobalManager(person));
+            return Scaffold(
+                body: MbCBlocProvider(
+                    child: LoaderProvider(
+              child: PageGlobalManager(person),
+            )));
           }
 
           return Center(child: CircularProgressIndicator());

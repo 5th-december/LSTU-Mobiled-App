@@ -2,12 +2,12 @@ import 'package:flutter/foundation.dart';
 
 abstract class NotificationConsumeEvent {}
 
-class StartNotificationConsumeEvent<T> extends NotificationConsumeEvent {
-  T command;
+class StartNotificationConsumeEvent<C> extends NotificationConsumeEvent {
+  C command;
   StartNotificationConsumeEvent({@required this.command});
 }
 
-class AckNotificationReceived extends NotificationConsumeEvent {}
+abstract class AckNotificationReceived extends NotificationConsumeEvent {}
 
 class AckAllNotificationReceived extends AckNotificationReceived {}
 

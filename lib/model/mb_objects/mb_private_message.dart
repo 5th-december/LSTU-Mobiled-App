@@ -1,8 +1,5 @@
-import 'dart:html';
-
 import 'package:flutter/foundation.dart';
 import 'package:json_annotation/json_annotation.dart';
-import 'package:lk_client/bloc/attached/attached_discussion_form_bloc.dart';
 import 'package:lk_client/model/data_transfer/attachment.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/messenger/private_message.dart';

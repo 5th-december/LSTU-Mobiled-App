@@ -1,16 +1,24 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
+import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
+import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
+import 'package:lk_client/service/file_local_manager.dart';
+import 'package:lk_client/service/notification/notifier.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/store/global/loader_provider.dart';
+import 'package:lk_client/store/global/service_provider.dart';
 import 'package:lk_client/widget/chunk/file_download_widget.dart';
+import 'package:lk_client/widget/chunk/link_open_widget.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
 
 class TeachMaterialsList extends StatefulWidget {
@@ -30,29 +38,52 @@ class TeachMaterialsList extends StatefulWidget {
 }
 
 class _TeachMaterialsListState extends State<TeachMaterialsList> {
-  TeachingMaterialListLoadingBloc _bloc;
+  TeachingMaterialListLoadingBloc _loadingBloc;
+  FileLocalManager _fileLocalManager;
+  Notifier _appNotifier;
+  FileTransferService _fileTransferService;
+  FileDownloaderBlocProvider _fileDownloaderBlocProvider;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (this._bloc == null) {
+    ServiceProvider serviceProvider =
+        AppStateContainer.of(context).serviceProvider;
+    if (this._loadingBloc == null) {
       DisciplineQueryService queryService =
-          AppStateContainer.of(context).serviceProvider.disciplineQueryService;
-      this._bloc = TeachingMaterialListLoadingBloc(queryService);
+          serviceProvider.disciplineQueryService;
+      this._loadingBloc = TeachingMaterialListLoadingBloc(queryService);
+    }
+
+    if (this._fileLocalManager == null) {
+      this._fileLocalManager = serviceProvider.fileLocalManager;
+    }
+
+    if (this._appNotifier == null) {
+      this._appNotifier = serviceProvider.notifier;
+    }
+
+    if (this._fileTransferService == null) {
+      this._fileTransferService = serviceProvider.fileTransferService;
+    }
+
+    if (this._fileDownloaderBlocProvider == null) {
+      this._fileDownloaderBlocProvider =
+          LoaderProvider.of(context).fileDownloaderBlocProvider;
     }
   }
 
   @override
   dispose() async {
     Future.delayed(Duration.zero, () async {
-      await this._bloc.dispose();
+      await this._loadingBloc.dispose();
     });
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    this._bloc.eventController.sink.add(
+    this._loadingBloc.eventController.sink.add(
         StartConsumeEvent<LoadTeachingMaterialsList>(
             request: LoadTeachingMaterialsList(
                 discipline: widget.discipline,
@@ -60,11 +91,10 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
                 semester: widget.semester)));
 
     return StreamLoadingWidget<List<TeachingMaterial>>(
-      loadingStream: this._bloc.consumingStateStream,
+      loadingStream: this._loadingBloc.consumingStateStream,
       childBuilder: (List<TeachingMaterial> teachingMaterials) {
         return ListView.separated(
             itemBuilder: (BuildContext context, int index) {
-              String teachingMaterialInfo = '';
               if (teachingMaterials[index].attachment != null) {
                 String fileExtension = teachingMaterials[index]
                         .attachment
@@ -77,39 +107,57 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
                 String sizeTitle = fileSize > 1024
                     ? (fileSize / 1024).toStringAsFixed(2) + ' Мб.'
                     : fileSize.toStringAsFixed(2) + ' Кб.';
-                teachingMaterialInfo = "Файл $fileExtension, $sizeTitle";
+                String teachingMaterialInfo = "Файл $fileExtension, $sizeTitle";
+                return Container(
+                  padding:
+                      EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(teachingMaterials[index].materialName),
+                      ),
+                      FileDownloadWidget(
+                        fileMaterial: DownloadFileMaterial(
+                          originalFileName: teachingMaterials[index]
+                              .attachment
+                              .attachmentName,
+                          attachmentId: teachingMaterials[index].id,
+                          attachment: teachingMaterials[index].attachment,
+                          command: LoadTeachingMaterialAttachment(
+                              teachingMaterials[index].id),
+                        ),
+                        proxyBloc: TeachingMaterialsDownloaderProxyBloc(
+                            fileDownloaderBlocProvider:
+                                this._fileDownloaderBlocProvider,
+                            fileLocalManager: this._fileLocalManager,
+                            fileTransferService: this._fileTransferService,
+                            appNotifier: this._appNotifier),
+                      )
+                    ],
+                  ),
+                );
               } else if (teachingMaterials[index].externalLink != null) {
-                teachingMaterialInfo = 'Внешний ресурс';
+                return Container(
+                    padding:
+                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
+                    child: Row(children: [
+                      Expanded(
+                        child: Text(teachingMaterials[index].materialName),
+                      ),
+                      LinkOpenWidget(
+                        externalLink: DownloadExternalLinkMaterial(
+                            externalLink: ExternalLink(
+                                linkContent: teachingMaterials[index]
+                                    .externalLink
+                                    .linkContent,
+                                linkText: teachingMaterials[index]
+                                    .externalLink
+                                    .linkText)),
+                      )
+                    ]));
+              } else {
+                return SizedBox.shrink();
               }
-              return Container(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                child: Row(
-                  children: [
-                    Text(teachingMaterials[index].materialName),
-                    FileDownloadWidget(
-                      manager:
-                          TeachingMaterialDownloadManagerCreator.initialize(
-                              teachingMaterials[index],
-                              TeachingMaterialDocumentTransferBloc(
-                                  fileLocalManager:
-                                      AppStateContainer.of(context)
-                                          .serviceProvider
-                                          .fileLocalManager,
-                                  appNotifier: null,
-                                  fileTransferService:
-                                      AppStateContainer.of(context)
-                                          .serviceProvider
-                                          .fileTransferService)),
-                    )
-                  ],
-                ),
-                /*child: ListTile(
-                  title: Text(teachingMaterials[index].materialName),
-                  subtitle: Text(teachingMaterialInfo),
-                  //trailing:
-                  //    FileDownloadWidget(material: teachingMaterials[index]),
-                ),*/
-              );
             },
             separatorBuilder: (BuildContext context, int index) => Divider(),
             itemCount: teachingMaterials.length);

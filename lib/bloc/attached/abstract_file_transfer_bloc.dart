@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
@@ -46,6 +47,8 @@ abstract class AbstractFileTransferBloc
 }
 
 abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
+  FileLocalManager fileLocalManager;
+
   /*
    * Метод вызова транспорта файла, должен быть переопределен в унаследованном классе
    */
@@ -59,14 +62,39 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
       this.eventController.stream.where(
           (event) => event is FileStartDownloadEvent<MultipartRequestCommand>);
 
-  AbstractFileDownloaderBloc(FileLocalManager fileLocalManager) {
+  Future<String> getFirstApplicablePath(String fPath) async {
+    if (fPath.isEmpty) {
+      throw new Exception('Empty file path');
+    }
+
+    String path = fPath;
+    int startingPoint = 1;
+    while (await this.fileLocalManager.isFileExists(filePath: path)) {
+      int lastDirPos = fPath.lastIndexOf('/');
+      int pos = fPath.indexOf('.', lastDirPos == -1 ? 0 : lastDirPos);
+      if (pos == -1) {
+        pos = fPath.length - 1;
+      }
+      path = fPath.substring(0, pos) +
+          '_' +
+          (startingPoint++).toString() +
+          fPath.substring(pos);
+    }
+    return path;
+  }
+
+  AbstractFileDownloaderBloc({@required this.fileLocalManager}) : super() {
     this._downloadingEventStream.listen((FileManagementEvent event) async {
       /* Доступно только, если получены разрешения на доступ к хранилищу */
       if (currentState is FileManagementRightsErrorState) return;
 
       final _event = event as FileStartDownloadEvent<MultipartRequestCommand>;
+
+      String applicableFilePath =
+          await this.getFirstApplicablePath(event.file.filePath);
+
       this
-          .startDownloadingOperation(_event.command, event.file.filePath)
+          .startDownloadingOperation(_event.command, applicableFilePath)
           .listen((iOEvent) async {
         if (iOEvent is FileOperationProgress) {
           // Передается состояние прогресса с величиной загруженной части
@@ -76,8 +104,8 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
           this.updateState(FileOperationErrorState());
         } else if (iOEvent is FileOperationDone) {
           // Проверка существования файла
-          bool isExists = await fileLocalManager.isFileExists(
-              filePath: event.file.filePath);
+          bool isExists =
+              await fileLocalManager.isFileExists(filePath: applicableFilePath);
 
           // В случае, если файл не существует по указанному пути, ошибка
           if (!isExists) {
@@ -91,9 +119,9 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
           this.afterSuccessOperation(_event.file);
 
           this.updateState(FileDownloadReadyState(
-              filePath: event.file.filePath,
-              fileName: fileLocalManager.getFileName(event.file.filePath),
-              fileSize: await fileLocalManager.getSize(event.file.filePath)));
+              filePath: applicableFilePath,
+              fileName: fileLocalManager.getFileName(applicableFilePath),
+              fileSize: await fileLocalManager.getSize(applicableFilePath)));
         }
       });
     });
@@ -110,7 +138,7 @@ abstract class AbstractFileUploaderBloc extends AbstractFileTransferBloc {
       .stream
       .where((event) => event is FileStartUploadEvent<MultipartRequestCommand>);
 
-  AbstractFileUploaderBloc() {
+  AbstractFileUploaderBloc() : super() {
     this._uploadingEventStream.listen((event) {
       /* Доступно только, если получены разрешения на доступ к хранилищу */
       if (currentState is FileManagementRightsErrorState) return;

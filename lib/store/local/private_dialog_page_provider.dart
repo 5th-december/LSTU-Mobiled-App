@@ -4,7 +4,9 @@ import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/attached/private_message_form_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
+import 'package:lk_client/bloc/proxy/private_message_list_proxy_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/store/global/mbc_bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 
 class PrivateDialogPageProvider extends StatefulWidget {
@@ -24,7 +26,7 @@ class PrivateDialogPageProvider extends StatefulWidget {
 }
 
 class PrivateDialogPageInherited extends InheritedWidget {
-  PrivateDialogPageProviderState pageState;
+  final PrivateDialogPageProviderState pageState;
 
   PrivateDialogPageInherited(
       {Key key, @required this.pageState, @required child})
@@ -37,6 +39,7 @@ class PrivateDialogPageInherited extends InheritedWidget {
 
 class PrivateDialogPageProviderState extends State<PrivateDialogPageProvider> {
   PrivateMessageListBloc privateMessageListBloc;
+
   AttachedPrivateMessageFormBloc attachedPrivateMessageFormBloc;
 
   @override
@@ -45,20 +48,25 @@ class PrivateDialogPageProviderState extends State<PrivateDialogPageProvider> {
     ServiceProvider appServiceProvider =
         AppStateContainer.of(context).serviceProvider;
     if (this.privateMessageListBloc == null) {
-      PrivateChatMessagesListLoadingBloc privateChatMessagesListLoadingBloc =
+      final privateChatMessagesListLoadingBloc =
           PrivateChatMessagesListLoadingBloc(
               appServiceProvider.messengerQueryService);
+
       this.privateMessageListBloc =
           PrivateMessageListBloc(privateChatMessagesListLoadingBloc);
     }
 
     if (this.attachedPrivateMessageFormBloc == null) {
-      PrivateMessageSendDocumentTransferBloc
-          privateMessageSendDocumentTransferBloc =
+      /**
+       * Блок транспорта файлов для отправки со
+       */
+      final privateMessageSendDocumentTransferBloc =
           PrivateMessageSendDocumentTransferBloc(
               fileTransferService: appServiceProvider.fileTransferService);
-      PrivateMessageFormBloc privateMessageFormBloc = PrivateMessageFormBloc(
+
+      final privateMessageFormBloc = PrivateMessageFormBloc(
           messengerQueryService: appServiceProvider.messengerQueryService);
+
       this.attachedPrivateMessageFormBloc = AttachedPrivateMessageFormBloc(
           privateMessageDocumentTransferBloc:
               privateMessageSendDocumentTransferBloc,

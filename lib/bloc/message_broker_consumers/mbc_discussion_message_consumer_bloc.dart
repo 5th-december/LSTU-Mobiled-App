@@ -3,18 +3,13 @@ import 'dart:async';
 import 'package:dart_amqp/dart_amqp.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
+import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
-import 'package:lk_client/model/education/group.dart';
 import 'package:lk_client/model/mb_objects/mb_discussion_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
-
-class MbCStartConsumeDiscussionMessages {
-  List<Group> groups = [];
-  MbCStartConsumeDiscussionMessages({@required this.groups});
-}
 
 class MbCDiscussionMessageConsumerBloc
     extends AbstractBloc<NotificationConsumeState, NotificationConsumeEvent> {
@@ -43,8 +38,8 @@ class MbCDiscussionMessageConsumerBloc
    * Стрим состояний блока
    */
   Stream<NotificationConsumeState> get discussionMessageConsumingStateStream =>
-      this.stateContoller.stream.where((event) =>
-          event is NotificationConsumeState<List<DiscussionMessage>>);
+      this.stateContoller.stream.where(
+          (event) => event is NotificationConsumeState<List<DiscussionUpdate>>);
 
   /*
    * Стрим событий старта потребления
@@ -58,10 +53,10 @@ class MbCDiscussionMessageConsumerBloc
 
   /*
    * Стрим событий подтверждения получения уведолмений
-   *
+   */
   Stream<NotificationConsumeEvent> get _ackDiscussionMessageNotification =>
-      this.eventController.stream.where(
-          (event) => event is AckNotificationReceived<List<DiscussionMessage>>);*/
+      this.eventController.stream.where((event) =>
+          event is AckPartiallyNotificationReceived<List<DiscussionUpdate>>);
 
   MbCDiscussionMessageConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
@@ -86,9 +81,6 @@ class MbCDiscussionMessageConsumerBloc
           exchangeType: this._exchangeType,
           routingKeys: routingKeys);
 
-      this.updateState(NotificationReadyState<List<DiscussionMessage>>(
-          notifications: <DiscussionMessage>[]));
-
       try {
         this._amqpConsumer =
             await amqpService.startListenBindedQueue(bindingData);
@@ -104,23 +96,21 @@ class MbCDiscussionMessageConsumerBloc
           final MbDiscussionMessage discussionMessageData =
               MbDiscussionMessage.fromJson(data);
 
-          final DiscussionMessage discussionMessage =
+          final DiscussionUpdate discussionUpdate =
               discussionMessageData.getDiscussionMessage();
 
           if (this.currentState
-              is NotificationReadyState<List<DiscussionMessage>>) {
-            List<DiscussionMessage> existing = List<DiscussionMessage>.from(
+              is NotificationReadyState<List<DiscussionUpdate>>) {
+            List<DiscussionUpdate> existing = List<DiscussionUpdate>.from(
                 (this.currentState
-                        as NotificationReadyState<List<DiscussionMessage>>)
+                        as NotificationReadyState<List<DiscussionUpdate>>)
                     .notifications);
 
-            existing.add(discussionMessage);
+            existing.add(discussionUpdate);
 
-            sink.add(NotificationReadyState<List<DiscussionMessage>>(
-                notifications: existing));
+            sink.add(existing);
           } else {
-            sink.add(NotificationReadyState<List<DiscussionMessage>>(
-                notifications: [discussionMessage]));
+            sink.add([discussionUpdate]);
           }
         });
 
@@ -133,8 +123,8 @@ class MbCDiscussionMessageConsumerBloc
             .transform(discussionMessageTransformer)
             .listen((event) {
           if (event is List) {
-            this.updateState(NotificationReadyState<List<DiscussionMessage>>(
-                notifications: event.cast<DiscussionMessage>()));
+            this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
+                notifications: event.cast<DiscussionUpdate>()));
           }
         });
 
@@ -145,13 +135,32 @@ class MbCDiscussionMessageConsumerBloc
           this._discussionController.sink.add(event.payloadAsJson);
         },
             onError: (e) => this.updateState(
-                NotificationErrorState<List<DiscussionMessage>>(error: e)));
+                NotificationErrorState<List<DiscussionUpdate>>(error: e)));
+
+        this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
+            notifications: <DiscussionUpdate>[]));
       } on Exception catch (e) {
         this.updateState(
-            NotificationErrorState<List<DiscussionMessage>>(error: e));
+            NotificationErrorState<List<DiscussionUpdate>>(error: e));
       }
     });
 
-    //this._ackDiscussionMessageNotification.listen((event) {});
+    this._ackDiscussionMessageNotification.listen((event) {
+      final _event =
+          event as AckPartiallyNotificationReceived<List<DiscussionUpdate>>;
+      final ackNotificationsList = _event.deliveredNotifications;
+
+      if (this.currentState is NotificationReadyState<List<DiscussionUpdate>>) {
+        final notificationsList = (this.currentState
+                as NotificationReadyState<List<DiscussionUpdate>>)
+            .notifications;
+
+        notificationsList
+            .removeWhere((element) => ackNotificationsList.contains(element));
+
+        this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
+            notifications: notificationsList));
+      }
+    });
   }
 }

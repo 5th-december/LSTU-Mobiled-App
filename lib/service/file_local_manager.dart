@@ -27,6 +27,14 @@ class FileLocalManager {
     return await testingFile.length();
   }
 
+  Future<bool> isDirectory(String fsObjectPath) async =>
+      FileSystemEntityType.directory ==
+      (await FileSystemEntity.type(fsObjectPath));
+
+  Future<bool> isFile(String fsObjectPath) async =>
+      FileSystemEntityType.file == (await FileSystemEntity.type(fsObjectPath));
+
+  // TODO: Расшифровывать stat
   Future<Map<String, bool>> getPremissions(String path) async {
     FileSystemEntityType actualType = await FileSystemEntity.type(path);
     if (actualType == FileSystemEntityType.directory) {

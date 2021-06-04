@@ -1,7 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
-import 'package:lk_client/bloc/amqp_consumers/amqp_dialog_start_consumer_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/dialog_list_bloc.dart';
+import 'package:lk_client/bloc/message_broker_consumers/mbc_dialog_list_consumer_bloc.dart';
+import 'package:lk_client/bloc_container/mbc_dialog_list_bloc_container.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
@@ -40,24 +41,36 @@ class DialogListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   /*
    * Получает доступ к блоку из notification bloc provider 
    */
-  final AmqpDialogListConsumerBloc amqpListConsumerBloc;
+  final MbCDialogListConsumerBloc mbcDialogListConsumerBloc;
+
+  static Future<DialogListProxyBloc> init(
+      {@required
+          DialogListBloc dialogListBloc,
+      @required
+          Future<MbCDialogListBlocContainer>
+              mbCDialogListBlocContainer}) async {
+    MbCDialogListBlocContainer _mbCDialogListBlocContainer =
+        await mbCDialogListBlocContainer;
+    MbCDialogListConsumerBloc mbCDialogListConsumerBloc =
+        _mbCDialogListBlocContainer.getBloc();
+    final pb = DialogListProxyBloc(
+        loadingBloc: dialogListBloc,
+        mbcDialogListConsumerBloc: mbCDialogListConsumerBloc);
+    return pb;
+  }
 
   DialogListProxyBloc(
-      {@required this.loadingBloc, @required this.amqpListConsumerBloc}) {
+      {@required this.loadingBloc, @required this.mbcDialogListConsumerBloc}) {
     this._dialogListInitEventStream.listen((event) {
       /**
        * При отправке событий инициализации списка подписывается на 
        * стрим событий блока событий + при возникновении нового диалога передает в 
        * блок списка событие внешнего добавления данных
        */
-      final _event = event as EndlessScrollingLoadEvent<StartNotifyOnPerson>;
-
-      this.amqpListConsumerBloc.eventController.sink.add(
-          StartNotificationConsumeEvent<AmqpStartConsumeDialogListUpdates>(
-              command: AmqpStartConsumeDialogListUpdates(
-                  receiver: _event.command.trackedPerson)));
-
-      this.amqpListConsumerBloc.dialogListConsumingStateStream.listen((event) {
+      this
+          .mbcDialogListConsumerBloc
+          .dialogListConsumingStateStream
+          .listen((event) {
         if (event is NotificationReadyState<List<Dialog>> &&
             event.notifications.length != 0) {
           this.loadingBloc.eventController.sink.add(
@@ -65,7 +78,7 @@ class DialogListProxyBloc extends AbstractBloc<dynamic, dynamic> {
                   externalAddedData: event.notifications));
 
           this
-              .amqpListConsumerBloc
+              .mbcDialogListConsumerBloc
               .eventController
               .sink
               .add(AckAllNotificationReceived());
@@ -86,8 +99,7 @@ class DialogListProxyBloc extends AbstractBloc<dynamic, dynamic> {
     });
 
     this._dialogListLoadEventStream.listen((event) {
-      final _event = event as EndlessScrollingLoadEvent;
-      this.loadingBloc.eventController.sink.add(_event);
+      this.loadingBloc.eventController.sink.add(event);
     });
   }
 }

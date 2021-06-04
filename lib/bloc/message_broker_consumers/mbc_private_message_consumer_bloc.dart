@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:dart_amqp/dart_amqp.dart';
 import 'package:flutter/foundation.dart';
-import 'package:hive/hive.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
+import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/mb_objects/mb_private_message.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
@@ -12,12 +12,7 @@ import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
-class AmqpStartConsumeDialogMessages {
-  final Dialog dialog;
-  AmqpStartConsumeDialogMessages({@required this.dialog});
-}
-
-class AmqpPrivateMessageConsumerBloc
+class MbCPrivateMessageConsumerBloc
     extends AbstractBloc<NotificationConsumeState, NotificationConsumeEvent> {
   /*
    * Тип exchange
@@ -53,24 +48,31 @@ class AmqpPrivateMessageConsumerBloc
   Stream<NotificationConsumeEvent>
       get _privateMessageStartConsumingEventStream =>
           this.eventController.stream.where((event) => event
-              is StartNotificationConsumeEvent<AmqpStartConsumeDialogMessages>);
+              is StartNotificationConsumeEvent<MbCStartConsumeDialogMessages>);
 
   /*
    * Стрим событий подтверждения получения уведомлений
-   *
-  Stream<NotificationConsumeEvent> get _ackNotificationReceivedEventStream =>
-      this.eventController.stream.where(
-          (event) => event is AckNotificationReceived<List<PrivateMessage>>);*/
+   */
+  Stream<NotificationConsumeEvent> get _ackReceivedAllNotificationEventStream =>
+      this
+          .eventController
+          .stream
+          .where((event) => event is AckAllNotificationReceived);
 
-  AmqpPrivateMessageConsumerBloc(
+  Stream<NotificationConsumeEvent>
+      get _ackReceivedPartiallyNotificationEventStream =>
+          this.eventController.stream.where((event) =>
+              event is AckPartiallyNotificationReceived<PrivateMessage>);
+
+  MbCPrivateMessageConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
     this._exchangeName = amqpConfig.messageExchangeName;
     /**
      * Событие старта подписки на обновления
      */
     this._privateMessageStartConsumingEventStream.listen((event) async {
-      final _event = event
-          as StartNotificationConsumeEvent<AmqpStartConsumeDialogMessages>;
+      final _event =
+          event as StartNotificationConsumeEvent<MbCStartConsumeDialogMessages>;
       final command = _event.command;
 
       /*
@@ -82,9 +84,6 @@ class AmqpPrivateMessageConsumerBloc
           exchangeName: this._exchangeName,
           exchangeType: this._exchangeType,
           routingKeys: [routingKey]);
-
-      this.updateState(NotificationReadyState<List<PrivateMessage>>(
-          notifications: <PrivateMessage>[]));
 
       try {
         this._amqpConsumer =
@@ -105,11 +104,9 @@ class AmqpPrivateMessageConsumerBloc
                         as NotificationReadyState<List<PrivateMessage>>)
                     .notifications);
             existing.add(privateMessage);
-            sink.add(NotificationReadyState<List<PrivateMessage>>(
-                notifications: existing));
+            sink.add(existing);
           } else {
-            sink.add(NotificationReadyState<List<PrivateMessage>>(
-                notifications: <PrivateMessage>[privateMessage]));
+            sink.add(<PrivateMessage>[privateMessage]);
           }
         });
 
@@ -129,6 +126,9 @@ class AmqpPrivateMessageConsumerBloc
         },
             onError: (e) => this
                 .updateState(NotificationErrorState<List<Dialog>>(error: e)));
+
+        this.updateState(NotificationReadyState<List<PrivateMessage>>(
+            notifications: <PrivateMessage>[]));
       } on Exception catch (e) {
         this.updateState(
             NotificationErrorState<List<PrivateMessage>>(error: e));
@@ -137,24 +137,38 @@ class AmqpPrivateMessageConsumerBloc
 
     /**
      * Обработка события подтверждения получения уведомления
-     *
-    this._ackNotificationReceivedEventStream.listen((event) async {
-      final _event = event as AckNotificationReceived<List<PrivateMessage>>;
-
-      List<PrivateMessage> receivedNotifications = _event.receivedNotification;
-
-      try {
-        final box = await Hive.openBox('private_msg_notifications');
-        for (PrivateMessage msg in receivedNotifications) {
-          box.delete(msg.id);
-        }
-        final List<PrivateMessage> notificationsList = box.values.toList();
+     */
+    this._ackReceivedAllNotificationEventStream.listen((event) {
+      if (this.currentState is NotificationReadyState<List<PrivateMessage>> &&
+          (this.currentState as NotificationReadyState<List<PrivateMessage>>)
+                  .notifications
+                  .length !=
+              0) {
         this.updateState(NotificationReadyState<List<PrivateMessage>>(
-            notifications: notificationsList));
-      } on Exception catch (e) {
-        this.updateState(
-            NotificationErrorState<List<PrivateMessage>>(error: e));
+            notifications: <PrivateMessage>[]));
       }
-    });*/
+    });
+
+    this._ackReceivedPartiallyNotificationEventStream.listen((event) {
+      if (this.currentState is NotificationReadyState<List<PrivateMessage>> &&
+          (this.currentState as NotificationReadyState<List<PrivateMessage>>)
+                  .notifications
+                  .length !=
+              0) {
+        final currentNotifications =
+            (this.currentState as NotificationReadyState<List<PrivateMessage>>)
+                .notifications;
+        final consumedNotifications =
+            (event as AckPartiallyNotificationReceived<PrivateMessage>)
+                .deliveredNotifications;
+        currentNotifications.removeWhere((PrivateMessage element) =>
+            consumedNotifications.firstWhere(
+                (PrivateMessage consumed) => consumed.id == element.id,
+                orElse: () => null) !=
+            null);
+        this.updateState(NotificationReadyState<List<PrivateMessage>>(
+            notifications: currentNotifications));
+      }
+    });
   }
 }

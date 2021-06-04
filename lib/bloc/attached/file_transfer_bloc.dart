@@ -8,15 +8,16 @@ import 'package:lk_client/service/file_transfer_manager.dart';
 import 'package:lk_client/service/notification/notification_producer.dart';
 import 'package:lk_client/service/notification/notifier.dart';
 
-class TeachingMaterialDocumentTransferBloc extends AbstractFileDownloaderBloc {
+class TeachingMaterialDocumentDownloaderBloc
+    extends AbstractFileDownloaderBloc {
   final FileTransferService fileTransferService;
   final Notifier appNotifier;
 
-  TeachingMaterialDocumentTransferBloc(
+  TeachingMaterialDocumentDownloaderBloc(
       {@required FileLocalManager fileLocalManager,
       @required this.appNotifier,
       @required this.fileTransferService})
-      : super(fileLocalManager);
+      : super(fileLocalManager: fileLocalManager);
 
   @override
   Stream<FileOperationStatus> startDownloadingOperation(

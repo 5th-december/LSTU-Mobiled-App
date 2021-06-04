@@ -15,6 +15,7 @@ import 'package:lk_client/service/api_consumer/authorization_service.dart';
 import 'package:lk_client/service/file_local_manager.dart';
 import 'package:lk_client/service/file_transfer_manager.dart';
 import 'package:lk_client/service/jwt_manager.dart';
+import 'package:lk_client/service/notification/notifier.dart';
 
 class ServiceProvider {
   final JwtManager jwtManager;
@@ -32,6 +33,7 @@ class ServiceProvider {
   final UtilQueryService utilQueryService;
   final FirebaseMessaging firebaseMessaging;
   final AmqpService amqpService;
+  final Notifier notifier;
   final AmqpConfig amqpConfig;
 
   ServiceProvider(
@@ -50,5 +52,6 @@ class ServiceProvider {
       @required this.utilQueryService,
       @required this.messengerQueryService,
       @required this.amqpConfig,
+      @required this.notifier,
       @required this.amqpService});
 }

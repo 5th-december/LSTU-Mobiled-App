@@ -43,10 +43,12 @@ class EducationQueryService {
   Stream<ConsumingState<ListedResponse<Semester>>> getSemesterList(
       String educationId) async* {
     try {
+      final apiToken = await this.authenticationExtractor.getAuthenticationData;
+
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/semesters/list',
           <String, String>{'edu': educationId},
-          await this.authenticationExtractor.getAuthenticationData);
+          apiToken);
 
       if (response.status == 200) {
         ListedResponse<Semester> personSemesterList =
@@ -63,10 +65,12 @@ class EducationQueryService {
   Stream<ConsumingState<ListedResponse<Discipline>>> getSubjectList(
       String educationId, String semesterId) async* {
     try {
+      final apiToken = await this.authenticationExtractor.getAuthenticationData;
+
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/discipline/list',
           <String, String>{'edu': educationId, 'sem': semesterId},
-          await this.authenticationExtractor.getAuthenticationData);
+          apiToken);
 
       if (response.status == 200) {
         ListedResponse<Discipline> requiredDisciplineList =
@@ -84,10 +88,11 @@ class EducationQueryService {
   Stream<ConsumingState<Semester>> getCurrentSemester(
       String educationId) async* {
     try {
+      final apiToken = await this.authenticationExtractor.getAuthenticationData;
       HttpResponse response = await this.apiEndpointConsumer.get(
           '/api/v1/student/edu/semesters/current',
           <String, String>{'edu': educationId},
-          await this.authenticationExtractor.getAuthenticationData);
+          apiToken);
 
       if (response.status == 200) {
         Semester currentSemester = Semester.fromJson(response.body);

@@ -245,7 +245,7 @@ class DiscussionLoadingBloc extends AbstractPrimitiveLoaderBloc<
       commandArgumentTranslator(
               loaderFunc, LoadDisciplineDiscussionListCommand command) =>
           loaderFunc(command.discipline.id, command.education.id,
-              command.semester.id, command.bound, command.count);
+              command.semester.id, command.bound, command.count.toString());
 
   @override
   ListedResponse<DiscussionMessage> valueTranslator(

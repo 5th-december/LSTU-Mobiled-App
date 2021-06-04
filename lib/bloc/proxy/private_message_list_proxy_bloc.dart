@@ -1,8 +1,11 @@
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
-import 'package:lk_client/bloc/amqp_consumers/amqp_private_message_consumer_bloc.dart';
-import 'package:lk_client/bloc/amqp_consumers/mbc_dialog_read_consumer_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
+import 'package:lk_client/bloc/message_broker_consumers/mbc_chat_update_consumer_bloc.dart';
+import 'package:lk_client/bloc/message_broker_consumers/mbc_private_message_consumer_bloc.dart';
+import 'package:lk_client/bloc_container/mbc_chat_update_bloc_container.dart';
+import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart';
+import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
@@ -20,9 +23,9 @@ class StartNotifyPrivateMessagesOnDialog {
 class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   final PrivateMessageListBloc listBloc;
 
-  final AmqpPrivateMessageConsumerBloc amqpPrivateMessageConsumerBloc;
+  final MbCPrivateMessageConsumerBloc mbcPrivateMessageConsumerBloc;
 
-  final MbCDialogReadConsumerBloc amqpMessagesReadConsumerBloc;
+  final MbCChatUpdateConsumerBloc mbcMessagesReadConsumerBloc;
 
   Stream<dynamic> get privateMessageListStateStream =>
       this.stateContoller.stream;
@@ -32,30 +35,44 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
           is EndlessScrollingLoadEvent<StartNotifyPrivateMessagesOnDialog>);
 
   Stream<dynamic> get _privateMessageListLoadingEventStream =>
-      this.eventController.stream.where(
-          (event) => event is EndlessScrollingLoadEvent<List<PrivateMessage>>);
+      this.eventController.stream.where((event) => event
+          is EndlessScrollingLoadEvent<LoadPrivateChatMessagesListCommand>);
+
+  static Future<PrivateMessageListProxyBloc> init(
+      {@required
+          Future<MbCPrivateMessageBlocContainer> mbCPrivateMessageBlocContainer,
+      @required
+          Future<MbCChatUpdateBlocContainer> mbCChatUpdateBlocContainer,
+      @required
+          PrivateMessageListBloc privateMessageListBloc,
+      @required
+          Person companion,
+      @required
+          Dialog dialog}) async {
+    MbCPrivateMessageBlocContainer _mbCPrivateMessageBlocContainer =
+        await mbCPrivateMessageBlocContainer;
+    MbCChatUpdateBlocContainer _mbCChatUpdateBlocContainer =
+        await mbCChatUpdateBlocContainer;
+    MbCChatUpdateConsumerBloc mbCChatUpdateConsumerBloc =
+        await _mbCChatUpdateBlocContainer.getBloc(dialog, companion);
+    MbCPrivateMessageConsumerBloc mbCPrivateMessageConsumerBloc =
+        await _mbCPrivateMessageBlocContainer.getBloc(dialog);
+    return PrivateMessageListProxyBloc(
+        listBloc: privateMessageListBloc,
+        mbcPrivateMessageConsumerBloc: mbCPrivateMessageConsumerBloc,
+        mbcMessagesReadConsumerBloc: mbCChatUpdateConsumerBloc);
+  }
 
   PrivateMessageListProxyBloc(
       {@required this.listBloc,
-      @required this.amqpPrivateMessageConsumerBloc,
-      @required this.amqpMessagesReadConsumerBloc}) {
+      @required this.mbcPrivateMessageConsumerBloc,
+      @required this.mbcMessagesReadConsumerBloc}) {
     this._privateMessageListInitEventStream.listen((event) {
-      final _event = event
-          as EndlessScrollingLoadEvent<StartNotifyPrivateMessagesOnDialog>;
-
-      /**
-       * Подписка на события добавлений сообщений
-       */
-      this.amqpPrivateMessageConsumerBloc.eventController.sink.add(
-          StartNotificationConsumeEvent<AmqpStartConsumeDialogMessages>(
-              command: AmqpStartConsumeDialogMessages(
-                  dialog: _event.command.trackedDialog)));
-
       /**
        * Listener на событие добавления сообщений
        */
       this
-          .amqpPrivateMessageConsumerBloc
+          .mbcPrivateMessageConsumerBloc
           .privateMessageConsumingStateStream
           .listen((event) {
         if (event is NotificationReadyState<List<PrivateMessage>> &&
@@ -65,26 +82,18 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
                   externalAddedData: event.notifications));
 
           this
-              .amqpPrivateMessageConsumerBloc
+              .mbcPrivateMessageConsumerBloc
               .eventController
               .sink
               .add(AckAllNotificationReceived());
         }
       });
 
-      /**
-       * Подписка на события обновлений чата
-       */
-      this.amqpMessagesReadConsumerBloc.eventController.sink.add(
-          StartNotificationConsumeEvent<MbCStartConsumeDialogUpdates>(
-              command: MbCStartConsumeDialogUpdates(
-                  readerCompanion: _event.command.trackedPerson,
-                  watchedDialog: _event.command.trackedDialog)));
       /*
        * Listener на события обновления чата 
        */
       this
-          .amqpMessagesReadConsumerBloc
+          .mbcMessagesReadConsumerBloc
           .dialogReadNotificationStateStream
           .listen((event) {
         if (event is NotificationReadyState<List<PrivateMessage>> &&
@@ -94,13 +103,13 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
                   externalUpdatedData: event.notifications));
 
           this
-              .amqpMessagesReadConsumerBloc
+              .mbcMessagesReadConsumerBloc
               .eventController
               .sink
               .add(AckAllNotificationReceived());
 
           /**
-           * Добавление события в блок чтения сообщений
+           * TODO: Добавление события в блок чтения сообщений
            */
         }
       });
@@ -116,8 +125,7 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
     });
 
     this._privateMessageListLoadingEventStream.listen((event) {
-      final _event = event as EndlessScrollingLoadEvent;
-      this.listBloc.eventController.sink.add(_event);
+      this.listBloc.eventController.sink.add(event);
     });
   }
 }

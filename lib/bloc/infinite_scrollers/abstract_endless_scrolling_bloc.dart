@@ -100,16 +100,16 @@ abstract class AbstractEndlessScrollingBloc<T, C>
 
       if (currentState is EndlessScrollingLoadingState<T>) return;
 
+      final previousState = this.currentState;
+
       this.updateState(
           EndlessScrollingLoadingState<T>(entityList: currentState.entityList));
 
       try {
         C command = _event.command;
-        if (currentState is EndlessScrollingChunkReadyState) {
+        if (previousState is EndlessScrollingChunkReadyState<T>) {
           command = this.getNextChunkCommand(
-              _event.command,
-              currentState.entityList,
-              (currentState as EndlessScrollingChunkReadyState).remains);
+              _event.command, previousState.entityList, previousState.remains);
         }
 
         /**
@@ -121,9 +121,9 @@ abstract class AbstractEndlessScrollingBloc<T, C>
          * Если предыдущий список был непустым, он копируется в новый
          */
         List<T> refreshData;
-        if (currentState.entityList.length != 0) {
+        if (previousState.entityList.length != 0) {
           refreshData = this
-              .copyPreviousToNew(currentState.entityList, freshData.payload);
+              .copyPreviousToNew(previousState.entityList, freshData.payload);
         } else {
           refreshData = freshData.payload;
         }

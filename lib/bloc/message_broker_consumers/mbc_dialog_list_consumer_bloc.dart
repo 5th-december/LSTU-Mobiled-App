@@ -3,20 +3,15 @@ import 'dart:async';
 import 'package:dart_amqp/dart_amqp.dart';
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
+import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/mb_objects/mb_dialog.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
-import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
-class AmqpStartConsumeDialogListUpdates {
-  Person receiver;
-  AmqpStartConsumeDialogListUpdates({@required this.receiver});
-}
-
-class AmqpDialogListConsumerBloc extends AbstractBloc<
+class MbCDialogListConsumerBloc extends AbstractBloc<
     NotificationConsumeState<List<Dialog>>, NotificationConsumeEvent> {
   final _exchangeType = ExchangeType.DIRECT;
 
@@ -46,7 +41,7 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
    */
   Stream<NotificationConsumeEvent> get _dialogListStartConsumingEvent =>
       this.eventController.stream.where((event) => event
-          is StartNotificationConsumeEvent<AmqpStartConsumeDialogListUpdates>);
+          is StartNotificationConsumeEvent<MbCStartConsumeDialogListUpdates>);
 
   /*
    * Стрим событий подтверждения 
@@ -57,7 +52,7 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
           .stream
           .where((event) => event is AckAllNotificationReceived);
 
-  AmqpDialogListConsumerBloc(
+  MbCDialogListConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
     this._exchangeName = amqpConfig.dialogListExchangeName;
     /**
@@ -65,7 +60,7 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
      */
     this._dialogListStartConsumingEvent.listen((event) async {
       final _event = event
-          as StartNotificationConsumeEvent<AmqpStartConsumeDialogListUpdates>;
+          as StartNotificationConsumeEvent<MbCStartConsumeDialogListUpdates>;
 
       final command = _event.command;
 
@@ -116,6 +111,9 @@ class AmqpDialogListConsumerBloc extends AbstractBloc<
         },
             onError: (e) => this
                 .updateState(NotificationErrorState<List<Dialog>>(error: e)));
+
+        this.updateState(
+            NotificationReadyState<List<Dialog>>(notifications: <Dialog>[]));
       } on Exception catch (e) {
         this.updateState(NotificationErrorState<List<Dialog>>(error: e));
       }

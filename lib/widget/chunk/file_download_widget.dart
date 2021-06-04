@@ -1,255 +1,475 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:ext_storage/ext_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/bloc/attached/abstract_file_transfer_bloc.dart';
 import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/file_management_event.dart';
 import 'package:lk_client/model/data_transfer/attachment.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
-import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
+import 'package:lk_client/service/api_consumer/file_transfer_service.dart';
+import 'package:lk_client/service/file_local_manager.dart';
+import 'package:lk_client/service/notification/notifier.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-// Доставляет контент в file download widget в независимом от типа запроса виде
-abstract class DownloadMaterial {
-  final AbstractFileTransferBloc bloc;
-  DownloadMaterial({@required this.bloc});
-}
+class FileDownloaderBlocProvider {
+  Map<String, AbstractFileDownloaderBloc> _loaders =
+      <String, AbstractFileDownloaderBloc>{};
 
-class DownloadFileMaterial extends DownloadMaterial {
-  final Attachment attachment;
-  final MultipartRequestCommand command;
-  DownloadFileMaterial(
-      {@required this.attachment, @required bloc, @required this.command})
-      : super(bloc: bloc);
-}
-
-class DownloadExternalLinkMaterial extends DownloadMaterial {
-  final ExternalLink externalLink;
-  DownloadExternalLinkMaterial({@required this.externalLink, @required bloc})
-      : super(bloc: bloc);
-}
-
-class TeachingMaterialDownloadManagerCreator {
-  /*
-   * Создание подкласса DownloadMaterial из TeachingMatrial
-   */
-  static DownloadMaterial initialize(
-      TeachingMaterial material, TeachingMaterialDocumentTransferBloc bloc) {
-    /*
-     * Если прикреплен файл
-     */
-    if (material.attachment != null) {
-      LoadTeachingMaterialAttachment command =
-          LoadTeachingMaterialAttachment(material.id);
-
-      return DownloadFileMaterial(
-          bloc: bloc, attachment: material.attachment, command: command);
-    } else if (material.externalLink != null) {
-      /*
-       * Если прикреплена внешняя ссылка
-       */
-      return DownloadExternalLinkMaterial(
-          bloc: bloc, externalLink: material.externalLink);
+  AbstractFileDownloaderBloc getLoader(String fileMaterialIdentifier) {
+    if (this._loaders.containsKey(fileMaterialIdentifier)) {
+      return _loaders[fileMaterialIdentifier];
+    } else {
+      return null;
     }
-    throw Exception('Undefined attachment type');
+  }
+
+  bool putLoader(String fileMaterialIdentifier,
+      AbstractFileDownloaderBloc downloaderBloc) {
+    final contains = this._loaders.containsKey(fileMaterialIdentifier);
+
+    if (!contains) {
+      this._loaders[fileMaterialIdentifier] = downloaderBloc;
+      return !contains;
+    }
+
+    return contains;
   }
 }
 
-class FileDownloadWidget extends StatefulWidget {
-  final DownloadMaterial manager;
+class TeachingMaterialsDownloaderProxyBloc
+    extends FileDownloaderProxyBloc<TeachingMaterialDocumentDownloaderBloc> {
+  FileLocalManager fileLocalManager;
 
-  FileDownloadWidget({Key key, @required this.manager}) : super(key: key);
+  Notifier appNotifier;
+
+  FileTransferService fileTransferService;
+
+  TeachingMaterialsDownloaderProxyBloc(
+      {@required this.fileLocalManager,
+      @required this.appNotifier,
+      @required this.fileTransferService,
+      @required FileDownloaderBlocProvider fileDownloaderBlocProvider})
+      : super(fileDownloaderBlocProvider: fileDownloaderBlocProvider);
+
+  @override
+  TeachingMaterialDocumentDownloaderBloc buildDownloaderInstance() {
+    return TeachingMaterialDocumentDownloaderBloc(
+        fileLocalManager: fileLocalManager,
+        appNotifier: appNotifier,
+        fileTransferService: fileTransferService);
+  }
+}
+
+/* 
+ * Предоставляет классу виджета выполняемый или сохраненный файл, а
+ * если таких не найдено, то инициализирует в подклассе новый объект блока загрузки 
+ * и при первой операции загрузки кладет ее в провайдер блоков загрузки
+ */
+abstract class FileDownloaderProxyBloc<T extends AbstractFileDownloaderBloc>
+    extends AbstractBloc<FileManagementState, FileManagementEvent> {
+  /*
+   * Объект downloadera заданного типаf
+   */
+  AbstractFileDownloaderBloc _fileDownloaderBloc;
+
+  /*
+   * Стрим состояний файловых операций
+   */
+  Stream<FileManagementState> get downloadFileManagementStateStream =>
+      this.stateContoller.stream;
+
+  /*
+   * Стрим событий файловых операций
+   */
+  Stream<FileManagementEvent> get _downloadFileInitEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is FileDownloadInitEvent);
+
+  Stream<FileManagementEvent> get _downloadManagementEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is FileManagementEvent);
+
+  T buildDownloaderInstance();
+
+  FileDownloaderProxyBloc(
+      {@required FileDownloaderBlocProvider fileDownloaderBlocProvider}) {
+    this._downloadFileInitEventStream.listen((event) {
+      final _event = event as FileDownloadInitEvent;
+
+      final progressFileDownloader =
+          fileDownloaderBlocProvider.getLoader(_event.fileMaterialIdentifier);
+
+      if (progressFileDownloader != null && progressFileDownloader is T) {
+        this._fileDownloaderBloc = progressFileDownloader;
+        this
+            ._fileDownloaderBloc
+            .stateContoller
+            .stream
+            .listen((event) => this.stateContoller.sink.add(event));
+      } else {
+        this._fileDownloaderBloc = this.buildDownloaderInstance();
+        this
+            ._fileDownloaderBloc
+            .binaryTransferStateStream
+            .listen((event) => this.stateContoller.sink.add(event));
+        this
+            ._fileDownloaderBloc
+            .eventController
+            .sink
+            .add(FileManagementInitEvent());
+      }
+
+      this._downloadManagementEventStream.listen((event) {
+        if (fileDownloaderBlocProvider
+                .getLoader(_event.fileMaterialIdentifier) ==
+            null) {
+          fileDownloaderBlocProvider.putLoader(
+              _event.fileMaterialIdentifier, this._fileDownloaderBloc);
+        }
+        this._fileDownloaderBloc.eventController.sink.add(event);
+      });
+    });
+  }
+}
+
+class DownloadFileMaterial {
+  final Attachment attachment;
+  final MultipartRequestCommand command;
+  final String attachmentId;
+  final String originalFileName;
+  DownloadFileMaterial(
+      {@required this.attachment,
+      @required this.command,
+      @required this.attachmentId,
+      @required this.originalFileName});
+}
+
+class DownloadExternalLinkMaterial {
+  final ExternalLink externalLink;
+  DownloadExternalLinkMaterial({@required this.externalLink});
+}
+
+class FileDownloadWidget extends StatefulWidget {
+  final FileDownloaderProxyBloc proxyBloc;
+  final DownloadFileMaterial fileMaterial;
+
+  FileDownloadWidget(
+      {Key key, @required this.proxyBloc, @required this.fileMaterial})
+      : super(key: key);
 
   @override
   _FileDownloadWidgetState createState() => _FileDownloadWidgetState();
 }
 
-Future<void> downloadFileToDirectory(DownloadMaterial manager) async {
-  String basePath;
-  if (Platform.isAndroid) {
-    basePath = await ExtStorage.getExternalStoragePublicDirectory(
-        ExtStorage.DIRECTORY_DOWNLOADS);
-  } else {
-    basePath = (await getApplicationDocumentsDirectory()).path;
-  }
-
-  manager.bloc.eventController.add(
-      FileStartDownloadEvent<MultipartRequestCommand>(
-          command: (manager as DownloadFileMaterial).command,
-          file: LocalFilesystemObject.fromFilePath(basePath)));
-}
-
 class _FileDownloadWidgetState extends State<FileDownloadWidget> {
-  DownloadMaterial get manager => widget.manager;
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    widget.proxyBloc.eventController.add(FileDownloadInitEvent(
+        fileMaterialIdentifier: widget.fileMaterial.attachmentId));
+  }
 
   @override
   Widget build(BuildContext context) {
-    this.manager.bloc.eventController.add(FileManagementInitEvent());
+    String fileExtension =
+        widget.fileMaterial.attachment.attachmentName.split('.')?.last ?? '';
+    double fileSize =
+        double.parse(widget.fileMaterial.attachment.attachmentSize);
+    String sizeTitle = fileSize > 1024
+        ? (fileSize / 1024).toStringAsFixed(2) + ' Мб.'
+        : fileSize.toStringAsFixed(2) + ' Кб.';
 
-    if (manager is DownloadFileMaterial) {
-      final _manager = (manager as DownloadFileMaterial);
-
-      String fileExtension =
-          _manager.attachment.attachmentName.split('.')?.last ?? '';
-      double fileSize = double.parse(_manager.attachment.attachmentSize);
-      String sizeTitle = fileSize > 1024
-          ? (fileSize / 1024).toStringAsFixed(2) + ' Мб.'
-          : fileSize.toStringAsFixed(2) + ' Кб.';
-
-      return StreamBuilder(
-          stream: this.manager.bloc.binaryTransferStateStream,
-          builder: (BuildContext context, AsyncSnapshot snapshot) {
-            if (snapshot.hasData) {
-              FileManagementState state =
-                  (snapshot.data) as FileManagementState;
-              /*
-               * В случае начальной инициализации при нажатии на кнопку загрузки
-               * определяется директория сохранения и отправляется event на скачивание файла
-               */
-              if (state is FileManagementInitState) {
-                return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: 150.0, minWidth: 150.0),
-                    child: Row(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () =>
-                                downloadFileToDirectory(this.manager),
-                            child: Icon(Icons.download_rounded, size: 24.0),
-                            style: ElevatedButton.styleFrom(
-                                shape: CircleBorder())),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Text(_manager.attachment.attachmentName),
-                            Text('$fileExtension $sizeTitle')
-                          ],
-                        ))
-                      ],
-                    ));
-              }
-
-              if (state is FileManagementRightsErrorState) {
-                return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: 150.0, minWidth: 150.0),
-                    child: Row(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () => {},
-                            child:
-                                Icon(Icons.warning_amber_rounded, size: 24.0),
-                            style: ElevatedButton.styleFrom(
-                                shape: CircleBorder())),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Text('Не предоставлены разрешения', maxLines: 2),
-                          ],
-                        ))
-                      ],
-                    ));
-              }
-
-              if (state is FileOperationProgressState) {
-                int percent = ((state.rate /
-                            1024.0 *
-                            double.parse((manager as DownloadFileMaterial)
-                                .attachment
-                                .attachmentSize)) *
-                        100.0)
-                    .round();
-                return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: 150.0, minWidth: 150.0),
-                    child: Row(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () => {},
-                            child: Text('$percent %'),
-                            style: ElevatedButton.styleFrom(
-                                shape: CircleBorder())),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Text('Загружается...', maxLines: 1),
-                          ],
-                        ))
-                      ],
-                    ));
-              }
-
-              if (state is FileOperationErrorState) {
-                return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: 150.0, minWidth: 150.0),
-                    child: Row(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () =>
-                                downloadFileToDirectory(this.manager),
-                            child:
-                                Icon(Icons.error_outline_rounded, size: 24.0),
-                            style: ElevatedButton.styleFrom(
-                                shape: CircleBorder())),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Text(_manager.attachment.attachmentName),
-                            Text('$fileExtension $sizeTitle'),
-                            Text('Произошла ошибка')
-                          ],
-                        ))
-                      ],
-                    ));
-              }
-
-              if (state is FileDownloadReadyState) {
-                return ConstrainedBox(
-                    constraints:
-                        BoxConstraints(maxWidth: 150.0, minWidth: 150.0),
-                    child: Row(
-                      children: [
-                        ElevatedButton(
-                            onPressed: () => {},
-                            child:
-                                Icon(Icons.download_done_rounded, size: 24.0),
-                            style: ElevatedButton.styleFrom(
-                                shape: CircleBorder())),
-                        Expanded(
-                            child: Column(
-                          children: [
-                            Text(_manager.attachment.attachmentName),
-                            Text('$fileExtension $sizeTitle')
-                          ],
-                        ))
-                      ],
-                    ));
-              }
+    return StreamBuilder(
+        stream: widget.proxyBloc.downloadFileManagementStateStream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            FileManagementState state = (snapshot.data) as FileManagementState;
+            if (state is FileManagementInitState) {
+              return this.getDownloadAvailableWidget(state, widget.fileMaterial,
+                  fileExtension, fileSize, sizeTitle);
             }
+            if (state is FileManagementRightsErrorState) {
+              return this.fileManagementRightsError();
+            }
+            if (state is FileOperationProgressState) {
+              return this.getDownloadProgressWidget(state, widget.fileMaterial);
+            }
+            if (state is FileOperationErrorState) {
+              return this.fileDownloadErrorWidget(state, widget.fileMaterial,
+                  fileExtension, fileSize, sizeTitle);
+            }
+            if (state is FileDownloadReadyState) {
+              return this.fileDownloadingReadyWidget(state, widget.fileMaterial,
+                  fileExtension, fileSize, sizeTitle);
+            }
+          }
 
-            return SizedBox.shrink();
-          });
-    } else if (manager is DownloadExternalLinkMaterial) {
-      return TextButton(
-        onPressed: () async {
-          final String link = (manager as DownloadExternalLinkMaterial)
-              .externalLink
-              .linkContent;
-          await canLaunch(link)
-              ? await launch(link)
-              : throw Exception('Can not open link');
-        },
-        child: Icon(Icons.open_in_browser_outlined),
-      );
+          return SizedBox.shrink();
+        });
+  }
+
+  Widget getDownloadProgressWidget(
+      FileOperationProgressState state, DownloadFileMaterial material) {
+    int percent = ((state.rate /
+                (double.parse(material.attachment.attachmentSize) * 1024)) *
+            100.0)
+        .round();
+
+    return Container(
+        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+        padding: EdgeInsets.all(7.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () => {},
+                child: Text('$percent %'),
+                style: ElevatedButton.styleFrom(
+                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(8.0))),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  material.attachment.attachmentName,
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500),
+                ),
+                SizedBox(height: 3.0),
+                Text(
+                  'Загружается',
+                  maxLines: 1,
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ))
+          ],
+        ));
+  }
+
+  Widget getDownloadAvailableWidget(
+      FileManagementInitState state,
+      DownloadFileMaterial material,
+      String fileExtension,
+      double fileSize,
+      String sizeTitle) {
+    return Container(
+        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+        padding: EdgeInsets.all(7.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () => downloadFileToDirectory(material),
+                child: Icon(Icons.download_rounded, size: 32.0),
+                style: ElevatedButton.styleFrom(
+                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(8.0))),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  material.attachment.attachmentName,
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 3.0,
+                ),
+                Text(
+                  '$fileExtension $sizeTitle',
+                  maxLines: 1,
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ))
+          ],
+        ));
+  }
+
+  Widget fileDownloadingReadyWidget(
+      FileDownloadReadyState state,
+      DownloadFileMaterial material,
+      String fileExtension,
+      double fileSize,
+      String sizeTitle) {
+    return Container(
+        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+        padding: EdgeInsets.all(7.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () => {},
+                child: Icon(Icons.download_done_rounded, size: 32.0),
+                style: ElevatedButton.styleFrom(
+                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(8.0))),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  material.attachment.attachmentName,
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500),
+                ),
+                SizedBox(
+                  height: 3.0,
+                ),
+                Text(
+                  '$fileExtension $sizeTitle',
+                  maxLines: 1,
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ))
+          ],
+        ));
+  }
+
+  Widget fileDownloadErrorWidget(
+      FileOperationErrorState state,
+      DownloadFileMaterial material,
+      String fileExtension,
+      double fileSize,
+      String sizeTitle) {
+    return Container(
+        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+        padding: EdgeInsets.all(7.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () => downloadFileToDirectory(material),
+                child: Icon(Icons.error_outline_rounded, size: 32.0),
+                style: ElevatedButton.styleFrom(
+                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(8.0))),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  material.attachment.attachmentName,
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500),
+                ),
+                SizedBox(height: 3.0),
+                Text(
+                  'Ошибка загрузки',
+                  maxLines: 1,
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ))
+          ],
+        ));
+  }
+
+  Widget fileManagementRightsError() {
+    return Container(
+        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+        padding: EdgeInsets.all(7.0),
+        decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12.0),
+            border: Border.all(
+                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+        child: Row(
+          children: [
+            ElevatedButton(
+                onPressed: () async => {},
+                child: Icon(Icons.warning_amber_rounded, size: 32.0),
+                style: ElevatedButton.styleFrom(
+                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    shape: CircleBorder(),
+                    padding: EdgeInsets.all(8.0))),
+            Expanded(
+                child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Не предоставлены разрешения для загрузки файлов',
+                  maxLines: 2,
+                  style: TextStyle(
+                      color: Colors.grey.shade500,
+                      fontSize: 14.0,
+                      fontWeight: FontWeight.w400),
+                ),
+              ],
+            ))
+          ],
+        ));
+  }
+
+  Future<void> downloadFileToDirectory(DownloadFileMaterial material) async {
+    String basePath;
+    if (Platform.isAndroid) {
+      basePath = await ExtStorage.getExternalStoragePublicDirectory(
+          ExtStorage.DIRECTORY_DOWNLOADS);
     } else {
-      return FlutterLogo();
+      basePath = (await getApplicationDocumentsDirectory()).path;
     }
+
+    widget.proxyBloc.eventController.add(
+        FileStartDownloadEvent<MultipartRequestCommand>(
+            command: material.command,
+            file: LocalFilesystemObject.fromNameAndBase(
+                basePath,
+                widget.fileMaterial.originalFileName ??
+                    base64UrlEncode(List<int>.generate(
+                        10, (i) => (Random.secure()).nextInt(255))))));
   }
 }

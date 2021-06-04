@@ -1,116 +1,148 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
+import 'package:lk_client/bloc/proxy/private_message_list_proxy_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as DialogModel;
 import 'package:lk_client/model/messenger/private_message.dart';
+import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/state/endless_scrolling_state.dart';
-import 'package:lk_client/store/local/private_dialog_page_provider.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
 import 'package:lk_client/widget/chunk/message_bubble_widget.dart';
-import 'package:lk_client/widget/list/endless_scrolling_widget.dart';
 
-class PrivateMessageHistoryList extends StatefulWidget {
+class PrivateMessageList extends StatefulWidget {
   final DialogModel.Dialog dialog;
+  final Person person;
+  final Future<PrivateMessageListProxyBloc> privateMessageListProxyBloc;
 
-  PrivateMessageHistoryList({Key key, @required this.dialog}) : super(key: key);
+  PrivateMessageList(
+      {Key key,
+      @required this.dialog,
+      @required this.person,
+      @required this.privateMessageListProxyBloc})
+      : super(key: key);
 
   @override
-  _PrivateMessageHistoryListState createState() =>
-      _PrivateMessageHistoryListState();
+  _PrivateMessageListState createState() => _PrivateMessageListState();
 }
 
-class _PrivateMessageHistoryListState extends State<PrivateMessageHistoryList> {
-  PrivateMessageListBloc _bloc;
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (this._bloc == null) {
-      this._bloc = PrivateDialogPageProvider.of(context).privateMessageListBloc;
-    }
-  }
-
+class _PrivateMessageListState extends State<PrivateMessageList> {
   @override
   Widget build(BuildContext context) {
-    final loadingEvent =
-        EndlessScrollingLoadEvent<LoadPrivateChatMessagesListCommand>(
-            command: LoadPrivateChatMessagesListCommand(
-                count: 50, dialog: widget.dialog));
-    this._bloc.eventController.sink.add(loadingEvent);
+    return FutureBuilder(
+      future: widget.privateMessageListProxyBloc,
+      builder: (BuildContext context, AsyncSnapshot snapshot) {
+        switch (snapshot.connectionState) {
+          case ConnectionState.done:
+            if (snapshot.hasError) {
+              return Center(child: Text('Произошла непредвиденная ошибка'));
+            } else {
+              PrivateMessageListProxyBloc bloc = snapshot.data;
 
-    final listViewScrollController = ScrollController();
-    final scrollDistance = 200.0;
+              bloc.eventController.sink.add(
+                  EndlessScrollingLoadEvent<StartNotifyPrivateMessagesOnDialog>(
+                      command: StartNotifyPrivateMessagesOnDialog(
+                          trackedDialog: widget.dialog,
+                          trackedPerson: widget.person)));
 
-    bool needsAutoloading = false;
+              final listViewScrollController = ScrollController();
 
-    listViewScrollController.addListener(() {
-      final maxScroll = listViewScrollController.position.maxScrollExtent;
-      final currentScroll = listViewScrollController.position.pixels;
-      if (needsAutoloading && maxScroll - currentScroll <= scrollDistance) {
-        this._bloc.eventController.sink.add(loadingEvent);
-      }
-    });
+              bool needsAutoloading = false;
 
-    return EndlessScrollingWidget<PrivateMessage,
-        LoadPrivateChatMessagesListCommand>(
-      bloc: this._bloc,
-      buildList: (EndlessScrollingState<PrivateMessage> state) {
-        if (state is EndlessScrollingChunkReadyState) {
-          needsAutoloading =
-              (state as EndlessScrollingChunkReadyState).hasMoreData;
-        } else {
-          needsAutoloading = false;
-        }
+              return StreamBuilder(
+                stream: bloc.privateMessageListStateStream,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    final state = snapshot.data;
 
-        if (state.entityList.length == 0) {
-          if (state is EndlessScrollingLoadingState) {
-            return CenteredLoader();
-          }
+                    if (state is EndlessScrollingInitState) {
+                      final loadNextChunkEvent = EndlessScrollingLoadEvent<
+                              LoadPrivateChatMessagesListCommand>(
+                          command: LoadPrivateChatMessagesListCommand(
+                              dialog: widget.dialog, count: 50));
 
-          if (state is EndlessScrollingErrorState) {
-            return Center(child: Text('Ошибка загрузки истории сообщений'));
-          }
+                      listViewScrollController.addListener(() {
+                        final maxScroll =
+                            listViewScrollController.position.maxScrollExtent;
+                        final currentScroll =
+                            listViewScrollController.position.pixels;
+                        if (needsAutoloading &&
+                            maxScroll - currentScroll <= 200.0) {
+                          bloc.eventController.sink.add(loadNextChunkEvent);
+                        }
+                      });
 
-          return Center(child: Text('История сообщений пуста'));
-        }
+                      bloc.eventController.sink.add(loadNextChunkEvent);
+                    }
 
-        List<PrivateMessage> messageList = state.entityList;
+                    if (state is EndlessScrollingChunkReadyState) {
+                      needsAutoloading = state.hasMoreData;
+                    } else {
+                      needsAutoloading = false;
+                    }
 
-        return ListView.builder(
-            controller: listViewScrollController,
-            reverse: true,
-            itemCount: (state is EndlessScrollingChunkReadyState ||
-                    state is EndlessScrollingLoadingState)
-                ? messageList.length + 1
-                : messageList.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (index >= messageList.length) {
-                ListLoadingBottomIndicator();
-              }
+                    if (state.entityList.length == 0) {
+                      if (state is EndlessScrollingLoadingState) {
+                        return CenteredLoader();
+                      }
 
-              PrivateMessage msg = messageList[index];
+                      if (state is EndlessScrollingErrorState) {
+                        return Center(
+                            child: Text('Ошибка загрузки истории сообщений'));
+                      }
 
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 5.0),
-                child: MessageBubbleWidget(
-                  messageText: msg.messageText,
-                  messageAttachment:
-                      (msg.attachments != null && msg.attachments.length != 0)
-                          ? msg.attachments[0]
-                          : null,
-                  messageExternalLink:
-                      (msg.links != null && msg.links.length != 0)
-                          ? msg.links[0]
-                          : null,
-                  sentByMe: msg.meSender ?? false,
-                  sentTime: msg.sendTime,
-                ),
+                      return Center(child: Text('История сообщений пуста'));
+                    }
+
+                    List<PrivateMessage> messageList = state.entityList;
+
+                    return ListView.builder(
+                        controller: listViewScrollController,
+                        reverse: true,
+                        itemCount: ((state is EndlessScrollingChunkReadyState &&
+                                    (state as EndlessScrollingChunkReadyState<
+                                            PrivateMessage>)
+                                        .hasMoreData) ||
+                                state is EndlessScrollingLoadingState)
+                            ? messageList.length + 1
+                            : messageList.length,
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index >= messageList.length) {
+                            ListLoadingBottomIndicator();
+                          }
+
+                          PrivateMessage msg = messageList[index];
+
+                          return Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 10.0, vertical: 5.0),
+                            child: MessageBubbleWidget(
+                              messageText: msg.messageText,
+                              messageAttachment: (msg.attachments != null &&
+                                      msg.attachments.length != 0)
+                                  ? msg.attachments[0]
+                                  : null,
+                              messageExternalLink:
+                                  (msg.links != null && msg.links.length != 0)
+                                      ? msg.links[0]
+                                      : null,
+                              sentByMe: msg.meSender ?? false,
+                              sentTime: msg.sendTime,
+                              isRead: msg.isRead ?? true,
+                            ),
+                          );
+                        });
+                  }
+
+                  return CenteredLoader();
+                },
               );
-            });
+            }
+            break;
+          default:
+            return CenteredLoader();
+        }
       },
     );
   }

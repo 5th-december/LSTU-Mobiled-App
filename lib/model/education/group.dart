@@ -6,8 +6,7 @@ import 'package:lk_client/model/education/speciality.dart';
 part 'group.g.dart';
 
 @JsonSerializable()
-class Group
-{
+class Group {
   final String id;
 
   final String name;
@@ -20,8 +19,14 @@ class Group
 
   final Speciality speciality;
 
-  Group({this.id, this.name, this.chair, this.admission, this.graduation, this.speciality});
+  Group(
+      {this.id,
+      this.name,
+      this.chair,
+      this.admission,
+      this.graduation,
+      this.speciality});
 
-  factory Group.fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
+  static Group fromJson(Map<String, dynamic> json) => _$GroupFromJson(json);
   Map<String, dynamic> toJson() => _$GroupToJson(this);
 }
