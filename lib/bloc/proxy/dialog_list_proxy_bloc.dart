@@ -7,13 +7,7 @@ import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
-import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
-
-class StartNotifyOnPerson {
-  Person trackedPerson;
-  StartNotifyOnPerson({@required this.trackedPerson});
-}
 
 class DialogListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   /*

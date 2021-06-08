@@ -1,5 +1,3 @@
-import 'dart:ffi';
-
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/service/notification/notifier.dart';

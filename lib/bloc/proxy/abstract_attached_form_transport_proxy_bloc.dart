@@ -9,6 +9,12 @@ import 'package:lk_client/state/attached_form_state.dart';
 import 'package:lk_client/state/producing_state.dart';
 import 'package:lk_client/store/global/attached_bloc_provider.dart';
 
+/*
+ * Прокси блок используется для инициализации транспортного блока для формы
+ * он передается в виджет формы и инициализирует либо находит в провайдере транспортный блок 
+ * Порождаемые подклассы должны реализовывть метод создания транспортного блока 
+ * типа Abstract attached transport bloc
+ */
 abstract class AbstractAttachedFormTransportProxyBloc<T, C>
     extends AbstractBloc<dynamic, dynamic> {
   Stream<dynamic> get attachedFormStateStream => this.stateContoller.stream;

@@ -1,8 +1,6 @@
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:lk_client/service/notification/notification_select_handler.dart';
 
 class Notifier {
   //final NotificationSelectHandler handler;

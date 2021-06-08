@@ -148,7 +148,7 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                             : messageList.length,
                         itemBuilder: (BuildContext context, int index) {
                           if (index >= messageList.length) {
-                            ListLoadingBottomIndicator();
+                            return ListLoadingBottomIndicator();
                           }
 
                           PrivateMessage msg = messageList[index];
@@ -171,7 +171,7 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                                             LoadPrivateMessageMaterialAttachment(
                                                 privateMessage: msg)),
                                     proxyBloc:
-                                        TeachingMaterialsDownloaderProxyBloc(
+                                        PrivateMessageDownloaderProxyBloc(
                                             fileDownloaderBlocProvider: this
                                                 ._fileDownloaderBlocProvider,
                                             fileLocalManager:

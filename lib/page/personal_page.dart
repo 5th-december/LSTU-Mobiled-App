@@ -42,11 +42,14 @@ class _PersonalPageState extends State<PersonalPage> {
     if (person.sex != null) {
       personProperties.add(Row(
         children: [
-          Icon(Icons.face_outlined, size: 18.0),
+          Icon(Icons.face_rounded, size: 22.0),
           Padding(
             padding: EdgeInsets.only(left: 12.0),
             child: Container(
-              child: Text('Пол: ${person.sex}'),
+              child: Text(
+                'Пол: ${person.sex}',
+                style: Theme.of(context).textTheme.subtitle1,
+              ),
             ),
           )
         ],
@@ -60,12 +63,14 @@ class _PersonalPageState extends State<PersonalPage> {
           padding: EdgeInsets.only(top: 10.0),
           child: Row(
             children: [
-              Icon(Icons.cake_outlined, size: 18.0),
+              Icon(Icons.cake_rounded, size: 22.0),
               Padding(
                 padding: EdgeInsets.only(left: 12.0),
                 child: Container(
                   child: Text(
-                      'Дата рождения: ${formatter.format(person.birthday)}'),
+                    'Дата рождения: ${formatter.format(person.birthday)}',
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
                 ),
               ),
             ],
@@ -77,12 +82,15 @@ class _PersonalPageState extends State<PersonalPage> {
           padding: EdgeInsets.only(top: 10.0),
           child: Row(
             children: [
-              Icon(Icons.call_outlined, size: 18.0),
+              Icon(Icons.call_rounded, size: 22.0),
               Padding(
                 padding: EdgeInsets.only(left: 12.0),
                 child: GestureDetector(
                   child: Container(
-                    child: Text('Телефон: ${person.phone}'),
+                    child: Text(
+                      'Телефон: ${person.phone}',
+                      style: Theme.of(context).textTheme.subtitle1,
+                    ),
                   ),
                   onTap: () async {
                     var phoneCallerUri = 'tel:${person.phone}';
@@ -103,12 +111,15 @@ class _PersonalPageState extends State<PersonalPage> {
         padding: EdgeInsets.only(top: 10.0),
         child: Row(
           children: [
-            Icon(Icons.email_outlined, size: 18.0),
+            Icon(Icons.email_rounded, size: 22.0),
             Padding(
               padding: EdgeInsets.only(left: 12.0),
               child: GestureDetector(
                 child: Container(
-                  child: Text('E-mail: ${person.email}'),
+                  child: Text(
+                    'E-mail: ${person.email}',
+                    style: Theme.of(context).textTheme.subtitle1,
+                  ),
                 ),
                 onTap: () async {
                   var emailUri = 'mailto:${person.email}';
@@ -130,7 +141,7 @@ class _PersonalPageState extends State<PersonalPage> {
         padding: EdgeInsets.only(top: 10.0),
         child: Row(
           children: [
-            Icon(Icons.send_outlined, size: 18.0),
+            Icon(Icons.send_outlined, size: 22.0),
             Padding(
               padding: EdgeInsets.only(left: 12.0),
               child: Container(
@@ -184,9 +195,8 @@ class _PersonalPageState extends State<PersonalPage> {
                                     '${loadedPerson.surname} ${loadedPerson.name} ${loadedPerson.patronymic}',
                                     maxLines: 3,
                                     overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                        fontSize: 18.0,
-                                        fontWeight: FontWeight.bold),
+                                    style:
+                                        Theme.of(context).textTheme.headline3,
                                   ),
                                   Padding(
                                       padding: EdgeInsets.only(top: 8.0),
@@ -216,14 +226,14 @@ class _PersonalPageState extends State<PersonalPage> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.only(top: 10.0),
+                    padding: EdgeInsets.only(top: 18.0),
                     child: Column(
                       children: this._constructPersonProperties(loadedPerson),
                     ),
                   ),
                   Divider(),
                   Container(
-                    padding: EdgeInsets.only(top: 10),
+                    padding: EdgeInsets.only(top: 18.0),
                     child: Column(
                       children: [
                         Row(

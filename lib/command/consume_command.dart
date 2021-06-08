@@ -1,6 +1,5 @@
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
-import 'package:lk_client/model/discipline/teaching_material.dart';
 import 'package:lk_client/model/discipline/work_answer_attachment.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
@@ -195,4 +194,10 @@ class LoadTasksListCommand {
       {@required this.discipline,
       @required this.education,
       @required this.semester});
+}
+
+// Команды старта отслеживания уведолмений из брокера
+class StartNotifyOnPerson {
+  Person trackedPerson;
+  StartNotifyOnPerson({@required this.trackedPerson});
 }

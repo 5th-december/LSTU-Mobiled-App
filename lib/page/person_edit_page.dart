@@ -10,6 +10,7 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/model/person/personal_data.dart';
 import 'package:lk_client/state/producing_state.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
+import 'package:lk_client/widget/chunk/form/semitransparent_text_form_field.dart';
 
 class PersonEditPage extends StatefulWidget {
   final Person person;
@@ -76,40 +77,43 @@ class _PersonEditPageState extends State<PersonEditPage> {
                           key: _editFormKey,
                           child: Column(
                             children: [
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Телефон',
-                                  errorText: state
-                                          is ProducingInvalidState<PersonalData>
-                                      ? state.errorBox
-                                          .getFirstForField('phone')
-                                          ?.message
-                                      : null,
-                                ),
+                              SemitransparentTextFormField(
+                                hintText: 'Телефон',
+                                icon: Icons.phone_rounded,
+                                errorText:
+                                    state is ProducingInvalidState<PersonalData>
+                                        ? state.errorBox
+                                            .getFirstForField('phone')
+                                            ?.message
+                                        : null,
                                 controller: phoneEditingController,
                               ),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'E-mail',
-                                  errorText: state
-                                          is ProducingInvalidState<PersonalData>
-                                      ? state.errorBox
-                                          .getFirstForField('email')
-                                          ?.message
-                                      : null,
-                                ),
+                              SizedBox(
+                                height: 8.0,
+                              ),
+                              SemitransparentTextFormField(
+                                errorText:
+                                    state is ProducingInvalidState<PersonalData>
+                                        ? state.errorBox
+                                            .getFirstForField('email')
+                                            ?.message
+                                        : null,
+                                hintText: 'E-mail',
+                                icon: Icons.email_rounded,
                                 controller: emailEditionController,
                               ),
-                              TextFormField(
-                                decoration: InputDecoration(
-                                  labelText: 'Мессенджер',
-                                  errorText: state
-                                          is ProducingInvalidState<PersonalData>
-                                      ? state.errorBox
-                                          .getFirstForField('messenger')
-                                          ?.message
-                                      : null,
-                                ),
+                              SizedBox(
+                                height: 8.0,
+                              ),
+                              SemitransparentTextFormField(
+                                hintText: 'Мессенджер',
+                                errorText:
+                                    state is ProducingInvalidState<PersonalData>
+                                        ? state.errorBox
+                                            .getFirstForField('messenger')
+                                            ?.message
+                                        : null,
+                                icon: Icons.message_rounded,
                                 controller: messengerEditionController,
                               ),
                               Padding(
