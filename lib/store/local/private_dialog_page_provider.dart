@@ -1,12 +1,9 @@
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/attached/attached_private_message_form_bloc.dart';
 import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/attached/private_message_form_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
-import 'package:lk_client/bloc/proxy/private_message_list_proxy_bloc.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
-import 'package:lk_client/store/global/mbc_bloc_provider.dart';
 import 'package:lk_client/store/global/service_provider.dart';
 
 class PrivateDialogPageProvider extends StatefulWidget {
@@ -40,7 +37,7 @@ class PrivateDialogPageInherited extends InheritedWidget {
 class PrivateDialogPageProviderState extends State<PrivateDialogPageProvider> {
   PrivateMessageListBloc privateMessageListBloc;
 
-  AttachedPrivateMessageFormBloc attachedPrivateMessageFormBloc;
+  //AttachedPrivateMessageFormBloc attachedPrivateMessageFormBloc;
 
   @override
   void didChangeDependencies() {
@@ -56,10 +53,8 @@ class PrivateDialogPageProviderState extends State<PrivateDialogPageProvider> {
           PrivateMessageListBloc(privateChatMessagesListLoadingBloc);
     }
 
-    if (this.attachedPrivateMessageFormBloc == null) {
-      /**
-       * Блок транспорта файлов для отправки со
-       */
+    /*if (this.attachedPrivateMessageFormBloc == null) {
+
       final privateMessageSendDocumentTransferBloc =
           PrivateMessageSendDocumentTransferBloc(
               fileTransferService: appServiceProvider.fileTransferService);
@@ -71,7 +66,7 @@ class PrivateDialogPageProviderState extends State<PrivateDialogPageProvider> {
           privateMessageDocumentTransferBloc:
               privateMessageSendDocumentTransferBloc,
           privateMessageFormBloc: privateMessageFormBloc);
-    }
+    }*/
   }
 
   @override

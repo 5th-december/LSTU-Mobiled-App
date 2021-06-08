@@ -5,16 +5,14 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
-import 'package:lk_client/model/mb_objects/mb_private_message.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
-import 'package:lk_client/state/notification_prefs_state.dart';
 
 class MbCChatUpdateConsumerBloc
     extends AbstractBloc<NotificationConsumeState, NotificationConsumeEvent> {
-  final _exchangeType = ExchangeType.DIRECT;
+  final _exchangeType = ExchangeType.TOPIC;
 
   String _exchangeName;
 
@@ -70,7 +68,7 @@ class MbCChatUpdateConsumerBloc
       final command = _event.command;
 
       final String routingKey =
-          "${command.watchedDialog.id}.${command.readerCompanion.id}";
+          "${command.watchedDialog.id}.${command.person.id}";
 
       final bindingData = AmqpBindingData(
           exchangeName: this._exchangeName,
@@ -83,8 +81,7 @@ class MbCChatUpdateConsumerBloc
 
         final dialogReadStreamTransformer =
             StreamTransformer.fromHandlers(handleData: (data, EventSink sink) {
-          final dialogData = MbPrivateMessage.fromJson(data);
-          final updatedMessage = dialogData.getPrivateMessage();
+          final updatedMessage = PrivateMessage.fromJson(data);
 
           if (this.currentState
               is NotificationReadyState<List<PrivateMessage>>) {

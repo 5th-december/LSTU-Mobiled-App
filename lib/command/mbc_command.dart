@@ -5,9 +5,9 @@ import 'package:lk_client/model/person/person.dart';
 
 class MbCStartConsumeDialogUpdates {
   Dialog watchedDialog;
-  Person readerCompanion;
+  Person person;
   MbCStartConsumeDialogUpdates(
-      {@required this.watchedDialog, @required this.readerCompanion});
+      {@required this.watchedDialog, @required this.person});
 }
 
 class MbCStartConsumeDialogListUpdates {
@@ -22,5 +22,6 @@ class MbCStartConsumeDiscussionMessages {
 
 class MbCStartConsumeDialogMessages {
   final Dialog dialog;
-  MbCStartConsumeDialogMessages({@required this.dialog});
+  final Person person;
+  MbCStartConsumeDialogMessages({@required this.dialog, @required this.person});
 }

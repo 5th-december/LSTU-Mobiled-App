@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:lk_client/bloc/attached/abstract_attached_form_bloc.dart';
+import 'package:lk_client/bloc/attached/abstract_attached_transport_bloc.dart';
 import 'package:lk_client/bloc/attached/file_transfer_bloc.dart';
 import 'package:lk_client/bloc/attached/private_message_form_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
@@ -11,13 +11,13 @@ import 'package:lk_client/model/util/local_filesystem_object.dart';
 import 'package:lk_client/state/file_management_state.dart';
 import 'package:lk_client/state/producing_state.dart';
 
-class AttachedPrivateMessageFormBloc extends AbstractAttachedFormBloc<
+class AttachedPrivateMessageTransportBloc extends AbstractAttachedTransportBloc<
     PrivateMessage, PrivateMessage, SendNewPrivateMessage> {
   final PrivateMessageFormBloc privateMessageFormBloc;
   final PrivateMessageSendDocumentTransferBloc
       privateMessageDocumentTransferBloc;
 
-  AttachedPrivateMessageFormBloc(
+  AttachedPrivateMessageTransportBloc(
       {@required this.privateMessageDocumentTransferBloc,
       @required this.privateMessageFormBloc});
 

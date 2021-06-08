@@ -10,7 +10,7 @@ import 'package:lk_client/state/producing_state.dart';
  * TQ - объект данных формы
  * TC - объект команды отправки формы
  */
-abstract class AbstractAttachedFormBloc<TQ, TR, TC>
+abstract class AbstractAttachedTransportBloc<TQ, TR, TC>
     extends AbstractBloc<ProducingState, ProducingEvent> {
   /*
    * Прозводный класс должен сам определять блоки для отправки 
@@ -28,10 +28,8 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
       .stream
       .where((event) => event is ProducingState<dynamic>);
 
-  Stream<ProducingEvent> get _attachedFormInitEventStream => this
-      .eventController
-      .stream
-      .where((event) => event is ProducerInitEvent<AttachedFileContent<TQ>>);
+  Stream<ProducingEvent> get _attachedFormInitEventStream =>
+      this.eventController.stream.where((event) => event is ProducerInitEvent);
 
   Stream<ProducingEvent> get _attachedFormProduceEventStream =>
       this.eventController.stream.where((event) =>
@@ -48,26 +46,27 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
   Stream<FileManagementState> sendMultipartData(
       LocalFilesystemObject loadingFile, TR argument);
 
-  AbstractAttachedFormBloc() {
+  AbstractAttachedTransportBloc() {
     /*
     * Событие первичной инициализация формы
     */
     this._attachedFormInitEventStream.listen((ProducingEvent event) {
-      final _event = event as ProducerInitEvent<AttachedFileContent<TQ>>;
-      // Первичная инициализация данных формы
-      this.updateState(ProducingInitState<TR>());
+      /**
+       * Первичная инициализация данных формы
+       */
+      this.updateState(ProducingInitState<TQ>());
     });
 
     /*
     * Событие отправки данных формы
     */
     this._attachedFormProduceEventStream.listen((ProducingEvent event) {
-      /**
+      /*
        * Отправка доступна, если в текущий момент нет других отправляемых сообщений
-       */
+       *
       if (this.currentState is ProducingLoadingState) {
         return;
-      }
+      }*/
       final _event = event as ProduceResourceEvent<AttachedFileContent<TQ>, TC>;
 
       /*
@@ -92,10 +91,15 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
 
       this.sendFormData(formData, command).listen((tEvent) {
         if (tEvent is ProducingInvalidState<TQ>) {
-          // Форма невалидна
+          /**
+           * В случае, если введенные в форме данные не валидны
+           * Такое состояние может быть отправлено из апи
+           */
           this.updateState(ProducingInvalidState<TQ>(tEvent.errorBox));
         } else if (tEvent is ProducingErrorState<TQ>) {
-          // Ошибка отправки формы
+          /**
+           * Ошибка отправки формы
+           */
           this.updateState(ProducingErrorState<TQ>(tEvent.error));
         } else if (tEvent is ProducingReadyState<TQ, TR>) {
           /*
@@ -118,20 +122,27 @@ abstract class AbstractAttachedFormBloc<TQ, TR, TC>
           /*
            * Вызов переопределенного метода отправки медиа, добавление листенера 
            */
-          this
-              .sendMultipartData(sendingFile, fileRequestResponse)
-              .listen((fEvent) {
+          this.sendMultipartData(sendingFile, fileRequestResponse).listen(
+              (fEvent) {
             if (fEvent is FileOperationErrorState) {
-              // При ошибке отправки медиа
+              /**
+                * Ошибка отправки медиа данных
+                */
               this.updateState(
                   ProducingErrorState<LocalFilesystemObject>(fEvent.error));
             } else if (fEvent is FileUploadReadyState) {
-              // Успешная отправка медиа
+              /**
+                 * Успешная отправка медиа данных
+                 */
               this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
                   data: _event.resourse, response: tEvent.response));
             }
+          }, onError: (e) {
+            this.updateState(ProducingErrorState<LocalFilesystemObject>(e));
           });
         }
+      }, onError: (e) {
+        this.updateState(ProducingErrorState<TQ>(e));
       });
     });
   }

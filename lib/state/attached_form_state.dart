@@ -1,17 +1,32 @@
-import 'package:flutter/foundation.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/util/local_filesystem_object.dart';
 
-abstract class AttachedInputState {}
-
-class NoAttachedDataState extends AttachedInputState {}
-
-class FileAttachedState extends AttachedInputState {
+abstract class AttachedFormInputState<T> {
   final LocalFilesystemObject fileAttachment;
-  FileAttachedState({@required this.fileAttachment});
+  final ExternalLink attachedLink;
+  final T formTypeInputObject;
+  AttachedFormInputState(
+      {this.attachedLink, this.fileAttachment, this.formTypeInputObject});
 }
 
-class LinkAttachedState extends AttachedInputState {
-  final ExternalLink attachedLink;
-  LinkAttachedState({@required this.attachedLink});
+class WaitUserInputState<T> extends AttachedFormInputState<T> {
+  WaitUserInputState(
+      {LocalFilesystemObject fileAttachment,
+      ExternalLink attachedLink,
+      T formTypeInputObject})
+      : super(
+            attachedLink: attachedLink,
+            fileAttachment: fileAttachment,
+            formTypeInputObject: formTypeInputObject);
+}
+
+class ObjectReadyFormInputState<T> extends AttachedFormInputState<T> {
+  ObjectReadyFormInputState(
+      {LocalFilesystemObject fileAttachment,
+      ExternalLink attachedLink,
+      T formTypeInputObject})
+      : super(
+            attachedLink: attachedLink,
+            fileAttachment: fileAttachment,
+            formTypeInputObject: formTypeInputObject);
 }

@@ -68,6 +68,78 @@ class TeachingMaterialsDownloaderProxyBloc
   }
 }
 
+class StudentTaskAnswerDownloaderProxyBloc
+    extends FileDownloaderProxyBloc<StudentTaskAnswerDocumentDownloaderBloc> {
+  FileLocalManager fileLocalManager;
+
+  Notifier appNotifier;
+
+  FileTransferService fileTransferService;
+
+  StudentTaskAnswerDownloaderProxyBloc(
+      {@required this.appNotifier,
+      @required this.fileLocalManager,
+      @required this.fileTransferService,
+      @required FileDownloaderBlocProvider fileDownloaderBlocProvider})
+      : super(fileDownloaderBlocProvider: fileDownloaderBlocProvider);
+
+  @override
+  StudentTaskAnswerDocumentDownloaderBloc buildDownloaderInstance() {
+    return StudentTaskAnswerDocumentDownloaderBloc(
+        fileLocalManager: this.fileLocalManager,
+        appNotifier: this.appNotifier,
+        fileTransferService: this.fileTransferService);
+  }
+}
+
+class PrivateMessageDownloaderProxyBloc
+    extends FileDownloaderProxyBloc<PrivateMessageDocumentDownloaderBloc> {
+  FileLocalManager fileLocalManager;
+
+  Notifier appNotifier;
+
+  FileTransferService fileTransferService;
+
+  PrivateMessageDownloaderProxyBloc(
+      {@required this.appNotifier,
+      @required this.fileLocalManager,
+      @required this.fileTransferService,
+      @required FileDownloaderBlocProvider fileDownloaderBlocProvider})
+      : super(fileDownloaderBlocProvider: fileDownloaderBlocProvider);
+
+  @override
+  PrivateMessageDocumentDownloaderBloc buildDownloaderInstance() {
+    return PrivateMessageDocumentDownloaderBloc(
+        appNotifier: this.appNotifier,
+        fileLocalManager: this.fileLocalManager,
+        fileTransferService: this.fileTransferService);
+  }
+}
+
+class DiscussionMessageDownloaderProxyBloc
+    extends FileDownloaderProxyBloc<DiscussionMessageDocumentDownloaderBloc> {
+  FileLocalManager fileLocalManager;
+
+  Notifier appNotifier;
+
+  FileTransferService fileTransferService;
+
+  DiscussionMessageDownloaderProxyBloc(
+      {@required this.appNotifier,
+      @required this.fileLocalManager,
+      @required this.fileTransferService,
+      @required FileDownloaderBlocProvider fileDownloaderBlocProvider})
+      : super(fileDownloaderBlocProvider: fileDownloaderBlocProvider);
+
+  @override
+  DiscussionMessageDocumentDownloaderBloc buildDownloaderInstance() {
+    return DiscussionMessageDocumentDownloaderBloc(
+        appNotifier: this.appNotifier,
+        fileTransferService: this.fileTransferService,
+        fileLocalManager: this.fileLocalManager);
+  }
+}
+
 /* 
  * Предоставляет классу виджета выполняемый или сохраненный файл, а
  * если таких не найдено, то инициализирует в подклассе новый объект блока загрузки 
@@ -111,17 +183,14 @@ abstract class FileDownloaderProxyBloc<T extends AbstractFileDownloaderBloc>
 
       if (progressFileDownloader != null && progressFileDownloader is T) {
         this._fileDownloaderBloc = progressFileDownloader;
-        this
-            ._fileDownloaderBloc
-            .stateContoller
-            .stream
-            .listen((event) => this.stateContoller.sink.add(event));
+        this._fileDownloaderBloc.binaryTransferStateStream.listen(
+            (event) => this.stateContoller.sink.add(event),
+            onError: (e) => this.stateContoller.sink.add(e));
       } else {
         this._fileDownloaderBloc = this.buildDownloaderInstance();
-        this
-            ._fileDownloaderBloc
-            .binaryTransferStateStream
-            .listen((event) => this.stateContoller.sink.add(event));
+        this._fileDownloaderBloc.binaryTransferStateStream.listen(
+            (event) => this.stateContoller.sink.add(event),
+            onError: (e) => this.stateContoller.sink.add(e));
         this
             ._fileDownloaderBloc
             .eventController

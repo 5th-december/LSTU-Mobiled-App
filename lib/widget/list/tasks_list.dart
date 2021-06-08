@@ -17,20 +17,18 @@ class TasksList extends StatefulWidget {
   final Education education;
   final Semester semester;
   final Discipline discipline;
-  TasksListLoaderBloc _tasksListLoaderBloc;
+  final TasksListLoaderBloc tasksListLoaderBloc;
 
   TasksList(
       {Key key,
       @required this.discipline,
       @required this.education,
       @required this.semester,
-      TasksListLoaderBloc tasksListLoaderBloc})
-      : super(key: key) {
-    this._tasksListLoaderBloc = tasksListLoaderBloc;
-  }
+      @required this.tasksListLoaderBloc})
+      : super(key: key);
 
   @override
-  _TasksListState createState() => _TasksListState(this._tasksListLoaderBloc);
+  _TasksListState createState() => _TasksListState(this.tasksListLoaderBloc);
 }
 
 class _TasksListState extends State<TasksList> {
@@ -86,7 +84,10 @@ class _TasksListState extends State<TasksList> {
                       itemBuilder: (BuildContext context, int index) {
                         StudentWork sw = loadedStudentWorks[index];
                         return Container(
-                            child: StudentTaskListItem(studentWork: sw));
+                            child: StudentTaskListItem(
+                          studentWork: sw,
+                          education: widget.education,
+                        ));
                       }));
             }
           }

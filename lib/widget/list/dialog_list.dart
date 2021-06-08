@@ -134,6 +134,7 @@ class _DialogListState extends State<DialogList> {
                                       builder: (BuildContext context) {
                                     return PrivateDialogPage(
                                         companion: companion,
+                                        person: widget.person,
                                         dialog: loadedDialogs[index]);
                                   }));
                                 },

@@ -8,9 +8,14 @@ import 'package:lk_client/model/validatable.dart';
 part 'discussion_message.g.dart';
 
 @JsonSerializable()
-class DiscussionMessage implements Validatable
-{
+class DiscussionMessage implements Validatable {
   final String id;
+
+  final String group;
+
+  final String discipline;
+
+  final String semester;
 
   final Person sender;
 
@@ -26,21 +31,33 @@ class DiscussionMessage implements Validatable
   @override
   ValidationErrorBox validate() {
     List<ValidationError> errors = [];
-    if(null == this.msg || '' == this.msg) {
-      errors.add(ValidationError(path: 'messageText', 
-        message: 'Нельзя отправить пустое сообщение'));
+    if (null == this.msg || '' == this.msg) {
+      errors.add(ValidationError(
+          path: 'messageText', message: 'Нельзя отправить пустое сообщение'));
     }
 
-    if(2048 < this.msg.length) {
-      errors.add(ValidationError(path: 'messageText', 
-        message: 'Длина сообщения превышает максимально допустимую 2048 символов'));
+    if (2048 < this.msg.length) {
+      errors.add(ValidationError(
+          path: 'messageText',
+          message:
+              'Длина сообщения превышает максимально допустимую 2048 символов'));
     }
 
     return ValidationErrorBox(errors);
   }
 
-  DiscussionMessage({this.id, this.sender, this.created, this.msg, this.attachments, this.externalLinks});
+  DiscussionMessage(
+      {this.id,
+      this.sender,
+      this.created,
+      this.msg,
+      this.attachments,
+      this.externalLinks,
+      this.discipline,
+      this.semester,
+      this.group});
 
-  static DiscussionMessage fromJson(Map<String, dynamic> json) => _$DiscussionMessageFromJson(json);
+  static DiscussionMessage fromJson(Map<String, dynamic> json) =>
+      _$DiscussionMessageFromJson(json);
   Map<String, dynamic> toJson() => _$DiscussionMessageToJson(this);
 }

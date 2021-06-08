@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/model/discipline/student_work.dart';
+import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/page/task_response_page.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
+import 'package:lk_client/widget/list/tasks_answer_list.dart';
 
 class StudentTaskListItem extends StatelessWidget {
   final StudentWork studentWork;
+  final Education education;
 
-  StudentTaskListItem({@required this.studentWork});
+  StudentTaskListItem({@required this.studentWork, @required this.education});
 
   @override
   Widget build(BuildContext context) {
@@ -71,7 +75,14 @@ class StudentTaskListItem extends StatelessWidget {
             children: () {
               List<Widget> actionButtons = [
                 ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return TaskResponsePage(
+                          studentWork: this.studentWork,
+                          education: this.education);
+                    }));
+                  },
                   child: Text('Добавить ответ'),
                 )
               ];
@@ -82,7 +93,20 @@ class StudentTaskListItem extends StatelessWidget {
                   width: 4.0,
                 ));
                 actionButtons.add(ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return Scaffold(
+                        appBar: AppBar(
+                          title: Text('Предоставленные ответы'),
+                        ),
+                        body: TasksAnswerList(
+                          answerAttachements:
+                              this.studentWork.answer.answerAttachments,
+                        ),
+                      );
+                    }));
+                  },
                   child: Text('Просмотр ответов'),
                 ));
               }

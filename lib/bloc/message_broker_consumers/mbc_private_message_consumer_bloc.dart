@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
-import 'package:lk_client/model/mb_objects/mb_private_message.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
@@ -17,7 +16,7 @@ class MbCPrivateMessageConsumerBloc
   /*
    * Тип exchange
    */
-  final _exchangeType = ExchangeType.DIRECT;
+  final _exchangeType = ExchangeType.TOPIC;
 
   /*
    *  Наименование exchange
@@ -78,7 +77,7 @@ class MbCPrivateMessageConsumerBloc
       /*
        * AMQP ключ для сообщений - id диалога
        */
-      final String routingKey = command.dialog.id;
+      final String routingKey = '${command.dialog.id}.${command.person.id}';
 
       final bindingData = AmqpBindingData(
           exchangeName: this._exchangeName,
@@ -94,8 +93,7 @@ class MbCPrivateMessageConsumerBloc
         StreamTransformer privateMessageTransformer =
             StreamTransformer.fromHandlers(
                 handleData: (data, EventSink sink) async {
-          final messageData = MbPrivateMessage.fromJson(data);
-          final privateMessage = messageData.getPrivateMessage();
+          final privateMessage = PrivateMessage.fromJson(data);
 
           if (this.currentState
               is NotificationReadyState<List<PrivateMessage>>) {

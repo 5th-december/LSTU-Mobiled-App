@@ -1,16 +1,45 @@
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/bloc/attached/attached_form_bloc.dart';
+import 'package:lk_client/bloc/attached/single_type_attachment_form_bloc.dart';
+import 'package:lk_client/bloc/proxy/abstract_attached_form_transport_proxy_bloc.dart';
+import 'package:lk_client/event/attached_form_event.dart';
+import 'package:lk_client/state/attached_form_state.dart';
+import 'package:lk_client/widget/form/attached_private_messaging_form.dart';
 
-class StudentTaskResponse extends StatefulWidget {
-  StudentTaskResponse({Key key}) : super(key: key);
+class StudentTaskResponseForm extends StatefulWidget {
+  final SingleTypeAttachementFormBloc formBloc;
+  final WorkAnswerAttachmentFormControllerProvider controllerProvider;
+  final AbstractAttachedFormTransportProxyBloc transportProxyBloc;
+
+  StudentTaskResponseForm(
+      {Key key,
+      @required this.formBloc,
+      @required this.controllerProvider,
+      @required this.transportProxyBloc})
+      : super(key: key);
 
   @override
-  State<StudentTaskResponse> createState() => StatefulTaskResponseState();
+  State<StudentTaskResponseForm> createState() =>
+      _StatefulTaskResponseFormState(
+          formBloc: this.formBloc,
+          controllerProvider: this.controllerProvider,
+          transportProxyBloc: this.transportProxyBloc);
 }
 
-class StatefulTaskResponseState extends State<StudentTaskResponse> {
-  AttachedFormBloc attachedFormBloc;
+class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
+  final SingleTypeAttachementFormBloc formBloc;
+
+  final WorkAnswerAttachmentFormControllerProvider controllerProvider;
+
+  final AbstractAttachedFormTransportProxyBloc transportProxyBloc;
+
+  _StatefulTaskResponseFormState(
+      {@required this.formBloc,
+      @required this.controllerProvider,
+      @required this.transportProxyBloc}) {
+    this.formBloc.eventController.sink.add(InitAttachedFormInputEvent());
+  }
 
   Widget getAttachmentTypeSelection() {
     return Row(
@@ -19,8 +48,16 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
         Column(
           children: [
             ElevatedButton(
-                onPressed: () => {},
-                child: Icon(Icons.download_rounded, size: 36.0),
+                onPressed: () async {
+                  final files =
+                      await FilePicker.platform.pickFiles(allowMultiple: false);
+
+                  if (files != null) {
+                    this.formBloc.eventController.sink.add(
+                        AddFileAttachmentEvent(attachmentPath: files.paths[0]));
+                  }
+                },
+                child: Icon(Icons.description_rounded, size: 36.0),
                 style: ElevatedButton.styleFrom(
                     primary: Color.fromRGBO(139, 62, 252, 1.0),
                     shape: CircleBorder(),
@@ -31,8 +68,12 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
         Column(
           children: [
             ElevatedButton(
-                onPressed: () => {},
-                child: Icon(Icons.download_rounded, size: 36.0),
+                onPressed: () {
+                  setState(() {
+                    this._showLinkAttachmentForm = true;
+                  });
+                },
+                child: Icon(Icons.public_rounded, size: 36.0),
                 style: ElevatedButton.styleFrom(
                     primary: Color.fromRGBO(139, 62, 252, 1.0),
                     shape: CircleBorder(),
@@ -44,14 +85,7 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
     );
   }
 
-  Widget getRemoveButtonWidget() {
-    return ElevatedButton(
-        child: Icon(Icons.close_rounded, size: 12.0),
-        style: ElevatedButton.styleFrom(
-            primary: Color.fromRGBO(180, 180, 180, 1.0),
-            shape: CircleBorder(),
-            padding: EdgeInsets.all(12.0)));
-  }
+  bool _showLinkAttachmentForm = false;
 
   Widget getExternalLinkAttachmentForm() {
     GlobalKey key = GlobalKey();
@@ -59,7 +93,7 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
 
     return Form(
       key: key,
-      child: Row(
+      child: Column(
         children: [
           TextFormField(
             controller: externalLinkTextController,
@@ -67,7 +101,17 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
                 fillColor: Color.fromRGBO(212, 212, 212, 1.0),
                 hintText: 'Ссылка на внешний ресурс'),
           ),
-          getRemoveButtonWidget()
+          ElevatedButton(
+              onPressed: () {
+                this.formBloc.eventController.sink.add(AddExternalLinkEvent(
+                    extenalLinkContent: externalLinkTextController.text,
+                    externalLinkText: externalLinkTextController.text));
+
+                setState(() {
+                  this._showLinkAttachmentForm = false;
+                });
+              },
+              child: Text('Добавить'))
         ],
       ),
     );
@@ -76,20 +120,69 @@ class StatefulTaskResponseState extends State<StudentTaskResponse> {
   @override
   Widget build(BuildContext context) {
     GlobalKey formKey = GlobalKey();
-    TextEditingController attachmentNameEditingController =
-        TextEditingController();
-
     return Form(
         key: formKey,
         child: Column(
           children: [
             TextFormField(
-              controller: attachmentNameEditingController,
+              controller:
+                  this.controllerProvider.responseNameTextEditionController,
               decoration: InputDecoration(
                 fillColor: Color.fromRGBO(212, 212, 212, 1.0),
                 hintText: 'Название ответа',
               ),
-            )
+            ),
+            StreamBuilder(
+                stream: this.formBloc.attachedInputStateStream,
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  if (snapshot.hasData) {
+                    final state = snapshot.data as AttachedFormInputState;
+
+                    if (state.attachedLink == null &&
+                        state.fileAttachment == null) {
+                      if (this._showLinkAttachmentForm) {
+                        return this.getExternalLinkAttachmentForm();
+                      } else {
+                        return getAttachmentTypeSelection();
+                      }
+                    }
+
+                    if (state.fileAttachment != null) {
+                      return Row(
+                        children: [
+                          Icon(Icons.description_rounded, size: 36.0),
+                          IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () => this
+                                  .formBloc
+                                  .eventController
+                                  .sink
+                                  .add(RemoveFileAttachmentEvent()))
+                        ],
+                      );
+                    }
+
+                    if (state.attachedLink != null) {
+                      return Row(
+                        children: [
+                          Icon(
+                            Icons.public_rounded,
+                            size: 36.0,
+                          ),
+                          IconButton(
+                              icon: Icon(Icons.close),
+                              onPressed: () => this
+                                  .formBloc
+                                  .eventController
+                                  .sink
+                                  .add(RemoveExternalLinkEvent()))
+                        ],
+                      );
+                    }
+                  }
+
+                  return SizedBox.shrink();
+                })
           ],
         ));
   }

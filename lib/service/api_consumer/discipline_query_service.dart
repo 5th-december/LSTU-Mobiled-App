@@ -5,6 +5,7 @@ import 'package:lk_client/error_handler/component_error_handler.dart';
 import 'package:lk_client/model/authentication/api_key.dart';
 import 'package:lk_client/model/discipline/student_work.dart';
 import 'package:lk_client/model/discipline/teaching_material.dart';
+import 'package:lk_client/model/discipline/work_answer_attachment.dart';
 import 'package:lk_client/model/education/timetable.dart';
 import 'package:lk_client/model/education/timetable_item.dart';
 import 'package:lk_client/model/listed_response.dart';
@@ -134,5 +135,26 @@ class DisciplineQueryService {
     } on Exception catch (e) {
       yield ConsumingErrorState<ListedResponse<StudentWork>>(error: e);
     }
+  }
+
+  Future<WorkAnswerAttachment> sendNewWorkAnswerAttachment(
+      WorkAnswerAttachment workAnswerAttachment,
+      String educationId,
+      String workId) async {
+    String apiToken = await this.authenticationExtractor.getAuthenticationData;
+
+    HttpResponse response = await this.apiEndpointConsumer.post(
+        '/api/v1/student/tasks',
+        {'edu': educationId, 'work': workId},
+        workAnswerAttachment.toJson(),
+        apiToken);
+
+    if (response.status == 201) {
+      WorkAnswerAttachment attachment =
+          WorkAnswerAttachment.fromJson(response.body);
+      return attachment;
+    }
+
+    throw this.apiErrorHandler.apply(response.body);
   }
 }

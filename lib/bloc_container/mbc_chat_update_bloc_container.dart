@@ -58,7 +58,7 @@ class MbCChatUpdateBlocContainer {
         amqpConfig: amqpConfig, amqpService: amqpService);
     bloc.eventController.sink.add(StartNotificationConsumeEvent(
         command: MbCStartConsumeDialogUpdates(
-            watchedDialog: dialog, readerCompanion: person)));
+            watchedDialog: dialog, person: person)));
     await for (var state in bloc.dialogReadNotificationStateStream) {
       if (state is NotificationReadyState<List<PrivateMessage>>) {
         return bloc;

@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:lk_client/model/data_transfer/attachment.dart';
-import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/person/person.dart';
 
 class MessageBubbleWidget extends StatelessWidget {
   final String messageText;
-  final Attachment messageAttachment;
-  final ExternalLink messageExternalLink;
+  final Widget attachmentWidget;
   final bool sentByMe;
   final Person sender;
   final DateTime sentTime;
@@ -19,8 +16,7 @@ class MessageBubbleWidget extends StatelessWidget {
       @required this.sentByMe,
       @required this.sentTime,
       this.isRead,
-      this.messageAttachment,
-      this.messageExternalLink,
+      this.attachmentWidget,
       this.sender})
       : super(key: key);
 
@@ -30,8 +26,9 @@ class MessageBubbleWidget extends StatelessWidget {
         mainAxisAlignment:
             this.sentByMe ? MainAxisAlignment.end : MainAxisAlignment.start,
         textDirection: this.sentByMe ? TextDirection.ltr : TextDirection.rtl,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          !(this.isRead && this.sentByMe)
+          !this.isRead && !this.sentByMe
               ? Container(
                   height: 10.0,
                   width: 10.0,
@@ -47,8 +44,8 @@ class MessageBubbleWidget extends StatelessWidget {
               decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(20),
                   color: this.sentByMe
-                      ? Color.fromRGBO(225, 193, 250, 1.0)
-                      : Color.fromRGBO(183, 135, 246, 1.0)),
+                      ? Color.fromRGBO(243, 243, 243, 1.0)
+                      : Color.fromRGBO(225, 193, 250, 1.0)),
               padding: EdgeInsets.all(10),
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -61,10 +58,10 @@ class MessageBubbleWidget extends StatelessWidget {
                     List<Widget> messageBodyChildren = [];
                     if (this.sender != null) {
                       messageBodyChildren.add(Text(
-                        sender.name,
+                        "${sender.name} ${sender.surname}",
                         style: TextStyle(
                             color: Colors.lightBlue.shade700,
-                            fontSize: 10.0,
+                            fontSize: 12.0,
                             fontWeight: FontWeight.w400),
                       ));
                       messageBodyChildren.add(SizedBox(
@@ -79,6 +76,10 @@ class MessageBubbleWidget extends StatelessWidget {
                             fontSize: 16, color: Colors.grey.shade900),
                       ));
                       messageBodyChildren.add(SizedBox(height: 3));
+                    }
+
+                    if (this.attachmentWidget != null) {
+                      messageBodyChildren.add(this.attachmentWidget);
                     }
 
                     final addZeros = (value) => value.toString().length == 1

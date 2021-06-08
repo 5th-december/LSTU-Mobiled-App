@@ -5,7 +5,6 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
-import 'package:lk_client/model/mb_objects/mb_dialog.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
@@ -13,7 +12,7 @@ import 'package:lk_client/state/notification_consume_state.dart';
 
 class MbCDialogListConsumerBloc extends AbstractBloc<
     NotificationConsumeState<List<Dialog>>, NotificationConsumeEvent> {
-  final _exchangeType = ExchangeType.DIRECT;
+  final _exchangeType = ExchangeType.TOPIC;
 
   String _exchangeName;
 
@@ -77,8 +76,7 @@ class MbCDialogListConsumerBloc extends AbstractBloc<
 
         final transformer = StreamTransformer.fromHandlers(
             handleData: (data, EventSink sink) async {
-          final createdDialogData = MbDialog.fromJson(data);
-          final dialog = createdDialogData.getDialog();
+          final dialog = Dialog.fromJson(data);
 
           if (this.currentState is NotificationReadyState<List<Dialog>> &&
               (this.currentState as NotificationReadyState<List<Dialog>>)

@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
+import 'package:lk_client/model/discipline/teaching_material.dart';
+import 'package:lk_client/model/discipline/work_answer_attachment.dart';
 import 'package:lk_client/model/education/education.dart';
 import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/model/education/timetable_week.dart';
@@ -114,6 +116,22 @@ class LoadTeachingMaterialAttachment extends MultipartRequestCommand {
   LoadTeachingMaterialAttachment(this.teachingMaterial);
 }
 
+class LoadStudentTaskAnswerMaterialAttachment extends MultipartRequestCommand {
+  final WorkAnswerAttachment studentTaskAnswerMaterial;
+  LoadStudentTaskAnswerMaterialAttachment(
+      {@required this.studentTaskAnswerMaterial});
+}
+
+class LoadPrivateMessageMaterialAttachment extends MultipartRequestCommand {
+  final PrivateMessage privateMessage;
+  LoadPrivateMessageMaterialAttachment({@required this.privateMessage});
+}
+
+class LoadDiscussionMessageMaterialAttachment extends MultipartRequestCommand {
+  final DiscussionMessage discussionMessage;
+  LoadDiscussionMessageMaterialAttachment({@required this.discussionMessage});
+}
+
 class UploadPrivateMessageAttachment extends MultipartRequestCommand {
   final PrivateMessage message;
   UploadPrivateMessageAttachment({@required this.message});
@@ -122,6 +140,11 @@ class UploadPrivateMessageAttachment extends MultipartRequestCommand {
 class UploadDiscussionMessageAttachment extends MultipartRequestCommand {
   final DiscussionMessage message;
   UploadDiscussionMessageAttachment({@required this.message});
+}
+
+class UploadWorkAnswerAttachment extends MultipartRequestCommand {
+  final WorkAnswerAttachment workAnswerAttachment;
+  UploadWorkAnswerAttachment({@required this.workAnswerAttachment});
 }
 
 class LoadPersonListByTextQuery {

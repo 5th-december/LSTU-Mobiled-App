@@ -7,7 +7,6 @@ import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
-import 'package:lk_client/model/mb_objects/mb_discussion_message.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
 class StartNotifyOnDiscussion {
@@ -62,34 +61,31 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
        * Подписка на обновления состяний блока событий
        */
       mbcConsumerBloc.discussionMessageConsumingStateStream.listen((event) {
-        if (event is NotificationReadyState<List<DiscussionUpdate>> &&
+        if (event is NotificationReadyState<List<DiscussionMessage>> &&
             event.notifications.length != 0) {
           /**
            * Выборка сообщений только для указанного чата
            */
-          final selectedNotificationsForCurrentChat = event.notifications.where(
-              (DiscussionUpdate element) =>
+          final selectedNotificationsForCurrentChat = event.notifications
+              .where((DiscussionMessage element) =>
                   element.discipline == command.discipline &&
                   element.group == element.group &&
-                  element.semester == element.semester);
+                  element.semester == element.semester)
+              .toList();
 
           if (selectedNotificationsForCurrentChat.length == 0) {
             return;
           }
 
-          final selectedDiscussionMessages = selectedNotificationsForCurrentChat
-              .map((e) => e.message)
-              .toList();
-
           this.listBloc.eventController.sink.add(
               ExternalDataAddEvent<DiscussionMessage>(
-                  externalAddedData: selectedDiscussionMessages));
+                  externalAddedData: selectedNotificationsForCurrentChat));
 
           /**
            * Частичное подтверждение получения
            */
           this.mbcConsumerBloc.eventController.sink.add(
-              AckPartiallyNotificationReceived<DiscussionUpdate>(
+              AckPartiallyNotificationReceived<DiscussionMessage>(
                   deliveredNotifications: selectedNotificationsForCurrentChat));
         }
       });

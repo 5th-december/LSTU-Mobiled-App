@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:lk_client/store/global/attached_bloc_provider.dart';
 import 'package:lk_client/widget/chunk/file_download_widget.dart';
 
 class LoaderProvider extends StatefulWidget {
@@ -28,11 +29,13 @@ class LoaderProviderInherited extends InheritedWidget {
 
 class LoaderProviderState extends State<LoaderProvider> {
   FileDownloaderBlocProvider fileDownloaderBlocProvider;
+  AttachedBlocProvider attachedBlocProvider;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     this.fileDownloaderBlocProvider = FileDownloaderBlocProvider();
+    this.attachedBlocProvider = AttachedBlocProvider();
   }
 
   @override

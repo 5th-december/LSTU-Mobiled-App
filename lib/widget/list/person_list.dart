@@ -33,6 +33,10 @@ class _PersonListState extends State<StatefulWidget> {
     if (this._personListBloc == null) {
       this._personListBloc =
           PersonFinderPageProvider.of(context).personListBloc;
+      this
+          ._personListBloc
+          .eventController
+          .add(EndlessScrollingInitEvent<Person>());
       this._dialogCreatorBloc =
           PersonFinderPageProvider.of(context).dialogCreatorBloc;
     }

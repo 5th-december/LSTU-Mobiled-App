@@ -24,12 +24,18 @@ DiscussionMessage _$DiscussionMessageFromJson(Map<String, dynamic> json) {
         ?.map((e) =>
             e == null ? null : ExternalLink.fromJson(e as Map<String, dynamic>))
         ?.toList(),
+    discipline: json['discipline'] as String,
+    semester: json['semester'] as String,
+    group: json['group'] as String,
   );
 }
 
 Map<String, dynamic> _$DiscussionMessageToJson(DiscussionMessage instance) =>
     <String, dynamic>{
       'id': instance.id,
+      'group': instance.group,
+      'discipline': instance.discipline,
+      'semester': instance.semester,
       'sender': instance.sender,
       'created': instance.created?.toIso8601String(),
       'msg': instance.msg,

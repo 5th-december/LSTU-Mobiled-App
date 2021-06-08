@@ -55,8 +55,8 @@ class AmqpService {
 
   Future<Consumer> startListenBindedQueue(AmqpBindingData binding) async {
     Channel channel = await amqpClient.channel();
-    Exchange exchange =
-        await channel.exchange(binding.exchangeName, binding.exchangeType);
+    Exchange exchange = await channel
+        .exchange(binding.exchangeName, binding.exchangeType, durable: true);
     Consumer consumer =
         await exchange.bindPrivateQueueConsumer(binding.routingKeys);
     return consumer;

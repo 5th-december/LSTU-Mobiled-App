@@ -93,9 +93,8 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
       String applicableFilePath =
           await this.getFirstApplicablePath(event.file.filePath);
 
-      this
-          .startDownloadingOperation(_event.command, applicableFilePath)
-          .listen((iOEvent) async {
+      this.startDownloadingOperation(_event.command, applicableFilePath).listen(
+          (iOEvent) async {
         if (iOEvent is FileOperationProgress) {
           // Передается состояние прогресса с величиной загруженной части
           this.updateState(FileOperationProgressState(rate: iOEvent.rate));
@@ -123,7 +122,7 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
               fileName: fileLocalManager.getFileName(applicableFilePath),
               fileSize: await fileLocalManager.getSize(applicableFilePath)));
         }
-      });
+      }, onError: (e) => this.updateState(FileOperationErrorState()));
     });
   }
 }

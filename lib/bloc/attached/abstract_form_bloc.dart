@@ -40,12 +40,12 @@ abstract class AbstractFormBloc<TQ extends Validatable, TC, TS>
 
       this.updateState(ProducingLoadingState<TQ>(data: resource));
 
-      ValidationErrorBox validationErrors = validateEntity(resource);
+      //ValidationErrorBox validationErrors = validateEntity(resource);
 
-      if (validationErrors.hasErrors()) {
-        this.updateState(ProducingInvalidState<TQ>(validationErrors));
-        return;
-      }
+      //if (validationErrors.hasErrors()) {
+      //  this.updateState(ProducingInvalidState<TQ>(validationErrors));
+      //  return;
+      //}
 
       try {
         TS response = await this.getResponse(resource, command);
@@ -53,7 +53,7 @@ abstract class AbstractFormBloc<TQ extends Validatable, TC, TS>
         this.updateState(
             ProducingReadyState<TQ, TS>(data: resource, response: response));
       } on ValidationException catch (e) {
-        this.updateState(ProducingInvalidState<TQ>(validationErrors));
+        //this.updateState(ProducingInvalidState<TQ>(validationErrors));
       } on Exception catch (e) {
         this.updateState(ProducingErrorState(e, data: resource));
       }

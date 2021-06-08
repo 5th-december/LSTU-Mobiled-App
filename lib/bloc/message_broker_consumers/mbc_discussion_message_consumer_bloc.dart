@@ -6,7 +6,6 @@ import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
-import 'package:lk_client/model/mb_objects/mb_discussion_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
@@ -38,8 +37,8 @@ class MbCDiscussionMessageConsumerBloc
    * Стрим состояний блока
    */
   Stream<NotificationConsumeState> get discussionMessageConsumingStateStream =>
-      this.stateContoller.stream.where(
-          (event) => event is NotificationConsumeState<List<DiscussionUpdate>>);
+      this.stateContoller.stream.where((event) =>
+          event is NotificationConsumeState<List<DiscussionMessage>>);
 
   /*
    * Стрим событий старта потребления
@@ -56,7 +55,7 @@ class MbCDiscussionMessageConsumerBloc
    */
   Stream<NotificationConsumeEvent> get _ackDiscussionMessageNotification =>
       this.eventController.stream.where((event) =>
-          event is AckPartiallyNotificationReceived<List<DiscussionUpdate>>);
+          event is AckPartiallyNotificationReceived<DiscussionMessage>);
 
   MbCDiscussionMessageConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
@@ -93,17 +92,14 @@ class MbCDiscussionMessageConsumerBloc
         StreamTransformer discussionMessageTransformer =
             StreamTransformer.fromHandlers(
                 handleData: (data, EventSink sink) async {
-          final MbDiscussionMessage discussionMessageData =
-              MbDiscussionMessage.fromJson(data);
-
-          final DiscussionUpdate discussionUpdate =
-              discussionMessageData.getDiscussionMessage();
+          final DiscussionMessage discussionUpdate =
+              DiscussionMessage.fromJson(data);
 
           if (this.currentState
-              is NotificationReadyState<List<DiscussionUpdate>>) {
-            List<DiscussionUpdate> existing = List<DiscussionUpdate>.from(
+              is NotificationReadyState<List<DiscussionMessage>>) {
+            List<DiscussionMessage> existing = List<DiscussionMessage>.from(
                 (this.currentState
-                        as NotificationReadyState<List<DiscussionUpdate>>)
+                        as NotificationReadyState<List<DiscussionMessage>>)
                     .notifications);
 
             existing.add(discussionUpdate);
@@ -123,8 +119,8 @@ class MbCDiscussionMessageConsumerBloc
             .transform(discussionMessageTransformer)
             .listen((event) {
           if (event is List) {
-            this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
-                notifications: event.cast<DiscussionUpdate>()));
+            this.updateState(NotificationReadyState<List<DiscussionMessage>>(
+                notifications: event.cast<DiscussionMessage>()));
           }
         });
 
@@ -135,30 +131,31 @@ class MbCDiscussionMessageConsumerBloc
           this._discussionController.sink.add(event.payloadAsJson);
         },
             onError: (e) => this.updateState(
-                NotificationErrorState<List<DiscussionUpdate>>(error: e)));
+                NotificationErrorState<List<DiscussionMessage>>(error: e)));
 
-        this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
-            notifications: <DiscussionUpdate>[]));
+        this.updateState(NotificationReadyState<List<DiscussionMessage>>(
+            notifications: <DiscussionMessage>[]));
       } on Exception catch (e) {
         this.updateState(
-            NotificationErrorState<List<DiscussionUpdate>>(error: e));
+            NotificationErrorState<List<DiscussionMessage>>(error: e));
       }
     });
 
     this._ackDiscussionMessageNotification.listen((event) {
       final _event =
-          event as AckPartiallyNotificationReceived<List<DiscussionUpdate>>;
+          event as AckPartiallyNotificationReceived<DiscussionMessage>;
       final ackNotificationsList = _event.deliveredNotifications;
 
-      if (this.currentState is NotificationReadyState<List<DiscussionUpdate>>) {
+      if (this.currentState
+          is NotificationReadyState<List<DiscussionMessage>>) {
         final notificationsList = (this.currentState
-                as NotificationReadyState<List<DiscussionUpdate>>)
+                as NotificationReadyState<List<DiscussionMessage>>)
             .notifications;
 
         notificationsList
             .removeWhere((element) => ackNotificationsList.contains(element));
 
-        this.updateState(NotificationReadyState<List<DiscussionUpdate>>(
+        this.updateState(NotificationReadyState<List<DiscussionMessage>>(
             notifications: notificationsList));
       }
     });

@@ -19,6 +19,8 @@ abstract class AbstractBloc<TS, TE> {
 
   @protected
   void updateState(TS newState) {
-    this.stateContoller.sink.add(newState);
+    if (!this.stateContoller.isClosed) {
+      this.stateContoller.sink.add(newState);
+    }
   }
 }

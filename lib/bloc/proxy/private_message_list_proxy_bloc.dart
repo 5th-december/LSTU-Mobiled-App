@@ -46,7 +46,7 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
       @required
           PrivateMessageListBloc privateMessageListBloc,
       @required
-          Person companion,
+          Person person,
       @required
           Dialog dialog}) async {
     MbCPrivateMessageBlocContainer _mbCPrivateMessageBlocContainer =
@@ -54,9 +54,9 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
     MbCChatUpdateBlocContainer _mbCChatUpdateBlocContainer =
         await mbCChatUpdateBlocContainer;
     MbCChatUpdateConsumerBloc mbCChatUpdateConsumerBloc =
-        await _mbCChatUpdateBlocContainer.getBloc(dialog, companion);
+        await _mbCChatUpdateBlocContainer.getBloc(dialog, person);
     MbCPrivateMessageConsumerBloc mbCPrivateMessageConsumerBloc =
-        await _mbCPrivateMessageBlocContainer.getBloc(dialog);
+        await _mbCPrivateMessageBlocContainer.getBloc(dialog, person);
     return PrivateMessageListProxyBloc(
         listBloc: privateMessageListBloc,
         mbcPrivateMessageConsumerBloc: mbCPrivateMessageConsumerBloc,

@@ -1,8 +1,8 @@
 import 'package:lk_client/bloc/message_broker_consumers/mbc_discussion_message_consumer_bloc.dart';
 import 'package:lk_client/command/mbc_command.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
+import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/model/education/group.dart';
-import 'package:lk_client/model/mb_objects/mb_discussion_message.dart';
 import 'package:lk_client/service/amqp_service.dart';
 import 'package:lk_client/service/api_consumer/util_query_service.dart';
 import 'package:lk_client/service/config/amqp_config.dart';
@@ -40,7 +40,7 @@ class MbCDiscussionMessageBlocContainer {
     bloc.eventController.sink.add(StartNotificationConsumeEvent(
         command: MbCStartConsumeDiscussionMessages(groups: groups)));
     await for (var state in bloc.discussionMessageConsumingStateStream) {
-      if (state is NotificationReadyState<List<DiscussionUpdate>>) {
+      if (state is NotificationReadyState<List<DiscussionMessage>>) {
         return bloc;
       }
     }
