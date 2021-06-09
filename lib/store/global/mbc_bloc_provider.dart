@@ -32,57 +32,31 @@ class MbCBlocProviderInherited extends InheritedWidget {
 }
 
 class MbCBlocProviderState extends State<MbCBlocProvider> {
-  MbCChatUpdateBlocContainer _mbCChatUpdateBlocContainer;
-
   ServiceProvider appServiceProvider;
 
+  Future<MbCChatUpdateBlocContainer> _mbCChatUpdateBlocContainer;
+
   Future<MbCChatUpdateBlocContainer> mbCChatUpdateBlocContainer() async {
-    if (this._mbCChatUpdateBlocContainer == null) {
-      this._mbCChatUpdateBlocContainer = await MbCChatUpdateBlocContainer.init(
-          this.appServiceProvider.utilQueryService,
-          this.appServiceProvider.amqpConfig,
-          this.appServiceProvider.amqpService);
-    }
     return this._mbCChatUpdateBlocContainer;
   }
 
-  MbCDialogListBlocContainer _mbCDialogListBlocContainer;
+  Future<MbCDialogListBlocContainer> _mbCDialogListBlocContainer;
 
   Future<MbCDialogListBlocContainer> mbCDialogListBlocContainer() async {
-    if (this._mbCDialogListBlocContainer == null) {
-      this._mbCDialogListBlocContainer = await MbCDialogListBlocContainer.init(
-          this.appServiceProvider.utilQueryService,
-          this.appServiceProvider.amqpConfig,
-          this.appServiceProvider.amqpService);
-    }
     return this._mbCDialogListBlocContainer;
   }
 
-  MbCDiscussionMessageBlocContainer _mbCDiscussionMessageBlocContainer;
+  Future<MbCDiscussionMessageBlocContainer> _mbCDiscussionMessageBlocContainer;
 
   Future<MbCDiscussionMessageBlocContainer>
       mbCDiscussionMessageBlocContainer() async {
-    if (this._mbCDiscussionMessageBlocContainer == null) {
-      this._mbCDiscussionMessageBlocContainer =
-          await MbCDiscussionMessageBlocContainer.init(
-              this.appServiceProvider.utilQueryService,
-              this.appServiceProvider.amqpConfig,
-              this.appServiceProvider.amqpService);
-    }
     return this._mbCDiscussionMessageBlocContainer;
   }
 
-  MbCPrivateMessageBlocContainer _mbCPrivateMessageBlocContainer;
+  Future<MbCPrivateMessageBlocContainer> _mbCPrivateMessageBlocContainer;
 
   Future<MbCPrivateMessageBlocContainer>
       mbCPrivateMessageBlocContainer() async {
-    if (this._mbCPrivateMessageBlocContainer == null) {
-      this._mbCPrivateMessageBlocContainer =
-          await MbCPrivateMessageBlocContainer.init(
-              this.appServiceProvider.utilQueryService,
-              this.appServiceProvider.amqpConfig,
-              this.appServiceProvider.amqpService);
-    }
     return this._mbCPrivateMessageBlocContainer;
   }
 
@@ -90,6 +64,27 @@ class MbCBlocProviderState extends State<MbCBlocProvider> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     this.appServiceProvider = AppStateContainer.of(context).serviceProvider;
+
+    this._mbCChatUpdateBlocContainer = MbCChatUpdateBlocContainer.init(
+        this.appServiceProvider.utilQueryService,
+        this.appServiceProvider.amqpConfig,
+        this.appServiceProvider.amqpService);
+
+    this._mbCDialogListBlocContainer = MbCDialogListBlocContainer.init(
+        this.appServiceProvider.utilQueryService,
+        this.appServiceProvider.amqpConfig,
+        this.appServiceProvider.amqpService);
+
+    this._mbCDiscussionMessageBlocContainer =
+        MbCDiscussionMessageBlocContainer.init(
+            this.appServiceProvider.utilQueryService,
+            this.appServiceProvider.amqpConfig,
+            this.appServiceProvider.amqpService);
+
+    this._mbCPrivateMessageBlocContainer = MbCPrivateMessageBlocContainer.init(
+        this.appServiceProvider.utilQueryService,
+        this.appServiceProvider.amqpConfig,
+        this.appServiceProvider.amqpService);
   }
 
   @override

@@ -166,76 +166,71 @@ class _AttachedMessageFormState extends State<AttachedMessageForm> {
                     Container(
                       height: 30.0,
                       padding: EdgeInsets.symmetric(horizontal: 10.0),
-                      child: Expanded(
-                        child: Row(children: () {
-                          List<Widget> secondaryWidgetsRow = <Widget>[];
-                          if (state.attachedLink != null) {
-                            secondaryWidgetsRow.add(this.getNotificationTile(
-                                'Добавлена внешняя ссылка ${state.attachedLink.linkBaseUrl}',
-                                false));
-                          }
-                          if (state.fileAttachment != null) {
-                            secondaryWidgetsRow.add(this.getNotificationTile(
-                                'Добавлен файл ${state.fileAttachment.fileExtension}',
-                                false));
-                          }
-                          return [Row(children: secondaryWidgetsRow)];
-                        }()),
-                      ),
+                      child: Row(children: () {
+                        List<Widget> secondaryWidgetsRow = <Widget>[];
+                        if (state.attachedLink != null) {
+                          secondaryWidgetsRow.add(this.getNotificationTile(
+                              'Добавлена внешняя ссылка ${state.attachedLink.linkBaseUrl}',
+                              false));
+                        }
+                        if (state.fileAttachment != null) {
+                          secondaryWidgetsRow.add(this.getNotificationTile(
+                              'Добавлен файл ${state.fileAttachment.fileExtension}',
+                              false));
+                        }
+                        return [Row(children: secondaryWidgetsRow)];
+                      }()),
                     ),
                     Positioned(
-                        top: 30.0,
-                        bottom: 0,
-                        left: 0,
-                        right: 0,
-                        child: Container(
-                          height: 70.0,
-                          color: Colors.white,
-                          child: Expanded(
-                            child: Row(
-                              children: () {
-                                List<Widget> leadingRowWidgets = <Widget>[];
+                      top: 30.0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: Container(
+                        height: 70.0,
+                        color: Colors.white,
+                        child: Row(
+                          children: () {
+                            List<Widget> leadingRowWidgets = <Widget>[];
 
-                                if (!(state.attachedLink != null)) {
-                                  leadingRowWidgets.add(
-                                      state.fileAttachment != null
-                                          ? this.getRemoveAttachmentButton()
-                                          : this.getAddAttachmentButton());
-                                  leadingRowWidgets.add(SizedBox(
-                                    width: 5.0,
-                                  ));
-                                }
+                            if (!(state.attachedLink != null)) {
+                              leadingRowWidgets.add(state.fileAttachment != null
+                                  ? this.getRemoveAttachmentButton()
+                                  : this.getAddAttachmentButton());
+                              leadingRowWidgets.add(SizedBox(
+                                width: 5.0,
+                              ));
+                            }
 
-                                if (!(state.fileAttachment != null)) {
-                                  leadingRowWidgets.add(
-                                      state.attachedLink != null
-                                          ? this.getRemoveLinkButton()
-                                          : this.getAddLinkButton());
-                                  leadingRowWidgets.add(SizedBox(
-                                    width: 5.0,
-                                  ));
-                                }
+                            if (!(state.fileAttachment != null)) {
+                              leadingRowWidgets.add(state.attachedLink != null
+                                  ? this.getRemoveLinkButton()
+                                  : this.getAddLinkButton());
+                              leadingRowWidgets.add(SizedBox(
+                                width: 5.0,
+                              ));
+                            }
 
-                                leadingRowWidgets.add(Expanded(
-                                  child: TextFormField(
-                                    controller: this
-                                        .controllerProvider
-                                        .messageTextEditingController,
-                                    decoration: InputDecoration(
-                                      hintText: 'Ваше сообщение',
-                                      hintStyle: TextStyle(
-                                          color: Colors.black45,
-                                          fontWeight: FontWeight.w400),
-                                      border: InputBorder.none,
-                                    ),
-                                  ),
-                                ));
+                            leadingRowWidgets.add(Expanded(
+                              child: TextFormField(
+                                controller: this
+                                    .controllerProvider
+                                    .messageTextEditingController,
+                                decoration: InputDecoration(
+                                  hintText: 'Ваше сообщение',
+                                  hintStyle: TextStyle(
+                                      color: Colors.black45,
+                                      fontWeight: FontWeight.w400),
+                                  border: InputBorder.none,
+                                ),
+                              ),
+                            ));
 
-                                return leadingRowWidgets;
-                              }(),
-                            ),
-                          ),
-                        )),
+                            return leadingRowWidgets;
+                          }(),
+                        ),
+                      ),
+                    ),
                     Align(
                       alignment: Alignment.bottomRight,
                       child: Padding(

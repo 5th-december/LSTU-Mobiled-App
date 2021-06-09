@@ -10,7 +10,6 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/private_dialog_page.dart';
 import 'package:lk_client/state/endless_scrolling_state.dart';
 import 'package:lk_client/state/producing_state.dart';
-import 'package:lk_client/store/local/messenger_page_provider.dart';
 import 'package:lk_client/store/local/person_finder_page_provider.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
