@@ -6,6 +6,7 @@ import 'package:lk_client/bloc_container/mbc_dialog_list_bloc_container.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
@@ -19,16 +20,18 @@ class DialogListProxyBloc extends AbstractBloc<dynamic, dynamic> {
    * Проксирует стрим передачи событий инициализации блоку загрузки + инициализирует
    * и вешает обработчик на стрим уведомлений
    */
-  Stream<dynamic> get _dialogListInitEventStream =>
-      this.eventController.stream.where(
-          (event) => event is EndlessScrollingLoadEvent<StartNotifyOnPerson>);
+  Stream<dynamic> get _dialogListInitEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is ProxyInitEvent<StartNotifyOnPerson>);
 
   /*
    * Проксирует стрим передачи событий на загрузку списка в loading bloc 
    */
-  Stream<dynamic> get _dialogListLoadEventStream =>
-      this.eventController.stream.where(
-          (event) => event is EndlessScrollingLoadEvent<LoadDialogListCommand>);
+  Stream<dynamic> get _dialogListLoadEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is LoadChunkEvent<LoadDialogListCommand>);
 
   final DialogListBloc loadingBloc;
 

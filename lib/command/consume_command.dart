@@ -150,8 +150,7 @@ class LoadPersonListByTextQuery {
   final String textQuery;
   final int count;
   final int offset;
-  LoadPersonListByTextQuery(
-      {@required this.count, @required this.offset, this.textQuery});
+  LoadPersonListByTextQuery({this.count, this.offset, this.textQuery});
 }
 
 class LoadTimetableCommand {

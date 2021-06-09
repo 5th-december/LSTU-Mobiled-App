@@ -60,7 +60,7 @@ class MessageBubbleWidget extends StatelessWidget {
                       messageBodyChildren.add(Text(
                         "${sender.name} ${sender.surname}",
                         style: TextStyle(
-                            color: Colors.lightBlue.shade700,
+                            color: Color.fromRGBO(139, 62, 252, 1.0),
                             fontSize: 12.0,
                             fontWeight: FontWeight.w400),
                       ));

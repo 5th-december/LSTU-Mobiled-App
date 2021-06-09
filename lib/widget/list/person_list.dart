@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/dialog_creator_bloc.dart';
@@ -13,16 +15,19 @@ import 'package:lk_client/state/producing_state.dart';
 import 'package:lk_client/store/local/person_finder_page_provider.dart';
 import 'package:lk_client/widget/chunk/centered_loader.dart';
 import 'package:lk_client/widget/chunk/list_loading_bottom_indicator.dart';
-import 'package:lk_client/widget/list/endless_scrolling_widget.dart';
+import 'package:lk_client/widget/layout/profile_picture.dart';
+import 'package:lk_client/widget/util/wait_modal_widget.dart';
 
 class PersonList extends StatefulWidget {
-  PersonList({Key key}) : super(key: key);
+  final Person person;
+
+  PersonList({Key key, @required this.person}) : super(key: key);
 
   @override
   _PersonListState createState() => _PersonListState();
 }
 
-class _PersonListState extends State<StatefulWidget> {
+class _PersonListState extends State<PersonList> {
   PersonListBloc _personListBloc;
   DialogCreatorBloc _dialogCreatorBloc;
 
@@ -43,105 +48,158 @@ class _PersonListState extends State<StatefulWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final loadingEvent = EndlessScrollingLoadEvent(
-        command: LoadPersonListByTextQuery(count: 20, offset: 0));
     // Инициализация заполнения списка
-    this._personListBloc.eventController.add(loadingEvent);
+    this
+        ._personListBloc
+        .eventController
+        .add(EndlessScrollingInitEvent<Person>());
 
     ScrollController scrollController = ScrollController();
-    final int scrollDistance = 200;
 
     bool needsAutoloading = false;
 
-    scrollController.addListener(() {
-      final maxScroll = scrollController.position.maxScrollExtent;
-      final currentScroll = scrollController.position.pixels;
-      if (needsAutoloading && maxScroll - currentScroll <= scrollDistance) {
-        this._personListBloc.eventController.sink.add(loadingEvent);
-      }
-    });
+    return StreamBuilder(
+        stream: this._personListBloc.endlessListScrollingStateStream,
+        builder: (BuildContext context, AsyncSnapshot snapshot) {
+          if (snapshot.hasData) {
+            final state = snapshot.data;
 
-    return EndlessScrollingWidget<Person, LoadPersonListByTextQuery>(
-        bloc: this._personListBloc,
-        buildList: (EndlessScrollingState<Person> state) {
-          if (state is EndlessScrollingChunkReadyState) {
-            needsAutoloading =
-                (state as EndlessScrollingChunkReadyState).hasMoreData;
-          } else {
-            needsAutoloading = false;
-          }
-
-          if (state.entityList.length == 0) {
-            if (state is EndlessScrollingErrorState) {
-              return Center(
-                  child: Text('Ошибка загрузки списка пользователей'));
-            }
-
-            if (state is EndlessScrollingLoadingState) {
-              return CenteredLoader();
-            }
-
-            return Center(child: Text('Ничего не найдено'));
-          }
-
-          final dataList = state.entityList;
-          return ListView.builder(
-              itemCount: (state is EndlessScrollingChunkReadyState ||
-                      state is EndlessScrollingLoadingState)
-                  ? dataList.length + 1
-                  : dataList.length,
-              controller: scrollController,
-              itemBuilder: (BuildContext context, int index) {
-                if (index >= dataList.length) {
-                  return ListLoadingBottomIndicator();
+            if (state is EndlessScrollingInitState) {
+              scrollController.addListener(() {
+                final maxScroll = scrollController.position.maxScrollExtent;
+                final currentScroll = scrollController.position.pixels;
+                if (needsAutoloading && maxScroll - currentScroll <= 200) {
+                  this._personListBloc.eventController.sink.add(
+                      LoadNextChunkEvent<LoadPersonListByTextQuery>(
+                          command:
+                              LoadPersonListByTextQuery(count: 50, offset: 0)));
                 }
-
-                return Container(
-                  child: ListTile(
-                    //leading: PersonProfilePicture(displayed: dataList[index], size: 30.0),
-                    title: Text(
-                        "${dataList[index].name} ${dataList[index].surname}"),
-                    onTap: () async {
-                      this._dialogCreatorBloc.eventController.add(
-                          ProduceResourceEvent<void, StartNewDialog>(
-                              command:
-                                  StartNewDialog(companion: dataList[index])));
-
-                      await for (ProducingState<void> response
-                          in this._dialogCreatorBloc.dialogCreatorStateStream) {
-                        if (response is ProducingErrorState<void>) {
-                          throw response;
-                        }
-                        if (response
-                            is ProducingReadyState<void, DialogModel.Dialog>) {
-                          DialogModel.Dialog createdDialog = response.response;
-                          this
-                              ._dialogCreatorBloc
-                              .eventController
-                              .add(ProducerInitEvent<void>());
-                          /*MessengerPageProvider.of(context)
-                              .dialogListBloc
-                              .eventController
-                              .add(EndlessScrollingLoadEvent<
-                                      LoadDialogListCommand>(
-                                  command: LoadDialogListCommand(
-                                      person: dataList[index],
-                                      count: 50,
-                                      offset: 0)));*/
-                          Navigator.of(context).pop();
-                          Navigator.of(context).push(MaterialPageRoute(
-                              builder: (BuildContext context) {
-                            return PrivateDialogPage(
-                              companion: dataList[index],
-                              dialog: createdDialog,
-                            );
-                          }));
-                        }
-                      }
-                    },
-                  ),
-                );
               });
+
+              this._personListBloc.eventController.sink.add(
+                  LoadFirstChunkEvent<LoadPersonListByTextQuery>(
+                      command:
+                          LoadPersonListByTextQuery(count: 50, offset: 0)));
+            }
+
+            if (state is EndlessScrollingChunkReadyState) {
+              needsAutoloading = state.hasMoreData;
+            } else {
+              needsAutoloading = false;
+            }
+
+            if (state.entityList.length == 0) {
+              if (state is EndlessScrollingErrorState) {
+                return Center(
+                    child: Text('Ошибка загрузки списка пользователей'));
+              }
+
+              if (state is EndlessScrollingLoadingState) {
+                return CenteredLoader();
+              }
+
+              return Center(child: Text('Ничего не найдено'));
+            }
+
+            final dataList = state.entityList;
+            return ListView.separated(
+                separatorBuilder: (BuildContext context, int index) => SizedBox(
+                      height: 5.0,
+                    ),
+                itemCount: ((state is EndlessScrollingChunkReadyState &&
+                            state.remains != 0) ||
+                        state is EndlessScrollingLoadingState)
+                    ? dataList.length + 1
+                    : dataList.length,
+                controller: scrollController,
+                itemBuilder: (BuildContext context, int index) {
+                  if (index >= dataList.length) {
+                    return ListLoadingBottomIndicator();
+                  }
+
+                  return Container(
+                    child: ListTile(
+                        leading: PersonProfilePicture(
+                            displayed: dataList[index], size: 30),
+                        title: Text(
+                            "${dataList[index].name} ${dataList[index].surname}"),
+                        trailing: IconButton(
+                            icon: Icon(Icons.chat_bubble_rounded),
+                            onPressed: () async {
+                              this._dialogCreatorBloc.eventController.add(
+                                  ProduceResourceEvent<void, StartNewDialog>(
+                                      command: StartNewDialog(
+                                          companion: dataList[index])));
+
+                              showDialog(
+                                context: context,
+                                barrierDismissible: false,
+                                useRootNavigator: false,
+                                builder: (BuildContext context) {
+                                  return WaitModalWidget();
+                                },
+                              );
+
+                              Completer<DialogModel.Dialog> completer =
+                                  Completer<DialogModel.Dialog>();
+
+                              completer.future.then((value) {
+                                Navigator.of(context).pop();
+                                Navigator.of(context).pop();
+                                Navigator.of(context).push(MaterialPageRoute(
+                                    builder: (BuildContext context) {
+                                  return PrivateDialogPage(
+                                    person: widget.person,
+                                    companion: dataList[index],
+                                    dialog: value,
+                                  );
+                                }));
+                              }, onError: (e) {
+                                Navigator.of(context).pop();
+                                showDialog(
+                                    context: context,
+                                    useRootNavigator: false,
+                                    builder: (BuildContext context) {
+                                      return AlertDialog(
+                                          title: Text('Ошибка'),
+                                          content:
+                                              Text('Не удалось открыть диалог'),
+                                          actions: [
+                                            TextButton(
+                                                onPressed: () =>
+                                                    Navigator.of(context).pop(),
+                                                child: Text('ОК'))
+                                          ]);
+                                    });
+                              });
+
+                              Future.delayed(Duration.zero, () async {
+                                await for (ProducingState<void> response in this
+                                    ._dialogCreatorBloc
+                                    .dialogCreatorStateStream) {
+                                  if (response is ProducingErrorState<void>) {
+                                    completer.completeError(response.error);
+                                  }
+                                  if (response is ProducingReadyState<void,
+                                      DialogModel.Dialog>) {
+                                    DialogModel.Dialog createdDialog =
+                                        response.response;
+
+                                    completer.complete(createdDialog);
+
+                                    this
+                                        ._dialogCreatorBloc
+                                        .eventController
+                                        .add(ProducerInitEvent<void>());
+                                  }
+                                }
+                              });
+                            })),
+                  );
+                });
+          }
+
+          return CenteredLoader();
         });
   }
 }

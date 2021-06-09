@@ -8,6 +8,7 @@ import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart';
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/model/person/person.dart';
@@ -31,12 +32,12 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
       this.stateContoller.stream;
 
   Stream<dynamic> get _privateMessageListInitEventStream =>
-      this.eventController.stream.where((event) => event
-          is EndlessScrollingLoadEvent<StartNotifyPrivateMessagesOnDialog>);
+      this.eventController.stream.where((event) =>
+          event is ProxyInitEvent<StartNotifyPrivateMessagesOnDialog>);
 
   Stream<dynamic> get _privateMessageListLoadingEventStream =>
-      this.eventController.stream.where((event) => event
-          is EndlessScrollingLoadEvent<LoadPrivateChatMessagesListCommand>);
+      this.eventController.stream.where((event) =>
+          event is LoadChunkEvent<LoadPrivateChatMessagesListCommand>);
 
   static Future<PrivateMessageListProxyBloc> init(
       {@required

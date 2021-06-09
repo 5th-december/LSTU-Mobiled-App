@@ -20,13 +20,23 @@ abstract class AbstractEndlessScrollingBloc<T, C>
       .where((event) => event is EndlessScrollingInitEvent<T>);
 
   /*
+   * Стрим событий загрузки первой страницы списка
+   * при этом ранее выполненные команды не учиываются
+   * и список ранее загруженных элементов удаляется
+   */
+  Stream<EndlessScrollingEvent> get _firstChunkLoadEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is LoadFirstChunkEvent<C>);
+
+  /*
    *  Стрим событий загрузки следующей страницы списка 
    *  при этом учитываются ранее добавленные элементы
    */
   Stream<EndlessScrollingEvent> get _nextChunkLoadEventStream => this
       .eventController
       .stream
-      .where((event) => event is EndlessScrollingLoadEvent<C>);
+      .where((event) => event is LoadNextChunkEvent<C>);
 
   /*
    * Стрим событий добавления списка извне блока
@@ -62,7 +72,8 @@ abstract class AbstractEndlessScrollingBloc<T, C>
   /*
    * Инициализация нового объекта команды для загрузки следующей страницы
    */
-  C getNextChunkCommand(C baseCommand, List<T> loaded, [int remains]);
+  C getNextChunkCommand(C previousCommand, C currentCommand, List<T> loaded,
+      [int remains]);
 
   /*
    * Обновляет элементы имеющегося списка из добавленного
@@ -95,22 +106,49 @@ abstract class AbstractEndlessScrollingBloc<T, C>
       this.updateState(EndlessScrollingInitState<T>());
     });
 
-    this._nextChunkLoadEventStream.listen((event) async {
-      final _event = event as EndlessScrollingLoadEvent<C>;
+    this._firstChunkLoadEventStream.listen((event) async {
+      final _event = event as LoadFirstChunkEvent<C>;
 
-      if (currentState is EndlessScrollingLoadingState<T>) return;
-
-      final previousState = this.currentState;
+      if (currentState is EndlessScrollingLoadingState<C, T>) return;
 
       this.updateState(
-          EndlessScrollingLoadingState<T>(entityList: currentState.entityList));
+          EndlessScrollingLoadingState<C, T>(previousCommand: _event.command));
 
       try {
-        C command = _event.command;
-        if (previousState is EndlessScrollingChunkReadyState<T>) {
-          command = this.getNextChunkCommand(
-              _event.command, previousState.entityList, previousState.remains);
-        }
+        /*
+         * Первый лист результата 
+         */
+        ListedResponse<T> data =
+            await this.loadListElementChunk(_event.command);
+
+        this.updateState(EndlessScrollingChunkReadyState<C, T>(
+            entityList: data.payload,
+            remains: data.remains,
+            hasMoreData: this.hasMoreChunks(data),
+            previousCommand: _event.command));
+      } on Exception catch (e) {
+        this.updateState(EndlessScrollingErrorState<C, T>(
+            error: e, previousCommand: _event.command));
+      }
+    });
+
+    this._nextChunkLoadEventStream.listen((event) async {
+      final _event = event as LoadNextChunkEvent<C>;
+
+      if (!(currentState is EndlessScrollingChunkReadyState<C, T>)) return;
+
+      final previousState =
+          this.currentState as EndlessScrollingChunkReadyState<C, T>;
+
+      try {
+        final C command = this.getNextChunkCommand(
+            previousState.previousCommand,
+            _event.command,
+            previousState.entityList,
+            previousState.remains);
+
+        this.updateState(EndlessScrollingLoadingState<C, T>(
+            entityList: currentState.entityList, previousCommand: command));
 
         /**
          * Новый лист
@@ -120,7 +158,8 @@ abstract class AbstractEndlessScrollingBloc<T, C>
         /**
          * Если предыдущий список был непустым, он копируется в новый
          */
-        List<T> refreshData;
+        List<T> refreshData = [];
+
         if (previousState.entityList.length != 0) {
           refreshData = this
               .copyPreviousToNew(previousState.entityList, freshData.payload);
@@ -128,41 +167,46 @@ abstract class AbstractEndlessScrollingBloc<T, C>
           refreshData = freshData.payload;
         }
 
-        this.updateState(EndlessScrollingChunkReadyState<T>(
+        this.updateState(EndlessScrollingChunkReadyState<C, T>(
             entityList: refreshData,
             remains: freshData.remains,
-            hasMoreData: this.hasMoreChunks(freshData)));
+            hasMoreData: this.hasMoreChunks(freshData),
+            previousCommand: command));
       } on Exception catch (e) {
-        this.updateState(EndlessScrollingErrorState<T>(
-            entityList: currentState.entityList, error: e));
+        this.updateState(EndlessScrollingErrorState<C, T>(
+            entityList: currentState.entityList,
+            error: e,
+            previousCommand: _event.command));
       }
     });
 
     this._externalDataAddedEventStream.listen((event) {
       final _event = event as ExternalDataAddEvent<T>;
 
-      if (currentState is EndlessScrollingChunkReadyState<T>) {
-        this.updateState(EndlessScrollingChunkReadyState<T>(
+      if (currentState is EndlessScrollingChunkReadyState<C, T>) {
+        final _currentState =
+            currentState as EndlessScrollingChunkReadyState<C, T>;
+        this.updateState(EndlessScrollingChunkReadyState<C, T>(
+            previousCommand: _currentState.previousCommand,
             entityList: this.addNewItemsToList(
                 currentState.entityList, _event.externalAddedData),
-            hasMoreData: (currentState as EndlessScrollingChunkReadyState<T>)
-                .hasMoreData,
-            remains:
-                (currentState as EndlessScrollingChunkReadyState<T>).remains));
+            hasMoreData: _currentState.hasMoreData,
+            remains: _currentState.remains));
       }
     });
 
     this._externalDataUpdateEventStream.listen((event) {
       final _event = event as ExternalDataUpdateEvent<T>;
 
-      if (currentState is EndlessScrollingChunkReadyState) {
-        this.updateState(EndlessScrollingChunkReadyState<T>(
+      if (currentState is EndlessScrollingChunkReadyState<C, T>) {
+        final _currentState =
+            currentState as EndlessScrollingChunkReadyState<C, T>;
+        this.updateState(EndlessScrollingChunkReadyState<C, T>(
             entityList: this.updateItemsInList(
                 this.currentState.entityList, _event.externalUpdatedData),
-            hasMoreData: (currentState as EndlessScrollingChunkReadyState<T>)
-                .hasMoreData,
-            remains:
-                (currentState as EndlessScrollingChunkReadyState<T>).remains));
+            hasMoreData: _currentState.hasMoreData,
+            previousCommand: _currentState.previousCommand,
+            remains: _currentState.remains));
       }
     });
   }

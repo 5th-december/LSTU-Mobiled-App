@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/proxy/discussion_message_list_proxy_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
@@ -85,7 +86,7 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
                 final bloc = snapshot.data;
 
                 bloc.eventController.sink.add(
-                    EndlessScrollingLoadEvent<StartNotifyOnDiscussion>(
+                    ProxyInitEvent<StartNotifyOnDiscussion>(
                         command: StartNotifyOnDiscussion(
                             discipline: widget.discipline.id,
                             semester: widget.semester.id,
@@ -95,8 +96,6 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
 
                 bool needsAutoloading = false;
 
-                scrollController.addListener(() {});
-
                 return StreamBuilder(
                   stream: bloc.discussionMessageListStateStream,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -104,14 +103,6 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
                       final state = snapshot.data;
 
                       if (state is EndlessScrollingInitState) {
-                        final loadNextChunkEvent = EndlessScrollingLoadEvent<
-                                LoadDisciplineDiscussionListCommand>(
-                            command: LoadDisciplineDiscussionListCommand(
-                                semester: widget.semester,
-                                education: widget.education,
-                                discipline: widget.discipline,
-                                count: 50));
-
                         scrollController.addListener(() {
                           final maxScroll =
                               scrollController.position.maxScrollExtent;
@@ -119,11 +110,23 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
                               scrollController.position.pixels;
                           if (needsAutoloading &&
                               maxScroll - currentScroll <= 200.0) {
-                            bloc.eventController.sink.add(loadNextChunkEvent);
+                            bloc.eventController.sink.add(LoadNextChunkEvent<
+                                    LoadDisciplineDiscussionListCommand>(
+                                command: LoadDisciplineDiscussionListCommand(
+                                    semester: widget.semester,
+                                    education: widget.education,
+                                    discipline: widget.discipline,
+                                    count: 50)));
                           }
                         });
 
-                        bloc.eventController.sink.add(loadNextChunkEvent);
+                        bloc.eventController.sink.add(LoadFirstChunkEvent<
+                                LoadDisciplineDiscussionListCommand>(
+                            command: LoadDisciplineDiscussionListCommand(
+                                semester: widget.semester,
+                                education: widget.education,
+                                discipline: widget.discipline,
+                                count: 50)));
                       }
 
                       if (state is EndlessScrollingChunkReadyState) {
@@ -149,7 +152,8 @@ class _DiscussionMessageList extends State<DiscussionMessageList> {
 
                       return ListView.builder(
                           itemCount:
-                              (state is EndlessScrollingChunkReadyState ||
+                              ((state is EndlessScrollingChunkReadyState &&
+                                          state.remains != 0) ||
                                       state is EndlessScrollingLoadingState)
                                   ? loadedMessages.length + 1
                                   : loadedMessages.length,

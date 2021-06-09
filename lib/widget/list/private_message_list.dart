@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/proxy/private_message_list_proxy_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/data_transfer/external_link.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as DialogModel;
 import 'package:lk_client/model/messenger/private_message.dart';
@@ -80,7 +81,7 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
               PrivateMessageListProxyBloc bloc = snapshot.data;
 
               bloc.eventController.sink.add(
-                  EndlessScrollingLoadEvent<StartNotifyPrivateMessagesOnDialog>(
+                  ProxyInitEvent<StartNotifyPrivateMessagesOnDialog>(
                       command: StartNotifyPrivateMessagesOnDialog(
                           trackedDialog: widget.dialog,
                           trackedPerson: widget.person)));
@@ -96,11 +97,6 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                     final state = snapshot.data;
 
                     if (state is EndlessScrollingInitState) {
-                      final loadNextChunkEvent = EndlessScrollingLoadEvent<
-                              LoadPrivateChatMessagesListCommand>(
-                          command: LoadPrivateChatMessagesListCommand(
-                              dialog: widget.dialog, count: 50));
-
                       listViewScrollController.addListener(() {
                         final maxScroll =
                             listViewScrollController.position.maxScrollExtent;
@@ -108,11 +104,17 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                             listViewScrollController.position.pixels;
                         if (needsAutoloading &&
                             maxScroll - currentScroll <= 200.0) {
-                          bloc.eventController.sink.add(loadNextChunkEvent);
+                          bloc.eventController.sink.add(LoadNextChunkEvent<
+                                  LoadPrivateChatMessagesListCommand>(
+                              command: LoadPrivateChatMessagesListCommand(
+                                  dialog: widget.dialog, count: 50)));
                         }
                       });
 
-                      bloc.eventController.sink.add(loadNextChunkEvent);
+                      bloc.eventController.sink.add(LoadFirstChunkEvent<
+                              LoadPrivateChatMessagesListCommand>(
+                          command: LoadPrivateChatMessagesListCommand(
+                              dialog: widget.dialog, count: 50)));
                     }
 
                     if (state is EndlessScrollingChunkReadyState) {
@@ -140,9 +142,7 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                         controller: listViewScrollController,
                         reverse: true,
                         itemCount: ((state is EndlessScrollingChunkReadyState &&
-                                    (state as EndlessScrollingChunkReadyState<
-                                            PrivateMessage>)
-                                        .hasMoreData) ||
+                                    state.hasMoreData) ||
                                 state is EndlessScrollingLoadingState)
                             ? messageList.length + 1
                             : messageList.length,

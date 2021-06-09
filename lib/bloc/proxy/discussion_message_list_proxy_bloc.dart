@@ -6,6 +6,7 @@ import 'package:lk_client/bloc_container/mbc_discussion_message_bloc_container.d
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/discipline/discussion_message.dart';
 import 'package:lk_client/state/notification_consume_state.dart';
 
@@ -27,13 +28,14 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   Stream<dynamic> get discussionMessageListStateStream =>
       this.stateContoller.stream;
 
-  Stream<dynamic> get _discussionMessageListInitEventStream =>
-      this.eventController.stream.where((event) =>
-          event is EndlessScrollingLoadEvent<StartNotifyOnDiscussion>);
+  Stream<dynamic> get _discussionMessageListInitEventStream => this
+      .eventController
+      .stream
+      .where((event) => event is ProxyInitEvent<StartNotifyOnDiscussion>);
 
   Stream<dynamic> get _discussionMessageLoadEventStream =>
-      this.eventController.stream.where((event) => event
-          is EndlessScrollingLoadEvent<LoadDisciplineDiscussionListCommand>);
+      this.eventController.stream.where((event) =>
+          event is LoadChunkEvent<LoadDisciplineDiscussionListCommand>);
 
   static Future<DiscussionMessageListProxyBloc> init(
       {@required
@@ -53,8 +55,7 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   DiscussionMessageListProxyBloc(
       {@required this.listBloc, @required this.mbcConsumerBloc}) {
     this._discussionMessageListInitEventStream.listen((event) {
-      final _event =
-          event as EndlessScrollingLoadEvent<StartNotifyOnDiscussion>;
+      final _event = event as ProxyInitEvent<StartNotifyOnDiscussion>;
 
       final command = _event.command;
       /**

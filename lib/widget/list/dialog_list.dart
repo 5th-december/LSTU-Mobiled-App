@@ -6,6 +6,7 @@ import 'package:lk_client/bloc_container/mbc_chat_update_bloc_container.dart';
 import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
+import 'package:lk_client/event/proxy_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as DialogModel;
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/model/person/person.dart';
@@ -63,7 +64,7 @@ class _DialogListState extends State<DialogList> {
               } else {
                 final bloc = snapshot.data;
                 bloc.eventController.sink.add(
-                    EndlessScrollingLoadEvent<StartNotifyOnPerson>(
+                    ProxyInitEvent<StartNotifyOnPerson>(
                         command:
                             StartNotifyOnPerson(trackedPerson: widget.person)));
 
@@ -91,13 +92,12 @@ class _DialogListState extends State<DialogList> {
                           if (needsAutoloading &&
                               maxScroll - currentScroll <= 200) {
                             bloc.eventController.sink.add(
-                                EndlessScrollingLoadEvent<
-                                        LoadDialogListCommand>(
+                                LoadNextChunkEvent<LoadDialogListCommand>(
                                     command: LoadDialogListCommand(count: 50)));
                           }
                         });
                         bloc.eventController.sink.add(
-                            EndlessScrollingLoadEvent<LoadDialogListCommand>(
+                            LoadFirstChunkEvent<LoadDialogListCommand>(
                                 command: LoadDialogListCommand(count: 50)));
                       }
 

@@ -23,7 +23,8 @@ class _MessengerPageState extends State<MessengerPage> {
           IconButton(
               icon: Icon(Icons.person_add_alt_1_rounded),
               onPressed: () => Navigator.of(context).push(MaterialPageRoute(
-                  builder: (BuildContext context) => PersonFinderPage())))
+                  builder: (BuildContext context) =>
+                      PersonFinderPage(person: widget.currentUser))))
         ],
       ),
       body: DialogList(

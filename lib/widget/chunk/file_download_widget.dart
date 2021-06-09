@@ -294,47 +294,49 @@ class _FileDownloadWidgetState extends State<FileDownloadWidget> {
             100.0)
         .round();
 
-    return Container(
-        constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
-        padding: EdgeInsets.all(7.0),
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(12.0),
-            border: Border.all(
-                color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
-        child: Row(
-          children: [
-            ElevatedButton(
-                onPressed: () => {},
-                child: Text('$percent %'),
-                style: ElevatedButton.styleFrom(
-                    primary: Color.fromRGBO(139, 62, 252, 1.0),
-                    shape: CircleBorder(),
-                    padding: EdgeInsets.all(8.0))),
-            Expanded(
-                child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    return Padding(
+        padding: EdgeInsets.symmetric(vertical: 5.0),
+        child: Container(
+            constraints: BoxConstraints(maxWidth: 220.0, minWidth: 220.0),
+            padding: EdgeInsets.all(7.0),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12.0),
+                border: Border.all(
+                    color: Color.fromRGBO(139, 62, 252, 1.0), width: 3.0)),
+            child: Row(
               children: [
-                Text(
-                  material.attachment.attachmentName,
-                  maxLines: 2,
-                  style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500),
-                ),
-                SizedBox(height: 3.0),
-                Text(
-                  'Загружается',
-                  maxLines: 1,
-                  style: TextStyle(
-                      color: Colors.grey.shade500,
-                      fontSize: 14.0,
-                      fontWeight: FontWeight.w400),
-                ),
+                ElevatedButton(
+                    onPressed: () => {},
+                    child: Text('$percent %'),
+                    style: ElevatedButton.styleFrom(
+                        primary: Color.fromRGBO(139, 62, 252, 1.0),
+                        shape: CircleBorder(),
+                        padding: EdgeInsets.all(8.0))),
+                Expanded(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      material.attachment.attachmentName,
+                      maxLines: 2,
+                      style: TextStyle(
+                          color: Colors.grey.shade600,
+                          fontSize: 16.0,
+                          fontWeight: FontWeight.w500),
+                    ),
+                    SizedBox(height: 3.0),
+                    Text(
+                      'Загружается',
+                      maxLines: 1,
+                      style: TextStyle(
+                          color: Colors.grey.shade500,
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w400),
+                    ),
+                  ],
+                ))
               ],
-            ))
-          ],
-        ));
+            )));
   }
 
   Widget getDownloadAvailableWidget(

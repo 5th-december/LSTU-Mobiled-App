@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
@@ -28,10 +29,12 @@ class DialogListBloc
 
   @override
   LoadDialogListCommand getNextChunkCommand(
-      LoadDialogListCommand previousCommand, List<Dialog> loaded,
+      LoadDialogListCommand previousCommand,
+      LoadDialogListCommand currentCommand,
+      List<Dialog> loaded,
       [int remains]) {
     return LoadDialogListCommand(
-        count: min(previousCommand.count, remains), bound: loaded.last.id);
+        count: min(currentCommand.count, remains), bound: loaded.last.id);
   }
 
   @override
@@ -49,13 +52,23 @@ class DialogListBloc
         .eventController
         .sink
         .add(StartConsumeEvent<LoadDialogListCommand>(request: command));
-    await for (ConsumingState<ListedResponse<Dialog>> event
-        in this._bloc.consumingStateStream) {
-      if (event is ConsumingErrorState<ListedResponse<Dialog>>) {
-        throw event.error;
-      } else if (event is ConsumingReadyState<ListedResponse<Dialog>>) {
-        return event.content;
+
+    Completer<ListedResponse<Dialog>> completer =
+        Completer<ListedResponse<Dialog>>();
+
+    Future.delayed(Duration.zero, () async {
+      await for (ConsumingState<ListedResponse<Dialog>> event
+          in this._bloc.consumingStateStream) {
+        if (event is ConsumingErrorState<ListedResponse<Dialog>>) {
+          completer.completeError(event.error);
+          break;
+        } else if (event is ConsumingReadyState<ListedResponse<Dialog>>) {
+          completer.complete(event.content);
+          break;
+        }
       }
-    }
+    });
+
+    return completer.future;
   }
 }

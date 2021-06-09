@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
+import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/store/local/person_finder_page_provider.dart';
 import 'package:lk_client/widget/list/person_list.dart';
 import 'package:lk_client/widget/util/bottom_navigator.dart';
 
 class PersonFinderPage extends StatefulWidget {
-  PersonFinderPage({Key key}) : super(key: key);
+  final Person person;
+
+  PersonFinderPage({Key key, @required this.person}) : super(key: key);
 
   @override
   _PersonFinderPageState createState() => _PersonFinderPageState();
@@ -20,7 +23,10 @@ class _PersonFinderPageState extends State<PersonFinderPage> {
         child: Scaffold(
       appBar: AppBar(title: Text('Поиск пользователей')),
       body: Column(
-        children: [SearchString(), Expanded(child: PersonList())],
+        children: [
+          SearchString(),
+          Expanded(child: PersonList(person: widget.person))
+        ],
       ),
       bottomNavigationBar: BottomNavigator(),
     ));
@@ -59,7 +65,7 @@ class SearchString extends StatelessWidget {
                     .personListBloc
                     .eventController
                     .sink
-                    .add(EndlessScrollingLoadEvent<LoadPersonListByTextQuery>(
+                    .add(LoadFirstChunkEvent<LoadPersonListByTextQuery>(
                         command: LoadPersonListByTextQuery(
                             count: 50,
                             offset: 0,

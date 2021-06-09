@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
@@ -30,13 +31,14 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
   @override
   LoadDisciplineDiscussionListCommand getNextChunkCommand(
       LoadDisciplineDiscussionListCommand previousCommand,
+      LoadDisciplineDiscussionListCommand currentCommand,
       List<DiscussionMessage> loaded,
       [int remains]) {
     return LoadDisciplineDiscussionListCommand(
         discipline: previousCommand.discipline,
         education: previousCommand.education,
         semester: previousCommand.semester,
-        count: min(previousCommand.count, remains),
+        count: min(currentCommand.count, remains),
         bound: loaded.last.id);
   }
 
@@ -54,15 +56,23 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
     this._bloc.eventController.sink.add(
         StartConsumeEvent<LoadDisciplineDiscussionListCommand>(
             request: command));
+    Completer<ListedResponse<DiscussionMessage>> completer =
+        Completer<ListedResponse<DiscussionMessage>>();
 
-    await for (ConsumingState<ListedResponse<DiscussionMessage>> event
-        in this._bloc.consumingStateStream) {
-      if (event is ConsumingErrorState<ListedResponse<DiscussionMessage>>) {
-        throw Exception('Data was not loaded');
-      } else if (event
-          is ConsumingReadyState<ListedResponse<DiscussionMessage>>) {
-        return event.content;
+    Future.delayed(Duration.zero, () async {
+      await for (ConsumingState<ListedResponse<DiscussionMessage>> event
+          in this._bloc.consumingStateStream) {
+        if (event is ConsumingErrorState<ListedResponse<DiscussionMessage>>) {
+          completer.completeError(event.error);
+          break;
+        } else if (event
+            is ConsumingReadyState<ListedResponse<DiscussionMessage>>) {
+          completer.complete(event.content);
+          break;
+        }
       }
-    }
+    });
+
+    return completer.future;
   }
 }

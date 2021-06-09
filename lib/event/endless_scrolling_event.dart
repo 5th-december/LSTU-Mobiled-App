@@ -7,9 +7,19 @@ class EndlessScrollingInitEvent<T> extends EndlessScrollingEvent {
   EndlessScrollingInitEvent({this.initialData});
 }
 
-class EndlessScrollingLoadEvent<C> extends EndlessScrollingEvent {
-  C command;
-  EndlessScrollingLoadEvent({@required this.command});
+abstract class LoadChunkEvent<C> {
+  final C command;
+  LoadChunkEvent({@required this.command});
+}
+
+class LoadFirstChunkEvent<C> extends LoadChunkEvent<C>
+    implements EndlessScrollingEvent {
+  LoadFirstChunkEvent({@required command}) : super(command: command);
+}
+
+class LoadNextChunkEvent<C> extends LoadChunkEvent<C>
+    implements EndlessScrollingEvent {
+  LoadNextChunkEvent({@required command}) : super(command: command);
 }
 
 class ExternalDataAddEvent<T> extends EndlessScrollingEvent {

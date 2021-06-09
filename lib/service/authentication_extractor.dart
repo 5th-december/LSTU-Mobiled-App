@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
@@ -62,12 +63,19 @@ class AuthenticationExtractor {
       this._bloc.eventController.sink.add(TokenInvalidateEvent());
     }
 
-    await for (AuthenticationState state in this._bloc.state) {
-      if (state is AuthenticationValidState ||
-          state is AuthenticationIdentifiedState) {
-        return (this._bloc.currentState as Tokenized).token;
+    Completer<ApiKey> completer = Completer<ApiKey>();
+
+    Future.delayed(Duration.zero, () async {
+      await for (AuthenticationState state in this._bloc.state) {
+        if (state is AuthenticationValidState ||
+            state is AuthenticationIdentifiedState) {
+          completer.complete((this._bloc.currentState as Tokenized).token);
+          break;
+        }
       }
-    }
+    });
+
+    return completer.future;
   }
 
   Future<String> get getAuthenticationData async {

@@ -1,7 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/infinite_scrollers/dialog_list_bloc.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
-import 'package:lk_client/bloc/message_broker_consumers/mbc_dialog_list_consumer_bloc.dart';
 import 'package:lk_client/bloc/proxy/dialog_list_proxy_bloc.dart';
 import 'package:lk_client/bloc_container/mbc_dialog_list_bloc_container.dart';
 import 'package:lk_client/store/global/app_state_container.dart';

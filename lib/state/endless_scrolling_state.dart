@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 
 abstract class EndlessScrollingState<T> {
   final List<T> entityList;
-  EndlessScrollingState({@required this.entityList});
+  EndlessScrollingState({this.entityList = const []});
 }
 
 class EndlessScrollingInitState<T> extends EndlessScrollingState<T> {
@@ -10,24 +10,31 @@ class EndlessScrollingInitState<T> extends EndlessScrollingState<T> {
       : super(entityList: entityList);
 }
 
-class EndlessScrollingLoadingState<T> extends EndlessScrollingState<T> {
-  EndlessScrollingLoadingState({List<T> entityList = const []})
+class EndlessScrollingLoadingState<C, T> extends EndlessScrollingState<T> {
+  final C previousCommand;
+  EndlessScrollingLoadingState(
+      {List<T> entityList = const [], @required this.previousCommand})
       : super(entityList: entityList);
 }
 
-class EndlessScrollingErrorState<T> extends EndlessScrollingState<T> {
+class EndlessScrollingErrorState<C, T> extends EndlessScrollingState<T> {
   final Exception error;
+  final C previousCommand;
   EndlessScrollingErrorState(
-      {@required this.error, List<T> entityList = const []})
+      {@required this.error,
+      List<T> entityList = const [],
+      @required this.previousCommand})
       : super(entityList: entityList);
 }
 
-class EndlessScrollingChunkReadyState<T> extends EndlessScrollingState<T> {
+class EndlessScrollingChunkReadyState<C, T> extends EndlessScrollingState<T> {
   bool hasMoreData;
   int remains;
+  C previousCommand;
   EndlessScrollingChunkReadyState(
       {@required List<T> entityList,
       @required this.hasMoreData,
-      @required this.remains})
+      @required this.remains,
+      @required this.previousCommand})
       : super(entityList: entityList);
 }

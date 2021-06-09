@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:lk_client/bloc/infinite_scrollers/abstract_endless_scrolling_bloc.dart';
@@ -22,11 +23,12 @@ class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<
   @override
   LoadPrivateChatMessagesListCommand getNextChunkCommand(
       LoadPrivateChatMessagesListCommand previousCommand,
+      LoadPrivateChatMessagesListCommand currentCommand,
       List<PrivateMessage> loaded,
       [int remains]) {
     return LoadPrivateChatMessagesListCommand(
         dialog: previousCommand.dialog,
-        count: min(previousCommand.count, remains),
+        count: min(currentCommand.count, remains),
         bound: loaded.last.id);
   }
 
@@ -67,13 +69,23 @@ class PrivateMessageListBloc extends AbstractEndlessScrollingBloc<
         StartConsumeEvent<LoadPrivateChatMessagesListCommand>(
             request: command));
 
-    await for (ConsumingState<ListedResponse<PrivateMessage>> event
-        in this._bloc.consumingStateStream) {
-      if (event is ConsumingErrorState<ListedResponse<PrivateMessage>>) {
-        throw Exception('Data not loaded');
-      } else if (event is ConsumingReadyState<ListedResponse<PrivateMessage>>) {
-        return event.content;
+    Completer<ListedResponse<PrivateMessage>> completer =
+        Completer<ListedResponse<PrivateMessage>>();
+
+    Future.delayed(Duration.zero, () async {
+      await for (ConsumingState<ListedResponse<PrivateMessage>> event
+          in this._bloc.consumingStateStream) {
+        if (event is ConsumingErrorState<ListedResponse<PrivateMessage>>) {
+          completer.completeError(event.error);
+          break;
+        } else if (event
+            is ConsumingReadyState<ListedResponse<PrivateMessage>>) {
+          completer.complete(event.content);
+          break;
+        }
       }
-    }
+    });
+
+    return completer.future;
   }
 }

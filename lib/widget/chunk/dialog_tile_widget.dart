@@ -91,17 +91,19 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                         padding: EdgeInsets.symmetric(
                                             vertical: 10.0, horizontal: 8.0),
                                         decoration: BoxDecoration(
-                                            color: lastMessage.isRead
-                                                ? Colors.transparent
-                                                : Color.fromRGBO(
-                                                    243, 243, 243, 1.0),
+                                            color:
+                                                (lastMessage?.isRead ?? false)
+                                                    ? Colors.transparent
+                                                    : Color.fromRGBO(
+                                                        243, 243, 243, 1.0),
                                             borderRadius: BorderRadius.all(
                                                 Radius.circular(8.0))),
                                         child: Row(
                                           children: [
                                             Expanded(child: () {
                                               String lastMessageString = '';
-                                              if (lastMessage.meSender) {
+                                              if (lastMessage?.meSender ??
+                                                  false) {
                                                 lastMessageString += 'Вы: ';
                                               } else {
                                                 lastMessageString +=
@@ -117,7 +119,10 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                               final currentDateTime =
                                                   DateTime.now();
                                               final lastMessageSentTime =
-                                                  lastMessage.sendTime;
+                                                  lastMessage?.sendTime;
+                                              if (lastMessageSentTime == null) {
+                                                return Text('');
+                                              }
                                               if (lastMessageSentTime.year ==
                                                   currentDateTime.year) {
                                                 if (lastMessageSentTime.month ==
