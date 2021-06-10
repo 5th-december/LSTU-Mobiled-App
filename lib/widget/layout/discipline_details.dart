@@ -51,43 +51,42 @@ class _DisciplineDetailsState extends State<DisciplineDetails> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Padding(
-                  padding: EdgeInsets.only(left: 8.0),
-                  child: Text(
-                    disciplineDetails.name,
-                    style:
-                        TextStyle(fontSize: 24.0, fontWeight: FontWeight.bold),
-                  ),
-                ),
+                Text(disciplineDetails.name,
+                    style: Theme.of(context).textTheme.headline2),
                 Padding(
                   padding: EdgeInsets.only(top: 14.0),
                   child: Row(
                     children: [
-                      Icon(Icons.school_outlined, size: 18.0),
+                      Icon(Icons.school_outlined),
                       Expanded(
-                        child: Padding(
-                          padding: EdgeInsets.only(left: 12.0),
-                          child: Container(
-                            child: Text(
-                            'Кафедра ${disciplineDetails.chair.chairName.toLowerCase()}'),
-                          ),
-                        )
-                      )
-                    ],
-                  ),
-                ),
-                Row(
-                  children: [
-                    Icon(Icons.account_balance_outlined, size: 18.0),
-                    Expanded(
-                      child: Padding(
+                          child: Padding(
                         padding: EdgeInsets.only(left: 12.0),
                         child: Container(
                           child: Text(
-                          'Факультет ${disciplineDetails.chair.faculty.facName.toLowerCase()}'),
+                            'Кафедра ${disciplineDetails.chair.chairName.toLowerCase()}',
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
                         ),
-                      )
-                    )
+                      ))
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 7.0,
+                ),
+                Row(
+                  children: [
+                    Icon(Icons.account_balance_outlined),
+                    Expanded(
+                        child: Padding(
+                      padding: EdgeInsets.only(left: 12.0),
+                      child: Container(
+                        child: Text(
+                          'Факультет ${disciplineDetails.chair.faculty.facName.toLowerCase()}',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ),
+                    ))
                   ],
                 )
               ],

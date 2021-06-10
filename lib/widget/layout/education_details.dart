@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/consuming_event.dart';
@@ -29,8 +30,7 @@ class _EducationDetailsState extends State<EducationDetails> {
     if (_bloc == null) {
       EducationQueryService appEducationQueryService =
           AppStateContainer.of(context).serviceProvider.educationQueryService;
-      this._bloc =
-          EducationListLoaderBloc(appEducationQueryService);
+      this._bloc = EducationListLoaderBloc(appEducationQueryService);
     }
   }
 
@@ -43,38 +43,98 @@ class _EducationDetailsState extends State<EducationDetails> {
   }
 
   Widget _buildEducationDetailsView(List<Education> educationsList) {
-    if (educationsList.length == 1) {
-      return Column(
-        children: [
-          Divider(),
-          Text('${educationsList[0].group.speciality.specName}'),
-          Text(
-              'Квалификация: ${educationsList[0].group.speciality.qualification}'),
-          Text('Статус: ${educationsList[0].status}'),
-          Text('Период обучения: ${educationsList[0].status}')
-        ],
-      );
-    } else {
-      return Column(
-        children: () {
-          List<Widget> educationViewGroups = [Divider()];
-
-          for (var educationItem in educationsList) {
-            educationViewGroups.add(Text(
-                '${educationItem.group.speciality.specName}, ${educationItem.group.speciality.specName}'));
-          }
-
-          return educationViewGroups;
-        }(),
-      );
+    List<Widget> educationWidgetList = <Widget>[];
+    for (Education education in educationsList) {
+      educationWidgetList.add(Row(children: [
+        Expanded(
+            child: Container(
+                padding: EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.school_rounded),
+                        SizedBox(
+                          width: 16.0,
+                        ),
+                        Text(
+                          'Направление: ${education.group.speciality.specName.toLowerCase()}',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.construction_rounded),
+                        SizedBox(
+                          width: 16.0,
+                        ),
+                        Text(
+                          'Квалификация: ${education.group.speciality.qualification.toLowerCase()}',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.bolt),
+                        SizedBox(
+                          width: 16.0,
+                        ),
+                        Text(
+                          'Статус: ${education.status.toLowerCase()}',
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                      children: [
+                        Icon(Icons.calendar_today_rounded),
+                        SizedBox(
+                          width: 16.0,
+                        ),
+                        Text(
+                          () {
+                            DateFormat formatter = DateFormat('MM.yyyy');
+                            final admissionDate = education.group.admission;
+                            final admissionString = admissionDate != null
+                                ? formatter.format(admissionDate)
+                                : '?';
+                            final graduationDate = education.group.graduation;
+                            final graduationString = graduationDate != null
+                                ? formatter.format(graduationDate)
+                                : '?';
+                            return 'Период обучения: $admissionString - $graduationString';
+                          }(),
+                          style: Theme.of(context).textTheme.subtitle1,
+                        ),
+                      ],
+                    ),
+                  ],
+                )))
+      ]));
     }
+    return Column(children: educationWidgetList);
   }
 
   @override
   Widget build(BuildContext context) {
     this._bloc.eventController.sink.add(
-        StartConsumeEvent<LoadCurrentEducationsCommand>(
-            request: LoadCurrentEducationsCommand(this._person)));
+        StartConsumeEvent<LoadUserEducationListCommand>(
+            request: LoadUserEducationListCommand(this._person)));
     return StreamBuilder(
       stream: this._bloc.consumingStateStream,
       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -84,11 +144,8 @@ class _EducationDetailsState extends State<EducationDetails> {
               (snapshot.data as ConsumingReadyState<List<Education>>).content;
 
           return this._buildEducationDetailsView(currentEducationList);
-        } else {
-          return Center(
-            child: CircularProgressIndicator(),
-          );
         }
+        return SizedBox.shrink();
       },
     );
   }

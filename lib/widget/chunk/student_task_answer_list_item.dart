@@ -37,9 +37,24 @@ class StudentTaskAnswerListItem extends StatelessWidget {
         children: [
           Row(
             children: [
-              Text(this.workAnswerAttachment.name ?? 'Материал ответа',
-                  style: TextStyle(fontSize: 18.0, color: Colors.grey.shade800))
+              Expanded(
+                  child: Text('Ответ на задание',
+                      style: Theme.of(context).textTheme.subtitle2))
             ],
+          ),
+          SizedBox(
+            height: 8.0,
+          ),
+          Row(
+            children: [
+              Expanded(
+                  child: Text(
+                      this.workAnswerAttachment.name ?? 'Материал ответа',
+                      style: Theme.of(context).textTheme.headline4))
+            ],
+          ),
+          SizedBox(
+            height: 10.0,
           ),
           Row(
             mainAxisSize: MainAxisSize.max,

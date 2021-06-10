@@ -19,6 +19,7 @@ class _LkAppState extends State<LkApp> {
 
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'LkApp',
       theme: lkAppTheme(),
       routes: {

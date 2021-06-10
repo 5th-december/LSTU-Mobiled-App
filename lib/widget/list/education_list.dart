@@ -8,6 +8,7 @@ import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/layout/rounded_leading_text_image.dart';
 
 class EducationList extends StatefulWidget {
   final Person _currentPerson;
@@ -61,8 +62,11 @@ class _EducationListState extends State<EducationList> {
                       itemBuilder: (BuildContext context, int index) {
                         return Container(
                           child: ListTile(
-                            leading: FlutterLogo(
-                              size: 50,
+                            leading: RoundedLeadingTextImage(
+                              phrase: educationsList[index]
+                                  .group
+                                  .speciality
+                                  .specName,
                             ),
                             title: Text(educationsList[index]
                                 .group

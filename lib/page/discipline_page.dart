@@ -37,20 +37,96 @@ class _DisciplinePageState extends State<DisciplinePage> {
         appBar: AppBar(
           title: Text('Дисциплина'),
         ),
-        body: ListView(
-          children: [
+        body: Padding(
+          padding: EdgeInsets.all(12.0),
+          child: ListView(children: [
             DisciplineDetails(discipline: widget.discipline),
-            DisciplineTeachersList(
-              discipline: widget.discipline,
-              education: widget.education,
-              semester: widget.semester,
-            ),
-            TimetableHorizontalList(
+            Column(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(
+                height: 18.0,
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+                    child: Text(
+                      'Преподаватели',
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              DisciplineTeachersList(
                 discipline: widget.discipline,
+                education: widget.education,
                 semester: widget.semester,
-                education: widget.education),
-            ElevatedButton(
-                onPressed: () => {
+              ),
+              SizedBox(
+                height: 12.0,
+              )
+            ]),
+            Column(mainAxisSize: MainAxisSize.min, children: [
+              SizedBox(
+                height: 18.0,
+              ),
+              Row(
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+                    child: Text(
+                      'Расписание',
+                      style: Theme.of(context).textTheme.subtitle2,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: 8.0),
+              TimetableHorizontalList(
+                  discipline: widget.discipline,
+                  semester: widget.semester,
+                  education: widget.education),
+              SizedBox(
+                height: 12.0,
+              )
+            ]),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SizedBox(
+                  height: 18.0,
+                ),
+                Row(
+                  children: [
+                    Padding(
+                      padding:
+                          EdgeInsets.only(top: 5.0, bottom: 5.0, left: 10.0),
+                      child: Text(
+                        'Ресурсы',
+                        style: Theme.of(context).textTheme.subtitle2,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 8.0),
+                Container(
+                  child: ListTile(
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.fromRGBO(165, 153, 255, 1.0)),
+                      child: Center(
+                        child: Icon(
+                          Icons.library_books_rounded,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                      ),
+                    ),
+                    title: Text('Материалы дисциплины'),
+                    onTap: () => {
                       Navigator.of(context).push(
                           MaterialPageRoute(builder: (BuildContext context) {
                         return Scaffold(
@@ -66,9 +142,26 @@ class _DisciplinePageState extends State<DisciplinePage> {
                         );
                       }))
                     },
-                child: Text('Материалы')),
-            ElevatedButton(
-                onPressed: () => Navigator.of(context).push(
+                  ),
+                ),
+                Container(
+                  child: ListTile(
+                    title: Text('Обсуждение'),
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.fromRGBO(165, 153, 255, 1.0)),
+                      child: Center(
+                        child: Icon(
+                          Icons.forum_rounded,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                      ),
+                    ),
+                    onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext builder) {
                       return DiscussionPage(
                         discipline: widget.discipline,
@@ -77,18 +170,40 @@ class _DisciplinePageState extends State<DisciplinePage> {
                         person: widget.person,
                       );
                     })),
-                child: Text('Обсуждение')),
-            ElevatedButton(
-              child: Text('Задания'),
-              onPressed: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (BuildContext context) {
-                return TasksPage(
-                    discipline: widget.discipline,
-                    education: widget.education,
-                    semester: widget.semester);
-              })),
+                  ),
+                ),
+                Container(
+                  child: ListTile(
+                    title: Text('Задания'),
+                    leading: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color.fromRGBO(165, 153, 255, 1.0)),
+                      child: Center(
+                        child: Icon(
+                          Icons.rule_rounded,
+                          color: Colors.white,
+                          size: 30.0,
+                        ),
+                      ),
+                    ),
+                    onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (BuildContext context) {
+                      return TasksPage(
+                          discipline: widget.discipline,
+                          education: widget.education,
+                          semester: widget.semester);
+                    })),
+                  ),
+                ),
+                SizedBox(
+                  height: 12.0,
+                )
+              ],
             )
-          ],
+          ]),
         ),
         bottomNavigationBar: BottomNavigator());
   }

@@ -10,6 +10,7 @@ import 'package:lk_client/model/education/timetable_item.dart';
 import 'package:lk_client/service/api_consumer/discipline_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
+import 'package:lk_client/widget/layout/profile_picture.dart';
 
 class DisciplineTeachersList extends StatefulWidget {
   final Discipline discipline;
@@ -64,9 +65,9 @@ class _DisciplineTeachersListState extends State<DisciplineTeachersList> {
               argumentList.length,
               (index) => Container(
                     child: ListTile(
-                      /*trailing: PersonProfilePicture(
+                      trailing: PersonProfilePicture(
                           displayed: argumentList[index].teacher.person,
-                          size: 36.0),*/
+                          size: 25.0),
                       title: Text(
                           '${argumentList[index].teacher.person.surname} ${argumentList[index].teacher.person.name} ${argumentList[index].teacher.person.patronymic}'),
                       subtitle: Text(argumentList[index].lessonType),

@@ -37,7 +37,7 @@ class CardTimetableWeek extends StatelessWidget {
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.4),
-                  spreadRadius: 2.0,
+                  spreadRadius: 1.0,
                   blurRadius: 2.0,
                 )
               ]),
@@ -46,26 +46,32 @@ class CardTimetableWeek extends StatelessWidget {
               children: this
                   .week
                   .days
-                  .map((TimetableDay day) => this.getDayView(day))
+                  .map((TimetableDay day) => this.getDayView(context, day))
                   .toList()),
         ));
   }
 
-  Widget getDayView(TimetableDay day) {
+  Widget getDayView(BuildContext context, TimetableDay day) {
     List<Widget> columnChild = [
       Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
             padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 15.0),
-            child: Text(day.name),
+            child: Text(
+              day.name,
+              style: Theme.of(context).textTheme.subtitle2,
+            ),
           )
         ],
+      ),
+      SizedBox(
+        height: 3.0,
       )
     ];
 
     columnChild.addAll(day.lessons
-        .map((TimetableItem lesson) => this.getLessonView(lesson))
+        .map((TimetableItem lesson) => this.getLessonView(context, lesson))
         .toList());
 
     return Row(children: [
@@ -76,7 +82,7 @@ class CardTimetableWeek extends StatelessWidget {
     ]);
   }
 
-  Widget getLessonView(TimetableItem lesson) {
+  Widget getLessonView(BuildContext context, TimetableItem lesson) {
     return Padding(
         padding: EdgeInsets.only(bottom: 5.0),
         child: Row(
@@ -85,19 +91,25 @@ class CardTimetableWeek extends StatelessWidget {
               children: [
                 Container(
                   decoration: BoxDecoration(
-                      color: Color.fromARGB(1, 76, 207, 224),
+                      color: Color.fromRGBO(243, 243, 243, 1.0),
                       borderRadius: BorderRadius.circular(2.0)),
-                  //padding: EdgeInsets.all(3.0),
-                  child: Text(lesson.beginTime),
+                  padding: EdgeInsets.all(3.0),
+                  child: Text(
+                    lesson.beginTime,
+                    style: Theme.of(context).textTheme.bodyText1,
+                  ),
                 ),
                 Padding(
                   padding: EdgeInsets.only(top: 3.0),
                   child: Container(
                     decoration: BoxDecoration(
-                        color: Color.fromARGB(1, 236, 0, 140),
+                        color: Color.fromRGBO(243, 243, 243, 1.0),
                         borderRadius: BorderRadius.circular(2.0)),
-                    //padding: EdgeInsets.all(3.0),
-                    child: Text(lesson.endTime),
+                    padding: EdgeInsets.all(3.0),
+                    child: Text(
+                      lesson.endTime,
+                      style: Theme.of(context).textTheme.bodyText1,
+                    ),
                   ),
                 )
               ],
@@ -109,10 +121,15 @@ class CardTimetableWeek extends StatelessWidget {
                       children: () {
                         List<Widget> lessonInfo = [];
                         if (this.showDiscipline) {
-                          lessonInfo.add(Text(lesson.discipline.name));
+                          lessonInfo.add(Text(lesson.discipline.name,
+                              style: Theme.of(context).textTheme.bodyText1));
                         }
                         if (this.showLessonType) {
-                          lessonInfo.add(Text(lesson.lessonType));
+                          lessonInfo.add(SizedBox(
+                            height: 4.0,
+                          ));
+                          lessonInfo.add(Text(lesson.lessonType,
+                              style: Theme.of(context).textTheme.bodyText2));
                         }
                         return lessonInfo;
                       }(),

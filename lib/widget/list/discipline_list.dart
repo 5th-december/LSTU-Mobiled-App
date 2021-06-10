@@ -9,6 +9,7 @@ import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/widget/chunk/stream_loading_widget.dart';
+import 'package:lk_client/widget/layout/rounded_leading_text_image.dart';
 
 class DisciplineList extends StatefulWidget {
   final Semester semester;
@@ -62,7 +63,9 @@ class _DisciplineListState extends State<DisciplineList> {
             itemBuilder: (BuildContext context, int index) {
               return Container(
                 child: ListTile(
-                    leading: FlutterLogo(size: 36.0),
+                    leading: RoundedLeadingTextImage(
+                      phrase: argumentList[index].name,
+                    ),
                     title: Text(argumentList[index].name),
                     onTap: () => widget.onItemTap(argumentList[index])),
               );

@@ -96,11 +96,13 @@ class TaskResponsePageState extends State<TaskResponsePage> {
             alignment: Alignment.bottomCenter,
             child: StreamBuilder(
               builder: (BuildContext context, AsyncSnapshot snapshot) {
-                return ElevatedButton(
-                  onPressed: () => formBloc.eventController.sink
-                      .add(PrepareFormObjectEvent()),
-                  child: Text('Отправить'),
-                );
+                return Padding(
+                    padding: EdgeInsets.only(bottom: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () => formBloc.eventController.sink
+                          .add(PrepareFormObjectEvent()),
+                      child: Text('Отправить'),
+                    ));
               },
             ),
           )

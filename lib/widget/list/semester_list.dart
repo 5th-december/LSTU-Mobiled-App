@@ -8,6 +8,7 @@ import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/service/api_consumer/education_query_service.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/layout/rounded_leading_text_image.dart';
 
 class SemesterList extends StatefulWidget {
   final Education _education;
@@ -62,8 +63,9 @@ class _SemesterListState extends State<SemesterList> {
                     itemBuilder: (BuildContext context, int index) {
                       return Container(
                         child: ListTile(
-                          leading: FlutterLogo(
-                            size: 50,
+                          leading: RoundedLeadingTextImage(
+                            phrase:
+                                "${semestersList[index].season} ${semestersList[index].year}",
                           ),
                           title: Text(
                               "${semestersList[index].season} ${semestersList[index].year}"),

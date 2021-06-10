@@ -29,7 +29,7 @@ class StudentTaskListItem extends StatelessWidget {
 
               if (studentWork.teacher != null) {
                 teacherDataViewChildren.add(PersonProfilePicture(
-                    displayed: studentWork.teacher.person, size: 12.0));
+                    displayed: studentWork.teacher.person, size: 14.0));
 
                 String teacherName = studentWork.teacher.person.surname;
                 teacherName +=
@@ -42,8 +42,7 @@ class StudentTaskListItem extends StatelessWidget {
                 teacherDataViewChildren.add(SizedBox(width: 8.0));
                 teacherDataViewChildren.add(Expanded(
                   child: Text(teacherName,
-                      style: TextStyle(
-                          fontSize: 12.0, color: Colors.grey.shade400)),
+                      style: Theme.of(context).textTheme.bodyText2),
                 ));
               } else {
                 teacherDataViewChildren.add(Container());
@@ -54,22 +53,37 @@ class StudentTaskListItem extends StatelessWidget {
           ),
           SizedBox(height: 8.0),
           Text(studentWork.workType ?? 'Учебная работа',
-              style: TextStyle(fontSize: 12.0, color: Colors.grey.shade400)),
+              style: Theme.of(context).textTheme.subtitle2),
           SizedBox(height: 8.0),
           Text(studentWork.workName ?? 'Учебное задание',
-              style: TextStyle(fontSize: 18.0, color: Colors.grey.shade800)),
+              style: Theme.of(context).textTheme.headline4),
           SizedBox(height: 10.0),
-          Text(studentWork.workTheme ?? '',
-              style: TextStyle(
-                  fontSize: 22.0,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold)),
-          SizedBox(height: 12.0),
+          studentWork.workTheme != null
+              ? Text(studentWork.workTheme,
+                  style: TextStyle(
+                      fontSize: 22.0,
+                      color: Color.fromRGBO(76, 72, 84, 1.0),
+                      fontWeight: FontWeight.bold))
+              : SizedBox.shrink(),
+          studentWork.workTheme != null
+              ? SizedBox(height: 12.0)
+              : SizedBox.shrink(),
           Text(
-              'Максимальный балл за работу: ${studentWork.workMaxScore.toString() ?? 'не указан'}'),
-          Text(studentWork.answer?.score != null
-              ? 'Оценка работы: ${studentWork.answer.score}'
-              : 'Работа не оценена'),
+            studentWork.answer?.score != null
+                ? 'Оценка работы: ${studentWork.answer.score}'
+                : 'Работа не оценена',
+            style: Theme.of(context).textTheme.bodyText1,
+          ),
+          SizedBox(
+            height: 6.0,
+          ),
+          Text(
+            'Максимальный балл за работу: ${studentWork.workMaxScore.toString() ?? 'не указан'}',
+            style: Theme.of(context).textTheme.bodyText2,
+          ),
+          SizedBox(
+            height: 10.0,
+          ),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: () {

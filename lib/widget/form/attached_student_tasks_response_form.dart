@@ -5,6 +5,7 @@ import 'package:lk_client/bloc/attached/single_type_attachment_form_bloc.dart';
 import 'package:lk_client/bloc/proxy/abstract_attached_form_transport_proxy_bloc.dart';
 import 'package:lk_client/event/attached_form_event.dart';
 import 'package:lk_client/state/attached_form_state.dart';
+import 'package:lk_client/widget/chunk/form/semitransparent_text_form_field.dart';
 import 'package:lk_client/widget/form/attached_private_messaging_form.dart';
 
 class StudentTaskResponseForm extends StatefulWidget {
@@ -43,7 +44,8 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
 
   Widget getAttachmentTypeSelection() {
     return Row(
-      mainAxisSize: MainAxisSize.min,
+      mainAxisSize: MainAxisSize.max,
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         Column(
           children: [
@@ -57,12 +59,23 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
                         AddFileAttachmentEvent(attachmentPath: files.paths[0]));
                   }
                 },
-                child: Icon(Icons.description_rounded, size: 36.0),
+                child: Icon(
+                  Icons.description_rounded,
+                  size: 36.0,
+                  color: Colors.white,
+                ),
                 style: ElevatedButton.styleFrom(
-                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    primary: Color.fromRGBO(165, 153, 255, 1.0),
                     shape: CircleBorder(),
-                    padding: EdgeInsets.all(12.0))),
-            Text('Документ')
+                    padding: EdgeInsets.all(16.0))),
+            SizedBox(
+              height: 12.0,
+            ),
+            Text('Документ',
+                style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(165, 153, 255, 1.0)))
           ],
         ),
         Column(
@@ -73,12 +86,23 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
                     this._showLinkAttachmentForm = true;
                   });
                 },
-                child: Icon(Icons.public_rounded, size: 36.0),
+                child: Icon(
+                  Icons.public_rounded,
+                  size: 36.0,
+                  color: Colors.white,
+                ),
                 style: ElevatedButton.styleFrom(
-                    primary: Color.fromRGBO(139, 62, 252, 1.0),
+                    primary: Color.fromRGBO(165, 153, 255, 1.0),
                     shape: CircleBorder(),
-                    padding: EdgeInsets.all(12.0))),
-            Text('Внешняя ссылка')
+                    padding: EdgeInsets.all(16.0))),
+            SizedBox(
+              height: 12.0,
+            ),
+            Text('Внешняя ссылка',
+                style: TextStyle(
+                    fontSize: 16.0,
+                    fontWeight: FontWeight.w500,
+                    color: Color.fromRGBO(165, 153, 255, 1.0)))
           ],
         )
       ],
@@ -95,11 +119,12 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
       key: key,
       child: Column(
         children: [
-          TextFormField(
-            controller: externalLinkTextController,
-            decoration: InputDecoration(
-                fillColor: Color.fromRGBO(212, 212, 212, 1.0),
-                hintText: 'Ссылка на внешний ресурс'),
+          SemitransparentTextFormField(
+              controller: externalLinkTextController,
+              hintText: 'Ссылка на внешний ресурс',
+              icon: Icons.public_rounded),
+          SizedBox(
+            height: 12.0,
           ),
           ElevatedButton(
               onPressed: () {
@@ -124,13 +149,14 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
         key: formKey,
         child: Column(
           children: [
-            TextFormField(
+            SemitransparentTextFormField(
               controller:
                   this.controllerProvider.responseNameTextEditionController,
-              decoration: InputDecoration(
-                fillColor: Color.fromRGBO(212, 212, 212, 1.0),
-                hintText: 'Название ответа',
-              ),
+              hintText: 'Название ответа',
+              icon: Icons.segment,
+            ),
+            SizedBox(
+              height: 30.0,
             ),
             StreamBuilder(
                 stream: this.formBloc.attachedInputStateStream,
@@ -147,38 +173,104 @@ class _StatefulTaskResponseFormState extends State<StudentTaskResponseForm> {
                       }
                     }
 
-                    if (state.fileAttachment != null) {
-                      return Row(
-                        children: [
-                          Icon(Icons.description_rounded, size: 36.0),
-                          IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () => this
-                                  .formBloc
-                                  .eventController
-                                  .sink
-                                  .add(RemoveFileAttachmentEvent()))
-                        ],
-                      );
-                    }
-
-                    if (state.attachedLink != null) {
-                      return Row(
-                        children: [
-                          Icon(
-                            Icons.public_rounded,
-                            size: 36.0,
-                          ),
-                          IconButton(
-                              icon: Icon(Icons.close),
-                              onPressed: () => this
-                                  .formBloc
-                                  .eventController
-                                  .sink
-                                  .add(RemoveExternalLinkEvent()))
-                        ],
-                      );
-                    }
+                    return Padding(
+                        padding: EdgeInsets.symmetric(
+                            horizontal: 35.0, vertical: 15.0),
+                        child: Container(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                            decoration: BoxDecoration(
+                                color: Color.fromRGBO(137, 64, 253, 1.0),
+                                border: Border.all(color: Colors.transparent),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(40.0))),
+                            child: Row(
+                              children: [
+                                () {
+                                  if (state.fileAttachment != null) {
+                                    return Icon(
+                                      Icons.description_rounded,
+                                      size: 36.0,
+                                      color: Colors.white,
+                                    );
+                                  } else if (state.attachedLink != null) {
+                                    return Icon(
+                                      Icons.public_rounded,
+                                      size: 36.0,
+                                      color: Colors.white,
+                                    );
+                                  }
+                                }(),
+                                SizedBox(
+                                  width: 18.0,
+                                ),
+                                Expanded(
+                                  child: Column(
+                                    children: [
+                                      Text(
+                                        () {
+                                          if (state.fileAttachment != null) {
+                                            return 'Добавлен файл';
+                                          } else if (state.attachedLink !=
+                                              null) {
+                                            return 'Добавлена внешняя ссылка';
+                                          }
+                                        }(),
+                                        style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 18.0,
+                                            fontWeight: FontWeight.w500),
+                                      ),
+                                      SizedBox(
+                                        height: 6.0,
+                                      ),
+                                      Text(
+                                        () {
+                                          if (state.fileAttachment != null) {
+                                            return state
+                                                    .fileAttachment?.filePath ??
+                                                '';
+                                          } else if (state.attachedLink !=
+                                              null) {
+                                            return state
+                                                .attachedLink.linkContent;
+                                          }
+                                        }(),
+                                        maxLines: 1,
+                                        style: TextStyle(
+                                            color: Colors.white70,
+                                            fontSize: 14.0,
+                                            fontWeight: FontWeight.w500),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(
+                                  width: 18.0,
+                                ),
+                                IconButton(
+                                    icon: Icon(
+                                      Icons.close,
+                                      size: 32.0,
+                                      color: Colors.white,
+                                    ),
+                                    onPressed: () {
+                                      if (state.fileAttachment != null) {
+                                        return () => this
+                                            .formBloc
+                                            .eventController
+                                            .sink
+                                            .add(RemoveFileAttachmentEvent());
+                                      } else if (state.attachedLink != null) {
+                                        return () => this
+                                            .formBloc
+                                            .eventController
+                                            .sink
+                                            .add(RemoveExternalLinkEvent());
+                                      }
+                                    }())
+                              ],
+                            )));
                   }
 
                   return SizedBox.shrink();

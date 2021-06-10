@@ -94,73 +94,103 @@ class _TeachMaterialsListState extends State<TeachMaterialsList> {
       loadingStream: this._loadingBloc.consumingStateStream,
       childBuilder: (List<TeachingMaterial> teachingMaterials) {
         return ListView.separated(
+            separatorBuilder: (BuildContext context, int index) => SizedBox(
+                  height: 8.0,
+                ),
+            itemCount: teachingMaterials.length,
             itemBuilder: (BuildContext context, int index) {
-              if (teachingMaterials[index].attachment != null) {
-                String fileExtension = teachingMaterials[index]
-                        .attachment
-                        .attachmentName
-                        .split('.')
-                        ?.last ??
-                    '';
-                double fileSize = double.parse(
-                    teachingMaterials[index].attachment.attachmentSize);
-                String sizeTitle = fileSize > 1024
-                    ? (fileSize / 1024).toStringAsFixed(2) + ' Мб.'
-                    : fileSize.toStringAsFixed(2) + ' Кб.';
-                String teachingMaterialInfo = "Файл $fileExtension, $sizeTitle";
-                return Container(
+              return Container(
                   padding:
-                      EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Text(teachingMaterials[index].materialName),
-                      ),
-                      FileDownloadWidget(
-                        fileMaterial: DownloadFileMaterial(
-                          originalFileName: teachingMaterials[index]
-                              .attachment
-                              .attachmentName,
-                          attachmentId: teachingMaterials[index].id,
-                          attachment: teachingMaterials[index].attachment,
-                          command: LoadTeachingMaterialAttachment(
-                              teachingMaterials[index].id),
-                        ),
-                        proxyBloc: TeachingMaterialsDownloaderProxyBloc(
-                            fileDownloaderBlocProvider:
-                                this._fileDownloaderBlocProvider,
-                            fileLocalManager: this._fileLocalManager,
-                            fileTransferService: this._fileTransferService,
-                            appNotifier: this._appNotifier),
-                      )
-                    ],
-                  ),
-                );
-              } else if (teachingMaterials[index].externalLink != null) {
-                return Container(
-                    padding:
-                        EdgeInsets.symmetric(vertical: 15.0, horizontal: 20.0),
-                    child: Row(children: [
-                      Expanded(
-                        child: Text(teachingMaterials[index].materialName),
-                      ),
-                      LinkOpenWidget(
-                        externalLink: DownloadExternalLinkMaterial(
-                            externalLink: ExternalLink(
-                                linkContent: teachingMaterials[index]
-                                    .externalLink
-                                    .linkContent,
-                                linkText: teachingMaterials[index]
-                                    .externalLink
-                                    .linkText)),
-                      )
-                    ]));
-              } else {
-                return SizedBox.shrink();
-              }
-            },
-            separatorBuilder: (BuildContext context, int index) => Divider(),
-            itemCount: teachingMaterials.length);
+                      EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(8.0))),
+                  child: Column(children: [
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Text(
+                                teachingMaterials[index].materialType ??
+                                    'Материал дисциплины',
+                                style: Theme.of(context).textTheme.subtitle2))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 8.0,
+                    ),
+                    Row(
+                      children: [
+                        Expanded(
+                            child: Text(
+                                teachingMaterials[index].materialName ??
+                                    'Прикрепленный материал',
+                                style: Theme.of(context).textTheme.headline4))
+                      ],
+                    ),
+                    SizedBox(
+                      height: 10.0,
+                    ),
+                    Row(
+                        mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          () {
+                            if (teachingMaterials[index].attachment != null) {
+                              String fileExtension = teachingMaterials[index]
+                                      .attachment
+                                      .attachmentName
+                                      .split('.')
+                                      ?.last ??
+                                  '';
+                              double fileSize = double.parse(
+                                  teachingMaterials[index]
+                                      .attachment
+                                      .attachmentSize);
+                              String sizeTitle = fileSize > 1024
+                                  ? (fileSize / 1024).toStringAsFixed(2) +
+                                      ' Мб.'
+                                  : fileSize.toStringAsFixed(2) + ' Кб.';
+                              String teachingMaterialInfo =
+                                  "Файл $fileExtension, $sizeTitle";
+
+                              return FileDownloadWidget(
+                                fileMaterial: DownloadFileMaterial(
+                                  originalFileName: teachingMaterials[index]
+                                      .attachment
+                                      .attachmentName,
+                                  attachmentId: teachingMaterials[index].id,
+                                  attachment:
+                                      teachingMaterials[index].attachment,
+                                  command: LoadTeachingMaterialAttachment(
+                                      teachingMaterials[index].id),
+                                ),
+                                proxyBloc: TeachingMaterialsDownloaderProxyBloc(
+                                    fileDownloaderBlocProvider:
+                                        this._fileDownloaderBlocProvider,
+                                    fileLocalManager: this._fileLocalManager,
+                                    fileTransferService:
+                                        this._fileTransferService,
+                                    appNotifier: this._appNotifier),
+                              );
+                            } else if (teachingMaterials[index].externalLink !=
+                                null) {
+                              return LinkOpenWidget(
+                                externalLink: DownloadExternalLinkMaterial(
+                                    externalLink: ExternalLink(
+                                        linkContent: teachingMaterials[index]
+                                            .externalLink
+                                            .linkContent,
+                                        linkText: teachingMaterials[index]
+                                            .externalLink
+                                            .linkText)),
+                              );
+                            } else {
+                              return SizedBox.shrink();
+                            }
+                          }()
+                        ])
+                  ]));
+            });
       },
     );
   }

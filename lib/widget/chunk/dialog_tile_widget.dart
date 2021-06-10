@@ -126,8 +126,13 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                               }
                                               lastMessageString +=
                                                   lastMessage.messageText;
-                                              return Text(lastMessageString,
-                                                  maxLines: 1);
+                                              return Text(
+                                                lastMessageString,
+                                                maxLines: 1,
+                                                style: Theme.of(context)
+                                                    .textTheme
+                                                    .bodyText1,
+                                              );
                                             }()),
                                             () {
                                               String sendLabel = '';
@@ -165,7 +170,10 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                               }
 
                                               return Text(sendLabel,
-                                                  maxLines: 1);
+                                                  maxLines: 1,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .bodyText1);
                                             }(),
                                           ],
                                         ),

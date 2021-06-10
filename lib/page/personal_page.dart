@@ -10,6 +10,7 @@ import 'package:lk_client/page/person_edit_page.dart';
 import 'package:lk_client/page/publications_page.dart';
 import 'package:lk_client/state/consuming_state.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
+import 'package:lk_client/widget/layout/education_details.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
 import 'package:lk_client/widget/util/bottom_navigator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -141,11 +142,14 @@ class _PersonalPageState extends State<PersonalPage> {
         padding: EdgeInsets.only(top: 10.0),
         child: Row(
           children: [
-            Icon(Icons.send_outlined, size: 22.0),
+            Icon(Icons.send_rounded, size: 22.0),
             Padding(
               padding: EdgeInsets.only(left: 12.0),
               child: Container(
-                child: Text('Мессенджер: ${person.messenger}'),
+                child: Text(
+                  'Мессенджер: ${person.messenger}',
+                  style: Theme.of(context).textTheme.subtitle1,
+                ),
               ),
             ),
           ],
@@ -226,7 +230,7 @@ class _PersonalPageState extends State<PersonalPage> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.only(top: 18.0),
+                    padding: EdgeInsets.all(18.0),
                     child: Column(
                       children: this._constructPersonProperties(loadedPerson),
                     ),
@@ -241,9 +245,17 @@ class _PersonalPageState extends State<PersonalPage> {
                             Padding(
                               padding: EdgeInsets.only(
                                   top: 5.0, bottom: 5.0, left: 10.0),
-                              child: Text('Образование'),
-                            )
+                              child: Text(
+                                'Образование',
+                                style: Theme.of(context).textTheme.subtitle2,
+                              ),
+                            ),
                           ],
+                        ),
+                        SizedBox(height: 8.0),
+                        EducationDetails(widget._person),
+                        SizedBox(
+                          height: 12.0,
                         )
                       ],
                     ),
@@ -252,8 +264,38 @@ class _PersonalPageState extends State<PersonalPage> {
                   ListView(
                     shrinkWrap: true,
                     children: [
+                      SizedBox(
+                        height: 18.0,
+                      ),
+                      Row(
+                        children: [
+                          Padding(
+                            padding: EdgeInsets.only(
+                                top: 5.0, bottom: 5.0, left: 10.0),
+                            child: Text(
+                              'Действия',
+                              style: Theme.of(context).textTheme.subtitle2,
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: 8.0),
                       Container(
                         child: ListTile(
+                          leading: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color.fromRGBO(165, 153, 255, 1.0)),
+                            child: Center(
+                              child: Icon(
+                                Icons.emoji_events_rounded,
+                                color: Colors.white,
+                                size: 30.0,
+                              ),
+                            ),
+                          ),
                           title: Text('Личные достижения'),
                           onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
@@ -266,12 +308,29 @@ class _PersonalPageState extends State<PersonalPage> {
                       Container(
                         child: ListTile(
                           title: Text('Публикации'),
+                          leading: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Color.fromRGBO(165, 153, 255, 1.0)),
+                            child: Center(
+                              child: Icon(
+                                Icons.auto_stories,
+                                color: Colors.white,
+                                size: 30.0,
+                              ),
+                            ),
+                          ),
                           onTap: () => Navigator.of(context).push(
                               MaterialPageRoute(
                                   builder: (BuildContext context) =>
                                       PublicationsPage(
                                           person: widget._person))),
                         ),
+                      ),
+                      SizedBox(
+                        height: 12.0,
                       )
                     ],
                   )
