@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc/widget/messenger_tile_bloc.dart';
+import 'package:lk_client/bloc/widget/messenger_tile_unread_bloc.dart';
+import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/messenger/dialog.dart' as Dl;
 import 'package:lk_client/model/messenger/private_message.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/state/consuming_state.dart';
+import 'package:lk_client/store/global/mbc_bloc_provider.dart';
+import 'package:lk_client/widget/chunk/messenger_tile_unread_widget.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
 
 class DialogTileWidget extends StatefulWidget {
@@ -30,6 +34,17 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
   final Future<MessengerTileBloc> _messengerTileBloc;
 
   _DialogTileWidgetState(this._messengerTileBloc);
+
+  Future<MbCPrivateMessageBlocContainer> _privateMessageBlocContainer;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (this._privateMessageBlocContainer == null) {
+      this._privateMessageBlocContainer =
+          MbCBlocProvider.of(context).mbCPrivateMessageBlocContainer();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -174,7 +189,34 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                 ],
               )
             ],
-          ))
+          )),
+          /*Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              FutureBuilder(
+                future: MessengerTileUnreadBloc.init(
+                    privateMessageBlocContainer:
+                        this._privateMessageBlocContainer,
+                    dialog: widget.dialog,
+                    person: widget.person),
+                builder: (BuildContext context, AsyncSnapshot snapshot) {
+                  switch (snapshot.connectionState) {
+                    case ConnectionState.done:
+                      final MessengerTileUnreadBloc messengerTileUnreadBloc =
+                          snapshot.data;
+                      messengerTileUnreadBloc.eventController.sink.add(
+                          StartConsumeEvent<Dl.Dialog>(request: widget.dialog));
+                      return MessengerTileUnreadWidget(
+                        bloc: messengerTileUnreadBloc,
+                      );
+                      break;
+                    default:
+                      return SizedBox.shrink();
+                  }
+                },
+              )
+            ],
+          )*/
         ],
       ),
     );

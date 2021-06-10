@@ -25,10 +25,16 @@ class AmqpBindingData {
   final String exchangeName;
   final ExchangeType exchangeType;
   final List<String> routingKeys;
+  final String queueName;
+  final bool isDurableQueue;
+  final bool needAck;
   AmqpBindingData(
       {@required this.exchangeName,
       @required this.exchangeType,
-      this.routingKeys});
+      this.routingKeys,
+      this.isDurableQueue,
+      this.queueName,
+      this.needAck});
 }
 
 class AmqpService {
@@ -53,12 +59,24 @@ class AmqpService {
     this.amqpClient = Client(settings: settings);
   }
 
-  Future<Consumer> startListenBindedQueue(AmqpBindingData binding) async {
+  Future<Consumer> startConsumePrivateQueue(AmqpBindingData binding) async {
     Channel channel = await amqpClient.channel();
     Exchange exchange = await channel
         .exchange(binding.exchangeName, binding.exchangeType, durable: true);
     Consumer consumer =
         await exchange.bindPrivateQueueConsumer(binding.routingKeys);
+    return consumer;
+  }
+
+  Future<Consumer> startConsumeCustomQueue(AmqpBindingData binding) async {
+    Channel channel = await amqpClient.channel();
+    Exchange exchange = await channel
+        .exchange(binding.exchangeName, binding.exchangeType, durable: true);
+    Queue customQueue =
+        await channel.queue(binding.queueName, durable: binding.isDurableQueue);
+    Consumer consumer = await exchange.bindQueueConsumer(
+        customQueue.name, binding.routingKeys,
+        noAck: !binding.needAck);
     return consumer;
   }
 

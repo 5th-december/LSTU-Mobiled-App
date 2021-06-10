@@ -86,7 +86,7 @@ class MbCPrivateMessageConsumerBloc
 
       try {
         this._amqpConsumer =
-            await amqpService.startListenBindedQueue(bindingData);
+            await amqpService.startConsumePrivateQueue(bindingData);
 
         // При обработке потока сообщений подтягиваются также необработанные
         // уведолмения из бд, в состояние кладется результирующий список

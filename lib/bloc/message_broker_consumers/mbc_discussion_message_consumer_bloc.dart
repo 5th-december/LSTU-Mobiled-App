@@ -82,7 +82,7 @@ class MbCDiscussionMessageConsumerBloc
 
       try {
         this._amqpConsumer =
-            await amqpService.startListenBindedQueue(bindingData);
+            await amqpService.startConsumePrivateQueue(bindingData);
 
         /**
          * Трансформер для стрима Map<dynamic, dynamic> в List<DiscussionMessage>

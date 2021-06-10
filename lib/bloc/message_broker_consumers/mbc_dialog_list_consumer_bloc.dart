@@ -72,7 +72,7 @@ class MbCDialogListConsumerBloc extends AbstractBloc<
 
       try {
         this._amqpConsumer =
-            await amqpService.startListenBindedQueue(amqpBindingData);
+            await amqpService.startConsumePrivateQueue(amqpBindingData);
 
         final transformer = StreamTransformer.fromHandlers(
             handleData: (data, EventSink sink) async {

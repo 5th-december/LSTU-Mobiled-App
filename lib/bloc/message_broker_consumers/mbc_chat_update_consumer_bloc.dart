@@ -77,7 +77,7 @@ class MbCChatUpdateConsumerBloc
 
       try {
         this._messageBrokerConsumer =
-            await amqpService.startListenBindedQueue(bindingData);
+            await amqpService.startConsumePrivateQueue(bindingData);
 
         final dialogReadStreamTransformer =
             StreamTransformer.fromHandlers(handleData: (data, EventSink sink) {
