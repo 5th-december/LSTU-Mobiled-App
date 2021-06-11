@@ -60,90 +60,49 @@ abstract class AbstractAttachedTransportBloc<TQ, TR, TC>
     /*
     * Событие отправки данных формы
     */
-    this._attachedFormProduceEventStream.listen((ProducingEvent event) {
-      /*
-       * Отправка доступна, если в текущий момент нет других отправляемых сообщений
-       *
-      if (this.currentState is ProducingLoadingState) {
-        return;
-      }*/
+    this._attachedFormProduceEventStream.listen((ProducingEvent event) async {
       final _event = event as ProduceResourceEvent<AttachedFileContent<TQ>, TC>;
-
-      /*
-       * Объект данных формы
-       */
       TQ formData = _event.resourse.content;
-
-      /*
-       * Прикрепленный файл
-       */
       LocalFilesystemObject sendingFile = _event.resourse.file;
-
-      /*
-       * Команда отправки формы
-       */
       TC command = _event.command;
-
-      /*
-       * Вызов переопределенного метода отправки данных формы, добавление листенера ответов
-       */
       this.updateState(ProducingLoadingState<TQ>());
 
-      this.sendFormData(formData, command).listen((tEvent) {
-        if (tEvent is ProducingInvalidState<TQ>) {
-          /**
-           * В случае, если введенные в форме данные не валидны
-           * Такое состояние может быть отправлено из апи
-           */
-          this.updateState(ProducingInvalidState<TQ>(tEvent.errorBox));
-        } else if (tEvent is ProducingErrorState<TQ>) {
-          /**
-           * Ошибка отправки формы
-           */
-          this.updateState(ProducingErrorState<TQ>(tEvent.error));
-        } else if (tEvent is ProducingReadyState<TQ, TR>) {
-          /*
-           * Успешная отправка формы
-           * В случае, если нет прикрепленного медиа файла, возвращается ready state
-           */
-          if (sendingFile == null) {
-            this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
-                data: _event.resourse, response: tEvent.response));
-            return;
-          }
+      final sendingStream = this.sendFormData(formData, command);
 
-          this.updateState(ProducingLoadingState<LocalFilesystemObject>());
+      TR formSendingResponse;
 
-          /*
-           * Получение идентификатора добавленного объекта из формы
-           */
-          TR fileRequestResponse = tEvent.response;
-
-          /*
-           * Вызов переопределенного метода отправки медиа, добавление листенера 
-           */
-          this.sendMultipartData(sendingFile, fileRequestResponse).listen(
-              (fEvent) {
-            if (fEvent is FileOperationErrorState) {
-              /**
-                * Ошибка отправки медиа данных
-                */
-              this.updateState(
-                  ProducingErrorState<LocalFilesystemObject>(fEvent.error));
-            } else if (fEvent is FileUploadReadyState) {
-              /**
-                 * Успешная отправка медиа данных
-                 */
-              this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
-                  data: _event.resourse, response: tEvent.response));
-            }
-          }, onError: (e) {
-            this.updateState(ProducingErrorState<LocalFilesystemObject>(e));
-          });
+      await for (ProducingState<TQ> value in sendingStream) {
+        if (value is ProducingInvalidState<TQ>) {
+          this.updateState(ProducingInvalidState<TQ>(value.errorBox));
+          break;
+        } else if (value is ProducingErrorState<TQ>) {
+          this.updateState(ProducingErrorState<TQ>(value.error));
+          break;
+        } else if (value is ProducingReadyState<TQ, TR>) {
+          formSendingResponse = value.response;
+          break;
         }
-      }, onError: (e) {
-        this.updateState(ProducingErrorState<TQ>(e));
-      });
+      }
+
+      if (sendingFile == null) {
+        this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
+            data: _event.resourse, response: formSendingResponse));
+      } else {
+        this.updateState(ProducingLoadingState<LocalFilesystemObject>());
+        final fileSendingStream =
+            this.sendMultipartData(sendingFile, formSendingResponse);
+        await for (FileManagementState fileSendingStatus in fileSendingStream) {
+          if (fileSendingStatus is FileOperationErrorState) {
+            this.updateState(ProducingErrorState<LocalFilesystemObject>(
+                fileSendingStatus.error));
+            break;
+          } else if (fileSendingStatus is FileUploadReadyState) {
+            this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
+                data: _event.resourse, response: formSendingResponse));
+            break;
+          }
+        }
+      }
     });
   }
 }

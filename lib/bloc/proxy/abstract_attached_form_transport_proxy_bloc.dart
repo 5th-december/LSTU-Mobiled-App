@@ -48,6 +48,7 @@ abstract class AbstractAttachedFormTransportProxyBloc<T, C>
       });
     } else {
       this._transportBloc = this.initTransport();
+      this._transportBloc.eventController.sink.add(ProducerInitEvent());
     }
 
     this
@@ -58,8 +59,6 @@ abstract class AbstractAttachedFormTransportProxyBloc<T, C>
     this._attachedFormEventStream.listen((event) {
       this._transportBloc.eventController.add(event);
     });
-
-    this._transportBloc.eventController.sink.add(ProducerInitEvent());
 
     /**
      * Когда объект в форме готов, она кидает ObjectReadyFormInputState
