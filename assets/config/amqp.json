@@ -5,9 +5,10 @@
     "rmqVHost": "lkapp",
     "rmqPassword": "client",
     "exchange": {
-        "dialogListExchangeName": "dialog",
-        "dialogReadExchangeName": "read_event",
-        "discussionMessageExchangeName": "discussion_msg",
-        "messageExchangeName": "private_msg"
+        "privateMessageListExchangeName": "private-created",
+        "privateMessageUpdateExchangeName": "private-changed",
+        "discussionMessageListExchangeName": "discussion-created",
+        "discussionMessageUpdateExchangeName": "discussion-changed",
+        "dialogListExchangeName": "dialog-created"
     }
 }

@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:lk_client/bloc/loader/loader_bloc.dart';
+import 'package:lk_client/model/discipline/discipline.dart';
 import 'package:lk_client/model/discipline/student_work.dart';
 import 'package:lk_client/model/education/education.dart';
+import 'package:lk_client/model/education/semester.dart';
 import 'package:lk_client/page/task_response_page.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
 import 'package:lk_client/widget/list/tasks_answer_list.dart';
@@ -9,8 +12,16 @@ import 'package:lk_client/widget/list/tasks_answer_list.dart';
 class StudentTaskListItem extends StatelessWidget {
   final StudentWork studentWork;
   final Education education;
+  final Semester semester;
+  final Discipline discipline;
+  final TasksListLoaderBloc bloc;
 
-  StudentTaskListItem({@required this.studentWork, @required this.education});
+  StudentTaskListItem(
+      {@required this.studentWork,
+      @required this.education,
+      @required this.discipline,
+      @required this.semester,
+      @required this.bloc});
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +104,9 @@ class StudentTaskListItem extends StatelessWidget {
                     Navigator.of(context).push(
                         MaterialPageRoute(builder: (BuildContext context) {
                       return TaskResponsePage(
+                          loaderBloc: this.bloc,
+                          discipline: this.discipline,
+                          semester: this.semester,
                           studentWork: this.studentWork,
                           education: this.education);
                     }));

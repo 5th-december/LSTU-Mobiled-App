@@ -2,7 +2,9 @@ import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/discussion_list_bloc.dart';
 import 'package:lk_client/bloc/message_broker_consumers/mbc_discussion_message_consumer_bloc.dart';
+import 'package:lk_client/bloc/message_broker_consumers/mbc_discussion_update_consumer_bloc.dart';
 import 'package:lk_client/bloc_container/mbc_discussion_message_bloc_container.dart';
+import 'package:lk_client/bloc_container/mbc_discussion_update_bloc_container.dart';
 import 'package:lk_client/command/consume_command.dart';
 import 'package:lk_client/event/endless_scrolling_event.dart';
 import 'package:lk_client/event/notification_consume_event.dart';
@@ -23,7 +25,9 @@ class StartNotifyOnDiscussion {
 class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   final DiscussionListBloc listBloc;
 
-  final MbCDiscussionMessageConsumerBloc mbcConsumerBloc;
+  final MbCDiscussionMessageConsumerBloc mbcDiscussionListConsumerBloc;
+
+  final MbCDiscussionUpdateConsumerBloc mbCDiscussionUpdateConsumerBloc;
 
   Stream<dynamic> get discussionMessageListStateStream =>
       this.stateContoller.stream;
@@ -41,19 +45,32 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
       {@required
           DiscussionListBloc discussionListBloc,
       @required
+          Future<MbCDiscussionUpdateBlocContainer>
+              mbCDiscussionUpdateBlocContainer,
+      @required
           Future<MbCDiscussionMessageBlocContainer>
               mbCDiscussionMessageBlocContainer}) async {
     MbCDiscussionMessageBlocContainer _mbCDiscussionMessageBlocContainer =
         await mbCDiscussionMessageBlocContainer;
     MbCDiscussionMessageConsumerBloc mbCDiscussionMessageConsumerBloc =
         _mbCDiscussionMessageBlocContainer.getBloc();
+    MbCDiscussionUpdateBlocContainer _mbCDiscussionUpdateBlocContainer =
+        await mbCDiscussionUpdateBlocContainer;
+    MbCDiscussionUpdateConsumerBloc mbCDiscussionUpdateConsumerBloc =
+        _mbCDiscussionUpdateBlocContainer.getBloc();
     return DiscussionMessageListProxyBloc(
         listBloc: discussionListBloc,
-        mbcConsumerBloc: mbCDiscussionMessageConsumerBloc);
+        mbcDiscussionListConsumerBloc: mbCDiscussionMessageConsumerBloc,
+        mbCDiscussionUpdateConsumerBloc: mbCDiscussionUpdateConsumerBloc);
   }
 
   DiscussionMessageListProxyBloc(
-      {@required this.listBloc, @required this.mbcConsumerBloc}) {
+      {@required this.listBloc,
+      @required this.mbcDiscussionListConsumerBloc,
+      @required this.mbCDiscussionUpdateConsumerBloc}) {
+    /**
+     * Обработчик события инициализации
+     */
     this._discussionMessageListInitEventStream.listen((event) {
       final _event = event as ProxyInitEvent<StartNotifyOnDiscussion>;
 
@@ -61,7 +78,8 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
       /**
        * Подписка на обновления состяний блока событий
        */
-      mbcConsumerBloc.discussionMessageConsumingStateStream.listen((event) {
+      mbcDiscussionListConsumerBloc.discussionMessageConsumingStateStream
+          .listen((event) {
         if (event is NotificationReadyState<List<DiscussionMessage>> &&
             event.notifications.length != 0) {
           /**
@@ -85,7 +103,35 @@ class DiscussionMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
           /**
            * Частичное подтверждение получения
            */
-          this.mbcConsumerBloc.eventController.sink.add(
+          this.mbcDiscussionListConsumerBloc.eventController.sink.add(
+              AckPartiallyNotificationReceived<DiscussionMessage>(
+                  deliveredNotifications: selectedNotificationsForCurrentChat));
+        }
+      });
+
+      mbCDiscussionUpdateConsumerBloc.discissionUpdateNotificationStateStream
+          .listen((event) {
+        if (event is NotificationReadyState<List<DiscussionMessage>> &&
+            event.notifications.length != 0) {
+          final selectedNotificationsForCurrentChat = event.notifications
+              .where((DiscussionMessage element) =>
+                  element.discipline == command.discipline &&
+                  element.group == element.group &&
+                  element.semester == element.semester)
+              .toList();
+
+          if (selectedNotificationsForCurrentChat.length == 0) {
+            return;
+          }
+
+          this.listBloc.eventController.sink.add(
+              ExternalDataUpdateEvent<DiscussionMessage>(
+                  externalUpdatedData: selectedNotificationsForCurrentChat));
+
+          /**
+           * Частичное подтверждение получения
+           */
+          this.mbCDiscussionUpdateConsumerBloc.eventController.sink.add(
               AckPartiallyNotificationReceived<DiscussionMessage>(
                   deliveredNotifications: selectedNotificationsForCurrentChat));
         }

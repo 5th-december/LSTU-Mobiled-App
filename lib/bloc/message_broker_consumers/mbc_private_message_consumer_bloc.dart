@@ -65,7 +65,7 @@ class MbCPrivateMessageConsumerBloc
 
   MbCPrivateMessageConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
-    this._exchangeName = amqpConfig.messageExchangeName;
+    this._exchangeName = amqpConfig.privateMessageListExchangeName;
     /**
      * Событие старта подписки на обновления
      */

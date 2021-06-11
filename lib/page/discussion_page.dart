@@ -61,7 +61,9 @@ class _DiscussionPageState extends State<DiscussionPage> {
       this.discussionMessageListProxyBloc = DiscussionMessageListProxyBloc.init(
           discussionListBloc: discussionListBloc,
           mbCDiscussionMessageBlocContainer:
-              MbCBlocProvider.of(context).mbCDiscussionMessageBlocContainer());
+              MbCBlocProvider.of(context).mbCDiscussionMessageBlocContainer(),
+          mbCDiscussionUpdateBlocContainer:
+              MbCBlocProvider.of(context).mbCDiscussionUpdateBlocContainer());
     }
 
     if (this.fileTransferService == null) {

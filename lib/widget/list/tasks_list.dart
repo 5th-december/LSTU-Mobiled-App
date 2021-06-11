@@ -86,6 +86,9 @@ class _TasksListState extends State<TasksList> {
                         return Container(
                             child: StudentTaskListItem(
                           studentWork: sw,
+                          semester: widget.semester,
+                          discipline: widget.discipline,
+                          bloc: this.tasksListLoaderBloc,
                           education: widget.education,
                         ));
                       }));

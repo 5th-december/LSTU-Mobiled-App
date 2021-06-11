@@ -56,7 +56,7 @@ class MbCChatUpdateConsumerBloc
 
   MbCChatUpdateConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
-    this._exchangeName = amqpConfig.dialogReadExchangeName;
+    this._exchangeName = amqpConfig.privateMessageUpdateExchangeName;
 
     /**
      * События подписки на обновления

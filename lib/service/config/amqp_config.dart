@@ -8,10 +8,11 @@ class AmqpConfig {
   final String rmqUsername;
   final String rmqVHost;
   final String rmqPassword;
-  final String messageExchangeName;
+  final String privateMessageUpdateExchangeName;
+  final String privateMessageListExchangeName;
   final String dialogListExchangeName;
-  final String dialogReadExchangeName;
-  final String discussionMessageExchangeName;
+  final String discussionMessageUpdateExchangeName;
+  final String discussionMessageListExchangeName;
 
   AmqpConfig._(
       {this.rmqHost,
@@ -20,9 +21,10 @@ class AmqpConfig {
       this.rmqUsername,
       this.rmqVHost,
       this.dialogListExchangeName,
-      this.dialogReadExchangeName,
-      this.discussionMessageExchangeName,
-      this.messageExchangeName});
+      this.discussionMessageListExchangeName,
+      this.discussionMessageUpdateExchangeName,
+      this.privateMessageListExchangeName,
+      this.privateMessageUpdateExchangeName});
 
   factory AmqpConfig._fromJson(Map<String, dynamic> json) {
     return AmqpConfig._(
@@ -32,10 +34,14 @@ class AmqpConfig {
         rmqUsername: json['rmqUsername'],
         rmqVHost: json['rmqVHost'],
         dialogListExchangeName: json['exchange']['dialogListExchangeName'],
-        dialogReadExchangeName: json['exchange']['dialogReadExchangeName'],
-        discussionMessageExchangeName: json['exchange']
-            ['discussionMessageExchangeName'],
-        messageExchangeName: json['exchange']['messageExchangeName']);
+        privateMessageListExchangeName: json['exchange']
+            ['privateMessageListExchangeName'],
+        privateMessageUpdateExchangeName: json['exchange']
+            ['privateMessageUpdateExchangeName'],
+        discussionMessageListExchangeName: json['exchange']
+            ['discussionMessageListExchangeName'],
+        discussionMessageUpdateExchangeName: json['exchange']
+            ['discussionMessageUpdateExchangeName']);
   }
 
   static Future<AmqpConfig> configure() async {

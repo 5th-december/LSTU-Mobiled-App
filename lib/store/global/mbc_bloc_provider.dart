@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:lk_client/bloc_container/mbc_chat_update_bloc_container.dart';
 import 'package:lk_client/bloc_container/mbc_dialog_list_bloc_container.dart';
 import 'package:lk_client/bloc_container/mbc_discussion_message_bloc_container.dart';
+import 'package:lk_client/bloc_container/mbc_discussion_update_bloc_container.dart';
 import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/global/service_provider.dart';
@@ -60,6 +61,13 @@ class MbCBlocProviderState extends State<MbCBlocProvider> {
     return this._mbCPrivateMessageBlocContainer;
   }
 
+  Future<MbCDiscussionUpdateBlocContainer> _mbCDiscussionUpdateBlocContainer;
+
+  Future<MbCDiscussionUpdateBlocContainer>
+      mbCDiscussionUpdateBlocContainer() async {
+    return this._mbCDiscussionUpdateBlocContainer;
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -74,6 +82,12 @@ class MbCBlocProviderState extends State<MbCBlocProvider> {
         this.appServiceProvider.utilQueryService,
         this.appServiceProvider.amqpConfig,
         this.appServiceProvider.amqpService);
+
+    this._mbCDiscussionUpdateBlocContainer =
+        MbCDiscussionUpdateBlocContainer.init(
+            this.appServiceProvider.utilQueryService,
+            this.appServiceProvider.amqpConfig,
+            this.appServiceProvider.amqpService);
 
     this._mbCDiscussionMessageBlocContainer =
         MbCDiscussionMessageBlocContainer.init(

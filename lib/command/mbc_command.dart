@@ -16,8 +16,13 @@ class MbCStartConsumeDialogListUpdates {
 }
 
 class MbCStartConsumeDiscussionMessages {
-  List<Group> groups = [];
+  List<Group> groups;
   MbCStartConsumeDiscussionMessages({@required this.groups});
+}
+
+class MbCStartConsumeDiscussionUpdates {
+  List<Group> groups;
+  MbCStartConsumeDiscussionUpdates({@required this.groups});
 }
 
 class MbCStartConsumeDialogMessages {

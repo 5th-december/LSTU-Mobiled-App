@@ -59,7 +59,7 @@ class MbCDiscussionMessageConsumerBloc
 
   MbCDiscussionMessageConsumerBloc(
       {@required AmqpService amqpService, @required AmqpConfig amqpConfig}) {
-    this._exchangeName = amqpConfig.discussionMessageExchangeName;
+    this._exchangeName = amqpConfig.discussionMessageListExchangeName;
 
     /**
      * Стрим команд прослушивания
