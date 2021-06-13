@@ -29,7 +29,7 @@ class _TogglableLoginPageState extends State<TogglableLoginPage> {
       children: [
         Container(
           padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.2),
+              horizontal: MediaQuery.of(context).size.width * 0.1),
           child: Column(
             children: [
               Visibility(

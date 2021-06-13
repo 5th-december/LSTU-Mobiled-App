@@ -156,14 +156,18 @@ class ApiEndpointConsumer {
       request.files.add(file);
     }
 
-    http.StreamedResponse response = await client.send(request);
+    try {
+      http.StreamedResponse response = await client.send(request);
 
-    if (expectedCodes.length != 0 &&
-        !expectedCodes.contains(response.statusCode)) {
-      throw new Exception('Uploading error');
+      if (expectedCodes.length != 0 &&
+          !expectedCodes.contains(response.statusCode)) {
+        throw Exception('Wrong status code');
+      }
+
+      return response.stream;
+    } on SocketException {
+      throw Exception('Connection error');
     }
-
-    return response.stream;
   }
 
   Future<http.ByteStream> consumeResourseAsStream(
@@ -182,13 +186,17 @@ class ApiEndpointConsumer {
     request.headers
         .addAll({HttpHeaders.authorizationHeader: "Bearer $apiJwtToken"});
 
-    http.StreamedResponse response = await client.send(request);
+    try {
+      http.StreamedResponse response = await client.send(request);
 
-    if (expectedCodes.length != 0 &&
-        !expectedCodes.contains(response.statusCode)) {
-      throw new Exception('Downloading error');
+      if (expectedCodes.length != 0 &&
+          !expectedCodes.contains(response.statusCode)) {
+        throw new Exception('Wrong status code');
+      }
+
+      return response.stream;
+    } on SocketException {
+      throw Exception('Connection error');
     }
-
-    return response.stream;
   }
 }

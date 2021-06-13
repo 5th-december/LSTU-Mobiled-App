@@ -76,42 +76,58 @@ class _ExamsListState extends State<ExamsList>
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            examList[index].discipline.name,
-                            style: TextStyle(
-                                fontSize: 18.0, fontWeight: FontWeight.bold),
-                          ),
-                          SizedBox(height: 8.0),
                           Row(children: [
-                            Icon(
-                              Icons.access_time_rounded,
-                              size: 16.0,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(width: 8.0),
-                            Text(formatter.format(examList[index].examTime),
-                                style: TextStyle(
-                                    fontSize: 14.0, color: Colors.grey)),
-                            SizedBox(width: 16.0),
-                            Icon(
-                              Icons.location_on_rounded,
-                              size: 16.0,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(width: 8.0),
-                            Text(examList[index].room,
-                                style: TextStyle(
-                                    fontSize: 14.0, color: Colors.grey)),
-                            SizedBox(width: 16.0),
+                            Expanded(
+                              child: Text(
+                                examList[index].discipline.name,
+                                style: Theme.of(context).textTheme.headline4,
+                              ),
+                            )
+                          ]),
+                          SizedBox(height: 8.0),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.access_time_rounded,
+                                size: 16.0,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(
+                                    formatter.format(examList[index].examTime),
+                                    style: TextStyle(
+                                        fontSize: 14.0, color: Colors.grey)),
+                              )
+                            ],
+                          ),
+                          Row(
+                            children: [
+                              Icon(
+                                Icons.location_on_rounded,
+                                size: 16.0,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(width: 8.0),
+                              Expanded(
+                                child: Text(examList[index].room,
+                                    style: TextStyle(
+                                        fontSize: 14.0, color: Colors.grey)),
+                              )
+                            ],
+                          ),
+                          Row(children: [
                             Icon(
                               Icons.person_rounded,
                               size: 16.0,
                               color: Colors.grey,
                             ),
                             SizedBox(width: 8.0),
-                            Text(examList[index].teacherName,
-                                style: TextStyle(
-                                    fontSize: 14.0, color: Colors.grey)),
+                            Expanded(
+                              child: Text(examList[index].teacherName,
+                                  style: TextStyle(
+                                      fontSize: 14.0, color: Colors.grey)),
+                            )
                           ])
                         ],
                       ),

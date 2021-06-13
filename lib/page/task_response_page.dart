@@ -113,7 +113,7 @@ class TaskResponsePageState extends State<TaskResponsePage> {
           Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                  padding: EdgeInsets.only(bottom: 50),
+                  padding: EdgeInsets.only(bottom: 80),
                   child: StreamBuilder(
                       stream: transportProxyBloc.attachedFormStateStream,
                       builder: (BuildContext context, AsyncSnapshot snapshot) {
@@ -129,7 +129,32 @@ class TaskResponsePageState extends State<TaskResponsePage> {
                                         discipline: widget.discipline,
                                         education: widget.education,
                                         semester: widget.semester)));
-                            Navigator.of(context).pop();
+                            Future.delayed(Duration(seconds: 1), () {
+                              Navigator.of(context).pop();
+                              Navigator.of(context).pop();
+                            });
+                            return Container(
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.done,
+                                    size: 32.0,
+                                    color: Color.fromRGBO(137, 64, 253, 1.0),
+                                  ),
+                                  SizedBox(
+                                    width: 12.0,
+                                  ),
+                                  Text(
+                                    'Успешно',
+                                    style: TextStyle(
+                                        fontSize: 14.0,
+                                        color:
+                                            Color.fromRGBO(137, 64, 253, 1.0)),
+                                  )
+                                ],
+                              ),
+                            );
                           }
                         }
                         return SizedBox.shrink();

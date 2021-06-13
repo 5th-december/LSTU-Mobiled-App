@@ -154,49 +154,55 @@ class _PrivateMessageListState extends State<PrivateMessageList> {
                           PrivateMessage msg = messageList[index];
 
                           return Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 10.0, vertical: 5.0),
-                            child: MessageBubbleWidget(
-                              messageText: msg.messageText,
-                              attachmentWidget: () {
-                                if (msg.attachments != null &&
-                                    msg.attachments.length != 0) {
-                                  return FileDownloadWidget(
-                                    fileMaterial: DownloadFileMaterial(
-                                        originalFileName:
-                                            msg.attachments[0].attachmentName,
-                                        attachmentId: msg.id,
-                                        attachment: msg.attachments[0],
-                                        command:
-                                            LoadPrivateMessageMaterialAttachment(
-                                                privateMessage: msg)),
-                                    proxyBloc:
-                                        PrivateMessageDownloaderProxyBloc(
-                                            fileDownloaderBlocProvider: this
-                                                ._fileDownloaderBlocProvider,
-                                            fileLocalManager:
-                                                this._fileLocalManager,
-                                            fileTransferService:
-                                                this._fileTransferService,
-                                            appNotifier: this._appNotifier),
-                                  );
-                                } else if (msg.links != null &&
-                                    msg.links.length != 0) {
-                                  return LinkOpenWidget(
-                                      externalLink:
-                                          DownloadExternalLinkMaterial(
-                                              externalLink: ExternalLink(
-                                                  linkContent:
-                                                      msg.links[0].linkContent,
-                                                  linkText:
-                                                      msg.links[0].linkText)));
-                                }
-                              }(),
-                              sentByMe: msg.meSender ?? false,
-                              sentTime: msg.sendTime,
-                              isRead: msg.isRead ?? true,
-                            ),
-                          );
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10.0, vertical: 5.0),
+                              child: Align(
+                                alignment:
+                                    (msg?.sender?.id == widget.person.id ||
+                                            (msg?.meSender ?? false))
+                                        ? Alignment.centerRight
+                                        : Alignment.centerLeft,
+                                child: MessageBubbleWidget(
+                                  messageText: msg.messageText,
+                                  attachmentWidget: () {
+                                    if (msg.attachments != null &&
+                                        msg.attachments.length != 0) {
+                                      return FileDownloadWidget(
+                                        fileMaterial: DownloadFileMaterial(
+                                            originalFileName: msg
+                                                .attachments[0].attachmentName,
+                                            attachmentId: msg.id,
+                                            attachment: msg.attachments[0],
+                                            command:
+                                                LoadPrivateMessageMaterialAttachment(
+                                                    privateMessage: msg)),
+                                        proxyBloc:
+                                            PrivateMessageDownloaderProxyBloc(
+                                                fileDownloaderBlocProvider: this
+                                                    ._fileDownloaderBlocProvider,
+                                                fileLocalManager:
+                                                    this._fileLocalManager,
+                                                fileTransferService:
+                                                    this._fileTransferService,
+                                                appNotifier: this._appNotifier),
+                                      );
+                                    } else if (msg.links != null &&
+                                        msg.links.length != 0) {
+                                      return LinkOpenWidget(
+                                          externalLink:
+                                              DownloadExternalLinkMaterial(
+                                                  externalLink: ExternalLink(
+                                                      linkContent: msg
+                                                          .links[0].linkContent,
+                                                      linkText: msg
+                                                          .links[0].linkText)));
+                                    }
+                                  }(),
+                                  sentByMe: msg.meSender ?? false,
+                                  sentTime: msg.sendTime,
+                                  isRead: msg.isRead ?? true,
+                                ),
+                              ));
                         });
                   }
 

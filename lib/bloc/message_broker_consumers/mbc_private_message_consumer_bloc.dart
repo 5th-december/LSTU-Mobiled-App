@@ -114,6 +114,7 @@ class MbCPrivateMessageConsumerBloc
             .transform(privateMessageTransformer)
             .listen((event) {
           if (event is List) {
+            final cur = event.cast<PrivateMessage>();
             this.updateState(NotificationReadyState<List<PrivateMessage>>(
                 notifications: event.cast<PrivateMessage>()));
           }

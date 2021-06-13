@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/bloc/infinite_scrollers/private_message_list_bloc.dart';
@@ -24,9 +26,19 @@ class StartNotifyPrivateMessagesOnDialog {
 class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
   final PrivateMessageListBloc listBloc;
 
-  final MbCPrivateMessageConsumerBloc mbcPrivateMessageConsumerBloc;
+  final MbCPrivateMessageConsumerBloc privateMessageConsumerBloc;
 
-  final MbCChatUpdateConsumerBloc mbcMessagesReadConsumerBloc;
+  final MbCChatUpdateConsumerBloc messagesChangeConsumerBloc;
+
+  StreamSubscription messageListUpdatesSubscription,
+      messageChangeUpdatesSubscription;
+
+  @override
+  dispose() {
+    messageChangeUpdatesSubscription.cancel();
+    messageListUpdatesSubscription.cancel();
+    super.dispose();
+  }
 
   Stream<dynamic> get privateMessageListStateStream =>
       this.stateContoller.stream;
@@ -60,20 +72,20 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
         await _mbCPrivateMessageBlocContainer.getBloc(dialog, person);
     return PrivateMessageListProxyBloc(
         listBloc: privateMessageListBloc,
-        mbcPrivateMessageConsumerBloc: mbCPrivateMessageConsumerBloc,
-        mbcMessagesReadConsumerBloc: mbCChatUpdateConsumerBloc);
+        privateMessageConsumerBloc: mbCPrivateMessageConsumerBloc,
+        messagesChangeConsumerBloc: mbCChatUpdateConsumerBloc);
   }
 
   PrivateMessageListProxyBloc(
       {@required this.listBloc,
-      @required this.mbcPrivateMessageConsumerBloc,
-      @required this.mbcMessagesReadConsumerBloc}) {
+      @required this.privateMessageConsumerBloc,
+      @required this.messagesChangeConsumerBloc}) {
     this._privateMessageListInitEventStream.listen((event) {
       /**
        * Listener на событие добавления сообщений
        */
-      this
-          .mbcPrivateMessageConsumerBloc
+      this.messageListUpdatesSubscription = this
+          .privateMessageConsumerBloc
           .privateMessageConsumingStateStream
           .listen((event) {
         if (event is NotificationReadyState<List<PrivateMessage>> &&
@@ -83,7 +95,7 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
                   externalAddedData: event.notifications));
 
           this
-              .mbcPrivateMessageConsumerBloc
+              .privateMessageConsumerBloc
               .eventController
               .sink
               .add(AckAllNotificationReceived());
@@ -93,8 +105,8 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
       /*
        * Listener на события обновления чата 
        */
-      this
-          .mbcMessagesReadConsumerBloc
+      this.messageChangeUpdatesSubscription = this
+          .messagesChangeConsumerBloc
           .dialogReadNotificationStateStream
           .listen((event) {
         if (event is NotificationReadyState<List<PrivateMessage>> &&
@@ -104,14 +116,10 @@ class PrivateMessageListProxyBloc extends AbstractBloc<dynamic, dynamic> {
                   externalUpdatedData: event.notifications));
 
           this
-              .mbcMessagesReadConsumerBloc
+              .messagesChangeConsumerBloc
               .eventController
               .sink
               .add(AckAllNotificationReceived());
-
-          /**
-           * TODO: Добавление события в блок чтения сообщений
-           */
         }
       });
 

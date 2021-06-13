@@ -61,10 +61,12 @@ class _EducationDetailsState extends State<EducationDetails> {
                         SizedBox(
                           width: 16.0,
                         ),
-                        Text(
-                          'Направление: ${education.group.speciality.specName.toLowerCase()}',
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
+                        Expanded(
+                          child: Text(
+                            'Направление: ${education.group.speciality.specName.toLowerCase()}',
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
+                        )
                       ],
                     ),
                     SizedBox(
@@ -76,10 +78,12 @@ class _EducationDetailsState extends State<EducationDetails> {
                         SizedBox(
                           width: 16.0,
                         ),
-                        Text(
-                          'Квалификация: ${education.group.speciality.qualification.toLowerCase()}',
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
+                        Expanded(
+                          child: Text(
+                            'Квалификация: ${education.group.speciality.qualification.toLowerCase()}',
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
+                        )
                       ],
                     ),
                     SizedBox(
@@ -91,10 +95,12 @@ class _EducationDetailsState extends State<EducationDetails> {
                         SizedBox(
                           width: 16.0,
                         ),
-                        Text(
-                          'Статус: ${education.status.toLowerCase()}',
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
+                        Expanded(
+                          child: Text(
+                            'Статус: ${education.status.toLowerCase()}',
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
+                        )
                       ],
                     ),
                     SizedBox(
@@ -106,21 +112,23 @@ class _EducationDetailsState extends State<EducationDetails> {
                         SizedBox(
                           width: 16.0,
                         ),
-                        Text(
-                          () {
-                            DateFormat formatter = DateFormat('MM.yyyy');
-                            final admissionDate = education.group.admission;
-                            final admissionString = admissionDate != null
-                                ? formatter.format(admissionDate)
-                                : '?';
-                            final graduationDate = education.group.graduation;
-                            final graduationString = graduationDate != null
-                                ? formatter.format(graduationDate)
-                                : '?';
-                            return 'Период обучения: $admissionString - $graduationString';
-                          }(),
-                          style: Theme.of(context).textTheme.subtitle1,
-                        ),
+                        Expanded(
+                          child: Text(
+                            () {
+                              DateFormat formatter = DateFormat('MM.yyyy');
+                              final admissionDate = education.group.admission;
+                              final admissionString = admissionDate != null
+                                  ? formatter.format(admissionDate)
+                                  : '?';
+                              final graduationDate = education.group.graduation;
+                              final graduationString = graduationDate != null
+                                  ? formatter.format(graduationDate)
+                                  : '?';
+                              return 'Период обучения: $admissionString - $graduationString';
+                            }(),
+                            style: Theme.of(context).textTheme.subtitle1,
+                          ),
+                        )
                       ],
                     ),
                   ],

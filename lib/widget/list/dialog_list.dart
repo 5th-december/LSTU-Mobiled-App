@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/proxy/dialog_list_proxy_bloc.dart';
 import 'package:lk_client/bloc/widget/messenger_tile_bloc.dart';
+import 'package:lk_client/bloc/widget/messenger_tile_unread_bloc.dart';
 import 'package:lk_client/bloc_container/mbc_chat_update_bloc_container.dart';
 import 'package:lk_client/bloc_container/mbc_private_message_bloc_container.dart';
 import 'package:lk_client/command/consume_command.dart';
@@ -147,6 +148,14 @@ class _DialogListState extends State<DialogList> {
                                 PrivateMessage lastDialogMessage =
                                     loadedDialogs[index].lastMessage;
 
+                                final Future<MessengerTileUnreadBloc>
+                                    dialogItemMessengerUnreadTileBloc =
+                                    MessengerTileUnreadBloc.init(
+                                        privateMessageBlocContainer:
+                                            this._privateMessageBlocContainer,
+                                        dialog: loadedDialogs[index],
+                                        person: widget.person);
+
                                 return Container(
                                   child: GestureDetector(
                                     onTap: () {
@@ -158,11 +167,18 @@ class _DialogListState extends State<DialogList> {
                                             person: widget.person,
                                             dialog: loadedDialogs[index]);
                                       }));
+                                      dialogItemMessengerUnreadTileBloc.then(
+                                          (bloc) => bloc.eventController.sink
+                                              .add(ResetCounterEvent<int>(
+                                                  value: 0)));
                                     },
                                     child: DialogTileWidget(
+                                      key: UniqueKey(),
                                       dialog: loadedDialogs[index],
                                       person: companion,
                                       lastloadedMessage: lastDialogMessage,
+                                      messengerTileUnreadBloc:
+                                          dialogItemMessengerUnreadTileBloc,
                                       messengerTileBloc: MessengerTileBloc.init(
                                           dialog: loadedDialogs[index],
                                           person: companion,

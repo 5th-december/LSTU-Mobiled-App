@@ -23,20 +23,20 @@ class _MessengerTileUnreadWidgetState extends State<MessengerTileUnreadWidget> {
             if (snapshot.data is ConsumingReadyState<int>) {
               int value = (snapshot.data as ConsumingReadyState<int>).content;
               return Container(
-                padding: EdgeInsets.all(1),
+                padding: EdgeInsets.all(4),
                 decoration: new BoxDecoration(
                   color: Colors.red,
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(9),
                 ),
                 constraints: BoxConstraints(
-                  minWidth: 12,
-                  minHeight: 12,
+                  minWidth: 18,
+                  minHeight: 18,
                 ),
                 child: new Text(
                   '$value',
                   style: new TextStyle(
                     color: Colors.white,
-                    fontSize: 8,
+                    fontSize: 14,
                   ),
                   textAlign: TextAlign.center,
                 ),

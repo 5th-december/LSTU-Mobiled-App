@@ -13,7 +13,7 @@ class RegisterPage extends StatelessWidget {
       children: [
         Container(
           padding: EdgeInsets.symmetric(
-              horizontal: MediaQuery.of(context).size.width * 0.2),
+              horizontal: MediaQuery.of(context).size.width * 0.1),
           child: Column(
             children: [
               RegisterForm(AppStateContainer.of(context)

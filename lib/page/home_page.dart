@@ -57,11 +57,13 @@ class _HomePageState extends State<HomePage> {
               snapshot.data is ConsumingReadyState<Person>) {
             Person person =
                 (snapshot.data as ConsumingReadyState<Person>).content;
-            this
-                .navigationBloc
-                .eventController
-                .sink
-                .add(NavigateToPageEvent(3));
+            if (!this.navigationBloc.eventController.isClosed) {
+              this
+                  .navigationBloc
+                  .eventController
+                  .sink
+                  .add(NavigateToPageEvent(3));
+            }
 
             return Scaffold(
                 body: MbCBlocProvider(

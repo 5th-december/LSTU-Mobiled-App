@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/authentication/identification_bloc.dart';
+import 'package:lk_client/error_handler/api_system_error_handler.dart';
+import 'package:lk_client/error_handler/duplicate_error_handler.dart';
+import 'package:lk_client/error_handler/not_found_error_handler.dart';
 import 'package:lk_client/event/identify_event.dart';
 import 'package:lk_client/service/api_consumer/authorization_service.dart';
 import 'package:lk_client/state/identify_state.dart';
 import 'package:lk_client/store/global/app_state_container.dart';
+import 'package:lk_client/widget/chunk/form/semitransparent_text_form_field.dart';
 
 class IdentifyForm extends StatefulWidget {
   final AuthorizationService _authorizationService;
@@ -24,6 +28,8 @@ class _IdentifyFormState extends State<IdentifyForm> {
   AuthorizationService get authorizationService => widget._authorizationService;
 
   IdentificationBloc _identificationBloc;
+
+  String _nameInputErrorLabel, _zBookNumberErrorLabel, _enterYearErrorLabel;
 
   @override
   void didChangeDependencies() {
@@ -55,21 +61,33 @@ class _IdentifyFormState extends State<IdentifyForm> {
             key: _stateKey,
             child: Column(
               children: [
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'ФИО', hintText: 'Иванов Иван Иванович'),
+                SemitransparentTextFormField(
+                  hintText: 'Фамилия имя отчество',
                   autofocus: true,
+                  errorText: _nameInputErrorLabel,
                   controller: _usernameEditingController,
+                  icon: Icons.person_rounded,
                 ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Номер зачетной книжки', hintText: '12345678'),
+                SizedBox(
+                  height: 20.0,
+                ),
+                SemitransparentTextFormField(
+                  hintText: 'Номер зачетной книжки',
                   controller: _zBookNumberEditingController,
+                  errorText: _zBookNumberErrorLabel,
+                  icon: Icons.source_rounded,
                 ),
-                TextFormField(
-                  decoration: InputDecoration(
-                      labelText: 'Год поступления', hintText: '2017'),
+                SizedBox(
+                  height: 20.0,
+                ),
+                SemitransparentTextFormField(
+                  hintText: 'Год поступления',
                   controller: _enterYearEditingController,
+                  errorText: _enterYearErrorLabel,
+                  icon: Icons.calendar_today_rounded,
+                ),
+                SizedBox(
+                  height: 20.0,
                 ),
                 Padding(
                     padding: EdgeInsets.only(top: 15),
@@ -78,6 +96,8 @@ class _IdentifyFormState extends State<IdentifyForm> {
                         builder: (BuildContext context,
                             AsyncSnapshot<IdentifyState>
                                 registerStateSnapshot) {
+                          final identifyChildWidgets = <Widget>[];
+
                           if (registerStateSnapshot.connectionState ==
                               ConnectionState.active) {
                             var receivedState = registerStateSnapshot.data;
@@ -87,33 +107,95 @@ class _IdentifyFormState extends State<IdentifyForm> {
                                   child: Center(
                                 child: CircularProgressIndicator(),
                               ));
-                            } else if (receivedState is IdentifyErrorState) {
-                              _onWidgetDidBuild(() {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text(
-                                        '${receivedState.error.toString()}'),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
-                              });
+                            }
+
+                            if (receivedState is IdentifyErrorState) {
+                              final error = receivedState.error;
+
+                              identifyChildWidgets.add(
+                                Text(
+                                  () {
+                                    if (error is NotFoundException) {
+                                      return 'Указанные данные недействительны.\nПроверьте учетную информацию';
+                                    } else if (error is DuplicateException) {
+                                      return 'Этот пользователь уже зарегистрирован';
+                                    } else if (error is ApiSystemException) {
+                                      return 'Внутренняя ошибка сервиса';
+                                    } else {
+                                      return 'Ошибка';
+                                    }
+                                  }(),
+                                  style: Theme.of(context).textTheme.subtitle2,
+                                ),
+                              );
                             }
                           }
 
-                          return ElevatedButton(
-                              onPressed: () {
-                                _identificationBloc.eventController.sink.add(
-                                    IdentificationButtonPressedEvent(
-                                        name: this
-                                            ._usernameEditingController
-                                            .text,
-                                        enterYear: int.parse(
-                                            _enterYearEditingController.text),
-                                        zBookNumber: this
-                                            ._zBookNumberEditingController
-                                            .text));
-                              },
-                              child: Text('Регистрация'));
+                          identifyChildWidgets.add(Padding(
+                              padding: EdgeInsets.only(top: 15.0),
+                              child: ElevatedButton(
+                                  onPressed: () {
+                                    bool valid = true;
+                                    setState(() {
+                                      final username =
+                                          this._usernameEditingController.text;
+                                      this._nameInputErrorLabel = null;
+                                      if (username == '') {
+                                        this._nameInputErrorLabel =
+                                            'Заполните ФИО';
+                                        valid = false;
+                                      }
+
+                                      final enterYear =
+                                          this._enterYearEditingController.text;
+                                      RegExp yearRegexp = RegExp(r'^\d{4}$');
+
+                                      this._enterYearErrorLabel = null;
+
+                                      if (enterYear == '') {
+                                        this._enterYearErrorLabel =
+                                            'Заполните год поступления';
+                                        valid = false;
+                                      } else if (!yearRegexp
+                                          .hasMatch(enterYear)) {
+                                        this._enterYearErrorLabel =
+                                            'Неверно указан год поступления';
+                                        valid = false;
+                                      }
+                                      final zBookNumber = this
+                                          ._zBookNumberEditingController
+                                          .text;
+
+                                      this._zBookNumberErrorLabel = null;
+
+                                      if (zBookNumber == '') {
+                                        this._zBookNumberErrorLabel =
+                                            'Укажите номер зачетной книжки';
+                                        valid = false;
+                                      }
+                                    });
+
+                                    if (!valid) {
+                                      return;
+                                    }
+
+                                    _identificationBloc.eventController.sink
+                                        .add(IdentificationButtonPressedEvent(
+                                            name: this
+                                                ._usernameEditingController
+                                                .text,
+                                            enterYear: int.parse(
+                                                _enterYearEditingController
+                                                    .text),
+                                            zBookNumber: this
+                                                ._zBookNumberEditingController
+                                                .text));
+                                  },
+                                  child: Text('Регистрация'))));
+
+                          return Column(
+                            children: identifyChildWidgets,
+                          );
                         }))
               ],
             ),

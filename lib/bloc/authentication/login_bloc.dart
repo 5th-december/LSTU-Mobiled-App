@@ -59,6 +59,7 @@ class LoginBloc extends AbstractBloc<LoginState, LoginEvent> {
 
             this.updateState(LoginInitState());
           } on Exception catch (e) {
+            this.authenticationBloc.eventController.sink.add(LoggedOutEvent());
             this.updateState(LoginErrorState(e));
           }
         }

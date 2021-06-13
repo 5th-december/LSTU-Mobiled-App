@@ -16,10 +16,8 @@ class ResetCounterEvent<T> {
 
 class MessengerTileUnreadBloc
     extends AbstractBloc<ConsumingState<int>, dynamic> {
-  Stream<ConsumingState<int>> get messengerUnreadCountStateStream => this
-      .stateContoller
-      .stream
-      .where((event) => event is ConsumingReadyState<int>);
+  Stream<ConsumingState<int>> get messengerUnreadCountStateStream =>
+      this.stateContoller.stream.where((event) => event is ConsumingState<int>);
 
   Stream<dynamic> get _initMessageUnreadCountEventStream => this
       .eventController
@@ -62,22 +60,27 @@ class MessengerTileUnreadBloc
 
       privateMessageConsumerBloc.privateMessageConsumingStateStream
           .listen((event) {
-        if (event is NotificationReadyState<List<PrivateMessage>>) {
+        if (event is NotificationReadyState<List<PrivateMessage>> &&
+            event.notifications.length != 0 &&
+            !event.notifications[0].meSender) {
           if (this.currentState is ConsumingReadyState<int>) {
             int currentValue =
                 (this.currentState as ConsumingReadyState<int>).content;
             this.updateState(ConsumingReadyState<int>(currentValue -
                 this._lastAddedCount +
                 event.notifications.length));
-            this._lastAddedCount = event.notifications.length;
+          } else if (this.currentState is ConsumingInitState<int>) {
+            this.updateState(
+                ConsumingReadyState<int>(event.notifications.length));
           }
+          this._lastAddedCount = event.notifications.length;
         }
       });
     });
 
     this._resetCounterEventStream.listen((event) {
       this._lastAddedCount = 0;
-      this.updateState(ConsumingReadyState<int>(0));
+      this.updateState(ConsumingInitState<int>());
     });
   }
 }

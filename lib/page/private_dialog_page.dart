@@ -46,6 +46,12 @@ class _PrivateDialogPageState extends State<PrivateDialogPage> {
   AttachedBlocProvider attachedBlocProvider;
 
   @override
+  void dispose() {
+    privateMessageListProxyBloc.then((bloc) => bloc.dispose());
+    super.dispose();
+  }
+
+  @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     ServiceProvider appServiceProvider =

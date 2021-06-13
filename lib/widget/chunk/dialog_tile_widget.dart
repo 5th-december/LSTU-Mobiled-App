@@ -16,14 +16,18 @@ class DialogTileWidget extends StatefulWidget {
   final Dl.Dialog dialog;
   final Person person;
   final PrivateMessage lastloadedMessage;
+  final Future<MessengerTileUnreadBloc> messengerTileUnreadBloc;
 
   final Future<MessengerTileBloc> messengerTileBloc;
 
   DialogTileWidget(
-      {@required this.dialog,
-      this.lastloadedMessage,
+      {Key key,
+      @required this.dialog,
+      @required this.messengerTileUnreadBloc,
       @required this.person,
-      @required this.messengerTileBloc});
+      @required this.messengerTileBloc,
+      this.lastloadedMessage})
+      : super(key: key);
 
   @override
   State<StatefulWidget> createState() =>
@@ -73,7 +77,26 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                       child: Text(
                     '${widget.person?.name ?? ''} ${widget.person?.surname ?? ''}',
                     style: Theme.of(context).textTheme.headline5,
-                  ))
+                  )),
+                  FutureBuilder(
+                    future: widget.messengerTileUnreadBloc,
+                    builder: (BuildContext context, AsyncSnapshot snapshot) {
+                      switch (snapshot.connectionState) {
+                        case ConnectionState.done:
+                          final MessengerTileUnreadBloc
+                              messengerTileUnreadBloc = snapshot.data;
+                          messengerTileUnreadBloc.eventController.sink.add(
+                              StartConsumeEvent<Dl.Dialog>(
+                                  request: widget.dialog));
+                          return MessengerTileUnreadWidget(
+                            bloc: messengerTileUnreadBloc,
+                          );
+                          break;
+                        default:
+                          return SizedBox.shrink();
+                      }
+                    },
+                  )
                 ],
               ),
               SizedBox(
@@ -103,6 +126,7 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                         PrivateMessage>) {
                                       final lastMessage = state.content;
                                       return Container(
+                                        key: UniqueKey(),
                                         padding: EdgeInsets.symmetric(
                                             vertical: 10.0, horizontal: 8.0),
                                         decoration: BoxDecoration(
@@ -125,7 +149,8 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
                                                     '${lastMessage.sender?.name ?? ''} ${lastMessage.sender?.surname ?? ''}: ';
                                               }
                                               lastMessageString +=
-                                                  lastMessage.messageText;
+                                                  lastMessage?.messageText ??
+                                                      '';
                                               return Text(
                                                 lastMessageString,
                                                 maxLines: 1,
@@ -198,33 +223,6 @@ class _DialogTileWidgetState extends State<DialogTileWidget> {
               )
             ],
           )),
-          /*Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FutureBuilder(
-                future: MessengerTileUnreadBloc.init(
-                    privateMessageBlocContainer:
-                        this._privateMessageBlocContainer,
-                    dialog: widget.dialog,
-                    person: widget.person),
-                builder: (BuildContext context, AsyncSnapshot snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.done:
-                      final MessengerTileUnreadBloc messengerTileUnreadBloc =
-                          snapshot.data;
-                      messengerTileUnreadBloc.eventController.sink.add(
-                          StartConsumeEvent<Dl.Dialog>(request: widget.dialog));
-                      return MessengerTileUnreadWidget(
-                        bloc: messengerTileUnreadBloc,
-                      );
-                      break;
-                    default:
-                      return SizedBox.shrink();
-                  }
-                },
-              )
-            ],
-          )*/
         ],
       ),
     );

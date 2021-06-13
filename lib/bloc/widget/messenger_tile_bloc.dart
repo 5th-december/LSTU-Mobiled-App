@@ -75,7 +75,7 @@ class MessengerTileBloc extends AbstractBloc<ConsumingState<PrivateMessage>,
           if (loadedNotificationList.length != 0) {
             // Для каждого события получения нового сообщения
             // выбирается последнее из них
-            final lastMessage = loadedNotificationList.first;
+            final lastMessage = loadedNotificationList.last;
             // В случае, если текущее состояние уже содержит
             //сообщение с данным идентификатором, не обновлять состояние
             if (this.currentState is ConsumingReadyState<PrivateMessage> &&

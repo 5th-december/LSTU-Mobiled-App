@@ -23,9 +23,10 @@ class LinkOpenWidget extends StatelessWidget {
                 onPressed: () async {
                   final String link =
                       this.externalLink.externalLink.linkContent;
-                  await canLaunch(link)
-                      ? await launch(link)
-                      : throw Exception('Can not open link');
+                  bool openAble = await canLaunch(link);
+                  if (openAble) {
+                    await launch(link);
+                  }
                 },
                 child: Icon(Icons.public_rounded, size: 32.0),
                 style: ElevatedButton.styleFrom(

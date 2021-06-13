@@ -65,7 +65,9 @@ class _PersonEditPageState extends State<PersonEditPage> {
                   this._personalDetailsLoaderBloc.eventController.sink.add(
                       StartConsumeEvent<LoadPersonDetails>(
                           request: LoadPersonDetails(widget.person)));
-                  Navigator.of(context).pop();
+                  Future.delayed(Duration.zero, () {
+                    Navigator.of(context).pop();
+                  });
                 }
 
                 return Stack(children: [

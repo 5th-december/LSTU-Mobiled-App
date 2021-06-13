@@ -37,28 +37,46 @@ class FileTransferManager {
     StreamController<FileOperationStatus> notifier =
         StreamController<FileOperationStatus>();
 
-    File downloadedFile = File(filePath);
-    IOSink fileWriteSink = downloadedFile.openWrite();
+    try {
+      File downloadedFile = File(filePath);
+      IOSink fileWriteSink = downloadedFile.openWrite();
 
-    ByteStream downloaderStream = await this
-        ._endpointConsumer
-        .consumeResourseAsStream(url, params, apiJwtToken: apiToken);
+      ByteStream downloaderStream = await this
+          ._endpointConsumer
+          .consumeResourseAsStream(url, params, apiJwtToken: apiToken);
 
-    double totalDownloadedSize = 0;
+      double totalDownloadedSize = 0;
 
-    downloaderStream.listen((chunk) {
-      fileWriteSink.add(chunk);
-      totalDownloadedSize += chunk.length;
-      notifier.sink.add(FileOperationProgress(filePath, totalDownloadedSize));
-    }, onError: (error) async {
-      fileWriteSink.close();
-      await downloadedFile.delete();
+      downloaderStream.listen((chunk) {
+        try {
+          fileWriteSink.add(chunk);
+          totalDownloadedSize += chunk.length;
+          notifier.sink
+              .add(FileOperationProgress(filePath, totalDownloadedSize));
+        } on Exception {
+          notifier.sink.add(FileOperationError(filePath));
+          notifier.close();
+        }
+      }, onError: (error) async {
+        try {
+          fileWriteSink.close();
+          await downloadedFile.delete();
+        } finally {
+          notifier.sink.add(FileOperationError(filePath));
+        }
+      }, onDone: () async {
+        try {
+          await fileWriteSink.close();
+          notifier.sink.add(FileOperationDone(filePath));
+          notifier.close();
+        } on Exception {
+          notifier.sink.add(FileOperationError(filePath));
+        }
+      });
+    } catch (e) {
       notifier.sink.add(FileOperationError(filePath));
-    }, onDone: () async {
-      await fileWriteSink.close();
-      notifier.sink.add(FileOperationDone(filePath));
-      notifier.close();
-    });
+      return;
+    }
 
     yield* notifier.stream;
   }
@@ -68,32 +86,52 @@ class FileTransferManager {
     StreamController<FileOperationStatus> notifier =
         StreamController<FileOperationStatus>();
 
-    File uploadingFile = File(filePath);
-    int fileSize = await uploadingFile.length();
-    Stream<List<int>> fileReadingSink = uploadingFile.openRead();
-    String fileName = this._fileLocalManager.getFileName(filePath);
+    try {
+      final uploadingFile = File(filePath);
+      final fileSize = await uploadingFile.length();
+      Stream<List<int>> fileReadingSink = uploadingFile.openRead();
+      String fileName = this._fileLocalManager.getFileName(filePath);
 
-    double totalUploadedSize = 0;
+      double totalUploadedSize = 0;
 
-    StreamController<List<int>> sc = StreamController<List<int>>();
-    Stream<List<int>> producer = sc.stream;
+      StreamController<List<int>> sc = StreamController<List<int>>();
+      Stream<List<int>> producer = sc.stream;
 
-    fileReadingSink.listen((event) {
-      sc.sink.add(event);
-      totalUploadedSize += event.length;
-      notifier.sink.add(FileOperationProgress(filePath, totalUploadedSize));
-    }, onError: (error) {
-      sc.close();
+      fileReadingSink.listen((event) {
+        try {
+          sc.sink.add(event);
+          totalUploadedSize += event.length;
+          notifier.sink.add(FileOperationProgress(filePath, totalUploadedSize));
+        } on Exception {
+          sc.sink.close();
+          notifier.sink.add(FileOperationError(filePath));
+        }
+      }, onError: (error) {
+        try {
+          sc.close();
+        } finally {
+          notifier.sink.add(FileOperationError(filePath));
+        }
+      }, onDone: () {
+        try {
+          sc.close();
+          notifier.sink.add(FileOperationDone(filePath));
+          notifier.close();
+        } on Exception {
+          notifier.sink.add(FileOperationError(filePath));
+        }
+      });
+
+      try {
+        await this._endpointConsumer.produceResourseAsStream(
+            url, params, 1, ['attachment'], [fileName], [producer], [fileSize],
+            apiJwtToken: apiToken);
+      } catch (e) {
+        notifier.sink.add(FileOperationError(filePath));
+      }
+    } on Exception {
       notifier.sink.add(FileOperationError(filePath));
-    }, onDone: () {
-      sc.close();
-      notifier.sink.add(FileOperationDone(filePath));
-      notifier.close();
-    });
-
-    this._endpointConsumer.produceResourseAsStream(
-        url, params, 1, ['attachment'], [fileName], [producer], [fileSize],
-        apiJwtToken: apiToken);
+    }
 
     yield* notifier.stream;
   }

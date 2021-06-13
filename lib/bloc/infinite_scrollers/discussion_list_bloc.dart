@@ -51,6 +51,20 @@ class DiscussionListBloc extends AbstractEndlessScrollingBloc<DiscussionMessage,
   }
 
   @override
+  List<DiscussionMessage> updateItemsInList(
+      List<DiscussionMessage> actual, List<DiscussionMessage> update) {
+    for (int i = 0; i != actual.length; ++i) {
+      final replacer = update.firstWhere(
+          (element) => element.id == actual[i].id,
+          orElse: () => null);
+      if (replacer != null) {
+        actual[i] = replacer;
+      }
+    }
+    return actual;
+  }
+
+  @override
   Future<ListedResponse<DiscussionMessage>> loadListElementChunk(
       LoadDisciplineDiscussionListCommand command) async {
     this._bloc.eventController.sink.add(

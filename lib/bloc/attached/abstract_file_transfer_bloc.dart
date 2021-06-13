@@ -22,14 +22,7 @@ abstract class AbstractFileTransferBloc
    * При первичной инициализации блока запрашивается доступ к хранилищу
    */
   AbstractFileTransferBloc() {
-    this._initEventStream.listen((event) async {
-      final isPermittedFileOperations = await this.checkFilePermissions();
-      if (isPermittedFileOperations) {
-        this.updateState(FileManagementInitState());
-      } else {
-        this.updateState(FileManagementRightsErrorState());
-      }
-    });
+    this.updateState(FileManagementInitState());
   }
 
   void afterSuccessOperation(LocalFilesystemObject file) async {
@@ -85,8 +78,16 @@ abstract class AbstractFileDownloaderBloc extends AbstractFileTransferBloc {
 
   AbstractFileDownloaderBloc({@required this.fileLocalManager}) : super() {
     this._downloadingEventStream.listen((FileManagementEvent event) async {
-      /* Доступно только, если получены разрешения на доступ к хранилищу */
-      if (currentState is FileManagementRightsErrorState) return;
+      try {
+        bool isPermissionsAvailable = await this.checkFilePermissions();
+        if (!isPermissionsAvailable) {
+          this.updateState(FileManagementRightsErrorState());
+          return;
+        }
+      } on Exception {
+        this.updateState(FileOperationErrorState());
+        return;
+      }
 
       final _event = event as FileStartDownloadEvent<MultipartRequestCommand>;
 
@@ -138,9 +139,17 @@ abstract class AbstractFileUploaderBloc extends AbstractFileTransferBloc {
       .where((event) => event is FileStartUploadEvent<MultipartRequestCommand>);
 
   AbstractFileUploaderBloc() : super() {
-    this._uploadingEventStream.listen((event) {
-      /* Доступно только, если получены разрешения на доступ к хранилищу */
-      if (currentState is FileManagementRightsErrorState) return;
+    this._uploadingEventStream.listen((event) async {
+      try {
+        bool isPermissionsAvailable = await this.checkFilePermissions();
+        if (!isPermissionsAvailable) {
+          this.updateState(FileManagementRightsErrorState());
+          return;
+        }
+      } on Exception {
+        this.updateState(FileOperationErrorState());
+        return;
+      }
 
       final _event = event as FileStartUploadEvent<MultipartRequestCommand>;
       this

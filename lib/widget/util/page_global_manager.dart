@@ -34,7 +34,6 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
     if (this._navigator == null) {
       this._navigator =
           AppStateContainer.of(context).blocProvider.navigationBloc;
-      this._navigator.eventController.sink.add(NavigateToPageEvent(3));
     }
   }
 
@@ -49,6 +48,7 @@ class _PageGlobalManagerState extends State<PageGlobalManager> {
   @override
   Widget build(BuildContext context) {
     // TODO: Обработка NavigatedToCustomPage
+    this._navigator.eventController.sink.add(NavigateToPageEvent(3));
 
     return StreamBuilder(
         stream: this._navigator.navigationStateStream,

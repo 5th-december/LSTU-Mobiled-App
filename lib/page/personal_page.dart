@@ -3,12 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:lk_client/bloc/loader/loader_bloc.dart';
 import 'package:lk_client/command/consume_command.dart';
+import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/event/consuming_event.dart';
 import 'package:lk_client/model/person/person.dart';
 import 'package:lk_client/page/achievements_page.dart';
 import 'package:lk_client/page/person_edit_page.dart';
 import 'package:lk_client/page/publications_page.dart';
 import 'package:lk_client/state/consuming_state.dart';
+import 'package:lk_client/store/global/app_state_container.dart';
 import 'package:lk_client/store/local/profile_page_provider.dart';
 import 'package:lk_client/widget/layout/education_details.dart';
 import 'package:lk_client/widget/layout/profile_picture.dart';
@@ -167,6 +169,18 @@ class _PersonalPageState extends State<PersonalPage> {
     return Scaffold(
         appBar: AppBar(
           title: Text('Персональная страница'),
+          actions: [
+            IconButton(
+                icon: Icon(Icons.logout),
+                onPressed: () {
+                  AppStateContainer.of(context)
+                      .blocProvider
+                      .authenticationBloc
+                      .eventController
+                      .sink
+                      .add(LoggedOutEvent());
+                })
+          ],
         ),
         body: StreamBuilder(
           stream: this._bloc.consumingStateStream,

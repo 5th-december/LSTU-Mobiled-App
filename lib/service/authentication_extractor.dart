@@ -67,8 +67,7 @@ class AuthenticationExtractor {
 
     Future.delayed(Duration.zero, () async {
       await for (AuthenticationState state in this._bloc.state) {
-        if (state is AuthenticationValidState ||
-            state is AuthenticationIdentifiedState) {
+        if (state is AuthenticationValidState) {
           completer.complete((this._bloc.currentState as Tokenized).token);
           break;
         }

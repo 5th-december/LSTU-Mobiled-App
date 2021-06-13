@@ -55,6 +55,12 @@ class RegistrationBloc extends AbstractBloc<RegisterState, RegisterEvent> {
           ApiKey accessKey =
               await this.authorizationService.register(credentials);
 
+          this
+              .authenticationBloc
+              .eventController
+              .sink
+              .add(TokenValidateEvent(accessKey));
+
           /**
            * Отправка fcm токена приложения
            */
@@ -63,15 +69,6 @@ class RegistrationBloc extends AbstractBloc<RegisterState, RegisterEvent> {
           if (!fcmAdded) {
             throw Exception('Notification server is unavailable');
           }
-
-          /**
-           * Сохранение токенов в secure storage
-           */
-          this
-              .authenticationBloc
-              .eventController
-              .sink
-              .add(TokenValidateEvent(accessKey));
 
           this.updateState(RegisterInitState());
         } on Exception catch (e) {

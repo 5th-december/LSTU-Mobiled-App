@@ -6,6 +6,7 @@ import 'package:lk_client/bloc/authentication/authentication_bloc.dart';
 import 'package:lk_client/bloc/navigation_bloc.dart';
 import 'package:lk_client/bloc/notification_prefs_bloc.dart';
 import 'package:lk_client/error_handler/access_denied_error_handler.dart';
+import 'package:lk_client/error_handler/authentication_error_handler.dart';
 import 'package:lk_client/error_handler/data_access_error_handler.dart';
 import 'package:lk_client/event/authentication_event.dart';
 import 'package:lk_client/error_handler/api_system_error_handler.dart';
@@ -71,7 +72,10 @@ Future<void> main() async {
   final appAmqpService = AmqpService(rmqAuthenticationData: authData);
 
   final stubErrorHandler = StubErrorHandler();
-  final validationErrorHandler = ValidationErrorHandler(stubErrorHandler);
+  final authentiocationErrorHandler =
+      AuthenticationErrorHandler(stubErrorHandler);
+  final validationErrorHandler =
+      ValidationErrorHandler(authentiocationErrorHandler);
   final duplicateErrorHandler = DuplicateErrorHandler(validationErrorHandler);
   final notFoundErrorHandler = NotFoundErrorHandler(duplicateErrorHandler);
   final apiSystemErrorHandler = ApiSystemErrorHandler(notFoundErrorHandler);
