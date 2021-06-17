@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:lk_client/bloc/abstract_bloc.dart';
 import 'package:lk_client/event/producing_event.dart';
 import 'package:lk_client/model/util/attached_file_content.dart';
@@ -46,6 +48,49 @@ abstract class AbstractAttachedTransportBloc<TQ, TR, TC>
   Stream<FileManagementState> sendMultipartData(
       LocalFilesystemObject loadingFile, TR argument);
 
+  Future<ProducingState> sendAttachedFileForm(
+      AttachedFileContent<TQ> data, TC command) async {
+    Completer<ProducingState> completer = Completer<ProducingState>();
+
+    final sendingStream = await this.sendFormData(data.content, command);
+
+    TR formSendingResponse;
+
+    await for (ProducingState<TQ> value in sendingStream) {
+      if (value is ProducingInvalidState<TQ>) {
+        completer.completeError(ProducingInvalidState<TQ>(value.errorBox));
+        break;
+      } else if (value is ProducingErrorState<TQ>) {
+        completer.completeError(ProducingErrorState<TQ>(value.error));
+        break;
+      } else if (value is ProducingReadyState<TQ, TR>) {
+        formSendingResponse = value.response;
+        break;
+      }
+    }
+
+    if (data.file == null) {
+      completer.complete(ProducingReadyState<AttachedFileContent<TQ>, TR>(
+          data: data, response: formSendingResponse));
+    } else {
+      final fileSendingStream =
+          this.sendMultipartData(data.file, formSendingResponse);
+      await for (FileManagementState fileSendingStatus in fileSendingStream) {
+        if (fileSendingStatus is FileOperationErrorState) {
+          completer.completeError(ProducingErrorState<LocalFilesystemObject>(
+              fileSendingStatus.error));
+          break;
+        } else if (fileSendingStatus is FileUploadReadyState) {
+          completer.complete(ProducingReadyState<AttachedFileContent<TQ>, TR>(
+              data: data, response: formSendingResponse));
+          break;
+        }
+      }
+    }
+
+    return completer.future;
+  }
+
   AbstractAttachedTransportBloc() {
     /*
     * Событие первичной инициализация формы
@@ -60,49 +105,12 @@ abstract class AbstractAttachedTransportBloc<TQ, TR, TC>
     /*
     * Событие отправки данных формы
     */
-    this._attachedFormProduceEventStream.listen((ProducingEvent event) async {
+    this._attachedFormProduceEventStream.listen((ProducingEvent event) {
       final _event = event as ProduceResourceEvent<AttachedFileContent<TQ>, TC>;
-      TQ formData = _event.resourse.content;
-      LocalFilesystemObject sendingFile = _event.resourse.file;
-      TC command = _event.command;
-      this.updateState(ProducingLoadingState<TQ>());
-
-      final sendingStream = this.sendFormData(formData, command);
-
-      TR formSendingResponse;
-
-      await for (ProducingState<TQ> value in sendingStream) {
-        if (value is ProducingInvalidState<TQ>) {
-          this.updateState(ProducingInvalidState<TQ>(value.errorBox));
-          break;
-        } else if (value is ProducingErrorState<TQ>) {
-          this.updateState(ProducingErrorState<TQ>(value.error));
-          break;
-        } else if (value is ProducingReadyState<TQ, TR>) {
-          formSendingResponse = value.response;
-          break;
-        }
-      }
-
-      if (sendingFile == null) {
-        this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
-            data: _event.resourse, response: formSendingResponse));
-      } else {
-        this.updateState(ProducingLoadingState<LocalFilesystemObject>());
-        final fileSendingStream =
-            this.sendMultipartData(sendingFile, formSendingResponse);
-        await for (FileManagementState fileSendingStatus in fileSendingStream) {
-          if (fileSendingStatus is FileOperationErrorState) {
-            this.updateState(ProducingErrorState<LocalFilesystemObject>(
-                fileSendingStatus.error));
-            break;
-          } else if (fileSendingStatus is FileUploadReadyState) {
-            this.updateState(ProducingReadyState<AttachedFileContent<TQ>, TR>(
-                data: _event.resourse, response: formSendingResponse));
-            break;
-          }
-        }
-      }
+      this
+          .sendAttachedFileForm(_event.resourse, _event.command)
+          .then((value) => this.updateState(value))
+          .catchError((e) => this.updateState(e));
     });
   }
 }
